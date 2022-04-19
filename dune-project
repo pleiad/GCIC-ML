@@ -1,2 +1,11 @@
 (lang dune 2.9)
 (name gcic)
+(source (github TDiazT/GCIC))
+(authors "Tomás Díaz")
+(maintainers "Tomás Díaz")
+(generate_opam_files true)
+(package
+ (name gcic)
+ (synopsis "Prototype implementation of GCIC")
+ (description "Prototype implementation of GCIC")
+ (depends ))
