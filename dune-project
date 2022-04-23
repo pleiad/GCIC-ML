@@ -9,3 +9,5 @@
  (synopsis "Prototype implementation of GCIC")
  (description "Prototype implementation of GCIC")
  (depends ))
+
+(using menhir 2.1)

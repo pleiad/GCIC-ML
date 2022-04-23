@@ -1,2 +1,4 @@
 (library
- (name gcic))
+ (name gcic)
+ (libraries parsing)
+ (modules compile))
