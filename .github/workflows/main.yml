@@ -8,31 +8,21 @@ on:
 
 jobs:
   build:
-    strategy:
-      fail-fast: false
-      matrix:
-        os:
-          - macos-latest
-          - ubuntu-latest
-          - windows-latest
-        ocaml-compiler:
-          - 4.13.x
-
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Use OCaml ${{ matrix.ocaml-compiler }}
-        uses: ocaml/setup-ocaml@v2
+      - name: Use Node
+        uses: actions/setup-node@v2
         with:
-          ocaml-compiler: ${{ matrix.ocaml-compiler }}
+          node-version: 14
+      - name: Install esy
+        run: npm install -g esy
+      - uses: esy/github-action@v1
+        with:
+          cache-key: ${{ hashFiles('esy.lock/index.json') }}
 
-      - run: opam install menhir stdio # is this really necessary?
-
-      - run: opam install . --deps-only --with-test
-
-      - run: opam exec -- dune build
-
-      - run: opam exec -- dune runtest
+      - run: esy install 
+      - run: esy build

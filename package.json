@@ -1,0 +1,14 @@
+{
+  "dependencies": {
+    "ocaml": "4.13.x",
+    "@opam/dune": "*",
+    "@opam/stdio": "*",
+    "@opam/menhir": "*"
+  },
+  "devDependencies": {
+      "@opam/merlin": "*",
+      "@opam/ocamlformat": "^0.21",
+      "@opam/ocaml-lsp-server": "^1.10.5"
+  }
+
+}
