@@ -1,0 +1,3 @@
+(library
+ (name cast_cic)
+ (modules cast_cic))
