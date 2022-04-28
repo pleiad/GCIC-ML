@@ -19,26 +19,26 @@ module String_id = struct
   let ( = ) = String.equal
 end
 
-module Var_name : ID = String_id
+module Name : ID = String_id
 
 (** Terms in GCIC *)
 type term =
-  | Var of Var_name.t
+  | Var of Name.t
   | Universe of int
   | App of term * term
-  | Lambda of Var_name.t * term * term
-  | Prod of Var_name.t * term * term
+  | Lambda of Name.t * term * term
+  | Prod of Name.t * term * term
   | Unknown of int
 
 (** Returns the stringified version of a term *)
 let rec to_string = function
-  | Var x -> Var_name.to_string x
+  | Var x -> Name.to_string x
   | Universe i -> asprintf "Universe_%i" i
   | App (t, t') -> asprintf "(%s %s)" (to_string t) (to_string t')
   | Lambda (x, t, b) ->
-      asprintf "lambda %s : %s. %s" (Var_name.to_string x) (to_string t)
+      asprintf "lambda %s : %s. %s" (Name.to_string x) (to_string t)
         (to_string b)
   | Prod (x, a, b) ->
-      asprintf "Prod %s : %s. %s" (Var_name.to_string x) (to_string a)
+      asprintf "Prod %s : %s. %s" (Name.to_string x) (to_string a)
         (to_string b)
   | Unknown i -> asprintf "?_%i" i

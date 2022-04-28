@@ -16,10 +16,10 @@ let is_empty = function
 let add ~key ~value (ctx : ('k, 'v) t) : ('k, 'v) t = (key, value) :: ctx
 (** Adds a new declaration to the context *)
 
-let rec lookup key ctx : 'v =
+let rec lookup ~key ~ctx : 'v =
   match ctx with
   | [] -> raise Not_found
-  | (k, v) :: tl -> if k == key then v else lookup key tl
+  | (k, v) :: tl -> if k == key then v else lookup ~key ~ctx:tl
 
 (** Returns the value associated to the given key.
       @raise Not_found if the given key has no associated value. *)

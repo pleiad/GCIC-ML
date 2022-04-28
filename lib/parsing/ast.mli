@@ -9,15 +9,15 @@ module type ID = sig
     val ( = ) : t -> t -> bool
   end
   
-module Var_name : ID 
+module Name : ID 
 
 (** Terms in GCIC *)
 type term =
-| Var of Var_name.t
+| Var of Name.t
 | Universe of int 
 | App of term * term 
-| Lambda of Var_name.t * term * term 
-| Prod of Var_name.t * term * term 
+| Lambda of Name.t * term * term 
+| Prod of Name.t * term * term 
 | Unknown of int
 
 (** Returns the stringified version of a term *)

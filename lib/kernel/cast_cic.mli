@@ -9,18 +9,21 @@ module type ID = sig
     val ( = ) : t -> t -> bool
   end
   
-module Var_name : ID 
+module Name : ID 
 
 (** Terms in CastCIC *)
 type term =
-| Var of Var_name.t
+| Var of Name.t
 | Universe of int 
 | App of term * term 
-| Lambda of Var_name.t * term * term 
-| Prod of Var_name.t * term * term 
+| Lambda of Name.t * term * term 
+| Prod of Name.t * term * term 
 | Unknown of term 
 | Err of term 
-| Cast of term * term
+| Cast of { source: term; target: term; term: term }
+
+(** Context *)
+type context = (Name.t, term) Context.t
 
 (** GCIC variants: Gradual, Normalizing and Shift *)
 type gcic_variant = G | N | S

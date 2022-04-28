@@ -18,18 +18,21 @@ module String_id = struct
   let ( = ) = String.equal
 end
 
-module Var_name : ID = String_id
+module Name : ID = String_id
 
 (** Terms in CastCIC *)
 type term =
-  | Var of Var_name.t
+  | Var of Name.t
   | Universe of int
   | App of term * term
-  | Lambda of Var_name.t * term * term
-  | Prod of Var_name.t * term * term
+  | Lambda of Name.t * term * term
+  | Prod of Name.t * term * term
   | Unknown of term
   | Err of term
-  | Cast of term * term
+  | Cast of { source: term; target: term; term: term }
+
+(** Context *)
+type context = (Name.t, term) Context.t
 
 (** GCIC variants: Gradual, Normalizing and Shift *)
 type gcic_variant = G | N | S
@@ -53,7 +56,7 @@ type head = Prod | Universe of int
 let head : term -> (head, string) result = function
   | Prod _ -> Ok Prod 
   | Universe i -> Ok (Universe i)
-  | Var _ | App (_, _) | Lambda (_, _, _) | Unknown _ | Err _ | Cast (_, _) ->
+  | Var _ | App (_, _) | Lambda (_, _, _) | Unknown _ | Err _ | Cast _ ->
       Error "invalid term to get head constructor"
 
 (** Returns the least precise type for the given head constructor, 
@@ -63,5 +66,5 @@ let germ i h : term =
   | Prod ->
       let cprod = cast_universe_level i in
       let univ : term = Universe cprod in
-      if cprod >= 0 then Prod (Var_name.of_string "__", Unknown univ, Unknown univ) else Err univ
+      if cprod >= 0 then Prod (Name.of_string "__", Unknown univ, Unknown univ) else Err univ
   | Universe j -> if j < i then (Universe j) else Err (Universe i)

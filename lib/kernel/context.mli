@@ -8,7 +8,7 @@ val empty : ('k, 'v) t
 val is_empty : ('k, 'v) t -> bool
 (** Returns whether the context is empty *)
 
-val add : key:'k -> value:'v -> ctx:('k, 'v) t -> ('k, 'v) t
+val add : key:'k -> value:'v -> ('k, 'v) t -> ('k, 'v) t
 (** Adds a new declaration to the context *)
 
 val lookup : key:'k -> ctx:('k, 'v) t -> 'v

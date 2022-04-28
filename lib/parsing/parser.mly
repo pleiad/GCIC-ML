@@ -38,14 +38,14 @@ program:
 
 term :
 | t=base_term                                          { t }
-| KWD_LAMBDA; id=ID; COLON; ty=term; DOT; body=term    { Lambda(Var_name.of_string id, ty, body) }
-| KWD_PROD; id=ID; COLON; ty=term; DOT; body=term      { Prod(Var_name.of_string id, ty, body) }
+| KWD_LAMBDA; id=ID; COLON; ty=term; DOT; body=term    { Lambda(Name.of_string id, ty, body) }
+| KWD_PROD; id=ID; COLON; ty=term; DOT; body=term      { Prod(Name.of_string id, ty, body) }
 | t=base_term; t2=base_term                            { App(t, t2) }
 
 
 base_term: 
 | LPAREN; t=term ; RPAREN                           { t }
-| id=ID                                             { Var(Var_name.of_string id) }
+| id=ID                                             { Var(Name.of_string id) }
 | KWD_UNIVERSE; i=INT                               { Universe i }
 | KWD_UNKNOWN; AT ; LBRACK; i=INT; RBRACK           { Unknown i }
 
