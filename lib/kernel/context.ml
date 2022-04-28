@@ -18,8 +18,8 @@ let add ~key ~value (ctx : ('k, 'v) t) : ('k, 'v) t = (key, value) :: ctx
 
 let rec lookup ~key ~ctx : 'v =
   match ctx with
-  | [] -> raise Not_found
-  | (k, v) :: tl -> if k == key then v else lookup ~key ~ctx:tl
+  | [] -> None
+  | (k, v) :: tl -> if k == key then Some v else lookup ~key ~ctx:tl
 
 (** Returns the value associated to the given key.
       @raise Not_found if the given key has no associated value. *)

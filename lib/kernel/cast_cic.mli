@@ -16,11 +16,13 @@ type term =
 | Var of Name.t
 | Universe of int 
 | App of term * term 
-| Lambda of Name.t * term * term 
-| Prod of Name.t * term * term 
+| Lambda of { id: Name.t; dom: term; body: term }
+| Prod of { id: Name.t; dom: term; cod: term }
 | Unknown of term 
 | Err of term 
 | Cast of { source: term; target: term; term: term }
+
+val to_string : term -> string
 
 (** Context *)
 type context = (Name.t, term) Context.t
@@ -40,8 +42,8 @@ val cast_universe_level : int -> int
 
 (** Head constructors *)
 type head =
-| Prod 
-| Universe of int
+| HProd 
+| HUniverse of int
 (* | Inductive *)
 
 (** Returns the head constructor of a type *)

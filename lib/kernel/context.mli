@@ -11,6 +11,6 @@ val is_empty : ('k, 'v) t -> bool
 val add : key:'k -> value:'v -> ('k, 'v) t -> ('k, 'v) t
 (** Adds a new declaration to the context *)
 
-val lookup : key:'k -> ctx:('k, 'v) t -> 'v
+val lookup : key:'k -> ctx:('k, 'v) t -> 'v option
 (** Returns the value associated to the given key.
       @raise Not_found if the given key has no associated value. *)

@@ -6,6 +6,7 @@ val reduce1 : term -> term
 val reduce : term -> term
 
 type type_error
+val error_msg : type_error -> string
 
 val infering : context -> term -> (term, type_error) result
 val checking : context -> term -> term -> (unit, type_error) result
