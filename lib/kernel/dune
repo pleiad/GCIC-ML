@@ -1,4 +1,4 @@
 (library
- (name cast_cic)
+ (name kernel)
  (modules cast_cic)
  (libraries parsing))
