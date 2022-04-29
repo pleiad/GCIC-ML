@@ -52,3 +52,6 @@ val head : term -> (head, string) result
 (** Returns the least precise type for the given head constructor, 
     at the provided level *)
 val germ : int -> head -> term 
+
+(** Checks if a term icorresponds to a germ at the provided universe level *)
+val is_germ : int -> term -> bool

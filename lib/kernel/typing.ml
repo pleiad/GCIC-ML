@@ -1,13 +1,8 @@
 (** This module specifies the typing relation *)
 
 open Cast_cic
+open Reduction
 
-
-let reduce1 (t : term) : term =
-  t
-
-let reduce (t : term) : term =
-  t
 
 (* TODO *)
 let subst x v t : term =

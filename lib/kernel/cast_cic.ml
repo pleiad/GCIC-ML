@@ -85,3 +85,11 @@ let germ i h : term =
       let univ : term = Universe cprod in
       if cprod >= 0 then Prod {id = Name.of_string "__"; dom = Unknown univ; cod = Unknown univ} else Err univ
   | HUniverse j -> if j < i then (Universe j) else Err (Universe i)
+
+(** Checks if a term icorresponds to a germ at the provided universe level *)
+let is_germ i : term -> bool = function
+  | Prod {id=_; dom=Unknown (Universe j); cod=Unknown (Universe k)} when 
+    cast_universe_level i == j && j == k && j >= 0 -> true
+  | Err (Universe j) -> i == j
+  | Universe j -> j < i
+  | _ -> false

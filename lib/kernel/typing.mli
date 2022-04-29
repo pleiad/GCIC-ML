@@ -2,9 +2,6 @@
 
 open Cast_cic
 
-val reduce1 : term -> term
-val reduce : term -> term
-
 type type_error
 val error_msg : type_error -> string
 
