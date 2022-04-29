@@ -24,8 +24,7 @@ let is_canonical : term -> bool = function
   | Unknown t when is_unknown_or_error_canonical t -> true
   | Err t when is_unknown_or_error_canonical t -> true
   | Cast {source=ty; target=Unknown (Universe i); term=_} when is_germ i ty -> true
-  | t when is_neutral t -> true
-  | _ -> false
+  | t -> is_neutral t
 
 (** One step reduction of terms *)
 let reduce1 (t : term) : term =
