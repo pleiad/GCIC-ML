@@ -25,4 +25,5 @@ jobs:
           cache-key: ${{ hashFiles('esy.lock/index.json') }}
 
       - run: esy install 
-      - run: esy build
+      - run: esy b dune build
+      - run: esy b dune runtest

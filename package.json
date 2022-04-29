@@ -1,4 +1,9 @@
 {
+  "scripts": {
+    "watch": "dune build -w",
+    "test": "dune runtest",
+    "run": "dune exec gcic"
+  },
   "dependencies": {
     "ocaml": "4.13.x",
     "@opam/dune": "*",
