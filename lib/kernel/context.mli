@@ -14,3 +14,6 @@ val add : key:'k -> value:'v -> ('k, 'v) t -> ('k, 'v) t
 val lookup : key:'k -> ctx:('k, 'v) t -> 'v option
 (** Returns the value associated to the given key.
       @raise Not_found if the given key has no associated value. *)
+
+val remove : key:'k -> ctx:('k, 'v) t -> ('k, 'v) t
+(** Remove a declaration from the context *)

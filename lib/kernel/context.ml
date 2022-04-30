@@ -23,3 +23,9 @@ let rec lookup ~key ~ctx : 'v =
 
 (** Returns the value associated to the given key.
       @raise Not_found if the given key has no associated value. *)
+
+let rec remove ~key ~ctx =
+  match ctx with
+  | [] -> []
+  | (k, v) :: tl -> if k == key then tl else (k, v) :: remove ~key ~ctx
+(** Remove a declaration from the context *)
