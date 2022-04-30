@@ -2,6 +2,7 @@
 
 open Cast_cic
 
+(** Extended AST with tagged values *)
 type vterm = 
   | Var of Name.t
   | Universe of int
@@ -18,7 +19,6 @@ type vterm =
 and vfun_info = { id: Name.t; dom: vterm; body: vterm }
 and vcontext = (Name.t, vterm) Context.t
 
-
 let rec to_vterm : term -> vterm = function
   | Var x -> Var x
   | Universe i -> Universe i
@@ -33,6 +33,7 @@ let rec to_vterm : term -> vterm = function
 
 and to_vfun_info {id; dom; body} = {id; dom=to_vterm dom; body=to_vterm body}
 
+(** Converts a term with tagged values into a term of the original AST *)
 let rec from_vterm : vterm -> term = function
   | Var x -> Var x
   | Universe i -> Universe i
@@ -46,20 +47,23 @@ let rec from_vterm : vterm -> term = function
                       term=from_vterm ci.term }
 and from_vfun_info {id; dom; body} = {id; dom=from_vterm dom; body=from_vterm body}
 
+(** Checks if a term corresponds to a type *)
 let is_type : vterm -> bool = function
 | VProd _ | Universe _ -> true
 | _ -> false
 
+(** Checks if a term corresponds to a taggd value *)
 let is_value = function
 | Universe _ | VLambda _ | VProd _ | VUnknown _ | VErr _ -> true
 | _ -> false
 
-let from_value : vterm -> vterm = function
+(** Untags values *)
+let rec from_value : vterm -> vterm = function
 | Universe i -> Universe i
-| VLambda (fi, _) -> Lambda fi
-| VProd (fi, _) -> Prod fi
-| VUnknown t -> Unknown t
-| VErr t -> Err t
+| VLambda (fi, _) -> Lambda {fi with dom=from_value fi.dom}
+| VProd (fi, _) -> Prod {fi with dom=from_value fi.dom}
+| VUnknown t -> Unknown (from_value t)
+| VErr t -> Err (from_value t)
 | t -> t
 
 type continuation =
@@ -76,9 +80,13 @@ type continuation =
 
 type state = vterm * vcontext * continuation
 
+(** Build the initial state from a term *)
 let initial_state t = (t, Context.empty, KHole)
 
+(** Projects the term from a state *)
 let term_state (t, _, _) = t
+
+(** Projects the continuation from a state *)
 let cont_state (_, _, k) = k
 
 (** One step reduction of terms *)
