@@ -2,5 +2,8 @@
 
 open Cast_cic
 
+(** Reduces a term in the given context *)
+val reduce_in : context -> term -> term
+
 (** Reduces a term *)
 val reduce : term -> term

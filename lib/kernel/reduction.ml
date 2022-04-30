@@ -38,6 +38,13 @@ let rec to_vterm : term -> vterm = function
 
 and to_vfun_info {id; dom; body} = {id; dom=to_vterm dom; body=to_vterm body}
 
+(** Converts a term of the original AST into a term with tagged values *)
+let to_vcontext (ctx : context) : vcontext = 
+  Context.to_list ctx |>
+  List.map (fun (k,v) -> (k, to_vterm v)) |>
+  Context.of_list
+
+
 (** Converts a term with tagged values into a term of the original AST *)
 let rec from_vterm : vterm -> term = function
   | Var x -> Var x
@@ -117,9 +124,6 @@ type continuation =
 
 (* Just an alias *)
 type state = vterm * vcontext * continuation
-
-(** Build the initial state from a term *)
-let initial_state t = (t, Context.empty, KHole)
 
 (** One step reduction of terms *)
 let reduce1 (term, ctx, cont) : state =
@@ -212,9 +216,12 @@ let rec reduce_fueled (fuel : int) ((term, _, cont) as s) : vterm =
      then term
      else reduce_fueled (fuel-1) (reduce1 s)
 
+(** Reduces a term in the given context *)
+let reduce_in ctx t : term = 
+  let t' = to_vterm t in
+  let ctx' = to_vcontext ctx in
+  let initial_state = (t', ctx', KHole) in
+  reduce_fueled 1000 initial_state |> from_vterm
+
 (** Reduces a term *)
-let reduce (t : term): term = 
-  to_vterm t |> 
-  initial_state |>
-  reduce_fueled 1000 |>
-  from_vterm
+let reduce : term -> term = reduce_in Context.empty
