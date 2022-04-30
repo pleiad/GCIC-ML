@@ -134,7 +134,7 @@ let is_canonical : term -> bool = function
 
 (** Performs substitution inside a term *)
 let rec subst1 x v = function
-  | Var y -> if x == y then Var y else v
+  | Var y -> if x == y then v else Var y
   | Universe i -> Universe i
   | App (t,u) -> App (subst1 x v t, subst1 x v u)
   | Lambda fi -> Lambda { fi with dom = subst1 x v fi.dom; body = (if x == fi.id then fi.body else subst1 x v fi.body) }
