@@ -96,10 +96,6 @@ let is_germ i : term -> bool = function
   | Universe j -> j < i
   | _ -> false
 
-(** Checks if a type t makes ?_t or err t canonical *)
-let is_unknown_or_error_canonical : term -> bool = function
-  | Universe _ | Unknown (Universe _) | Err (Universe _) -> true
-  | _ -> false
 
 (** Checks if a term is in neutral form *)
 let rec is_neutral : term -> bool = function
@@ -112,10 +108,15 @@ let rec is_neutral : term -> bool = function
   | Cast {source=t;                    target=_;      term=_} -> is_neutral t
   | _ -> false
 
+  (** Checks if a type t makes ?_t or err t canonical *)
+let is_unknown_or_error_canonical : term -> bool = function
+  | Universe _ | Unknown (Universe _) | Err (Universe _) -> true
+  | _ -> false
+
 (** Checks if a term is in canonical form *)
 let is_canonical : term -> bool = function
   | Universe _ | Lambda _ | Prod _ -> true
-  | Unknown t when is_unknown_or_error_canonical t -> true
-  | Err t when is_unknown_or_error_canonical t -> true
-  | Cast {source=ty; target=Unknown (Universe i); term=_} when is_germ i ty -> true
+  | Unknown t -> is_unknown_or_error_canonical t
+  | Err t -> is_unknown_or_error_canonical t
+  | Cast {source=ty; target=Unknown (Universe i); term=_} -> is_germ i ty
   | t -> is_neutral t

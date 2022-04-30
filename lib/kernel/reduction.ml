@@ -1,8 +1,12 @@
 (** This module specifies the operational semantics *)
+(* The implementation is based on a CEK machine (https://en.wikipedia.org/wiki/CEK_Machine) *)
 
 open Cast_cic
 
-(** Extended AST with tagged values *)
+(** Extended AST with tagged values
+
+    We are using this representation because otherwise we have to 
+    constantly query whether a term is canonical, when reducing the stack *)
 type vterm = 
   | Var of Name.t
   | Universe of int
@@ -19,6 +23,7 @@ type vterm =
 and vfun_info = { id: Name.t; dom: vterm; body: vterm }
 and vcontext = (Name.t, vterm) Context.t
 
+(** Converts a term of the original AST into a term with tagged values *)
 let rec to_vterm : term -> vterm = function
   | Var x -> Var x
   | Universe i -> Universe i
@@ -52,20 +57,20 @@ let is_type : vterm -> bool = function
 | VProd _ | Universe _ -> true
 | _ -> false
 
-(** Checks if a term corresponds to a taggd value *)
+(** Checks if a term corresponds to a tagged value *)
 let is_value = function
 | Universe _ | VLambda _ | VProd _ | VUnknown _ | VErr _ -> true
 | _ -> false
 
 (** Untags values *)
 let rec from_value : vterm -> vterm = function
-| Universe i -> Universe i
 | VLambda (fi, _) -> Lambda {fi with dom=from_value fi.dom}
 | VProd (fi, _) -> Prod {fi with dom=from_value fi.dom}
 | VUnknown t -> Unknown (from_value t)
 | VErr t -> Err (from_value t)
 | t -> t
 
+(** The representation of a continuation of the CEK machine *)
 type continuation =
 | KHole
 | KApp_l of (vterm * vcontext * continuation)
@@ -78,16 +83,11 @@ type continuation =
 | KCast_target of (vterm * vterm * vcontext * continuation)
 | KCast_term of (vterm * vterm * vcontext * continuation)
 
+(* Just an alias *)
 type state = vterm * vcontext * continuation
 
 (** Build the initial state from a term *)
 let initial_state t = (t, Context.empty, KHole)
-
-(** Projects the term from a state *)
-let term_state (t, _, _) = t
-
-(** Projects the continuation from a state *)
-let cont_state (_, _, k) = k
 
 (** One step reduction of terms *)
 let reduce1 (term, ctx, cont) : state =
@@ -171,12 +171,12 @@ let reduce1 (term, ctx, cont) : state =
   | (_, _) -> failwith "stuck term"
 
 (** Transitive clousure of reduce1 with fuel *)
-let rec reduce_fueled (i : int) s : vterm =
-  if i < 0 || (is_value (term_state s) && cont_state s == KHole)
-     then term_state s
-     else reduce_fueled (i-1) (reduce1 s)
+let rec reduce_fueled (fuel : int) ((term, _, cont) as s) : vterm =
+  if fuel < 0 || (is_value term && cont == KHole)
+     then term
+     else reduce_fueled (fuel-1) (reduce1 s)
 
-(** Transitive clousure of reduce1 *)
+(** Reduces a term *)
 let reduce (t : term): term = 
   to_vterm t |> 
   initial_state |>
