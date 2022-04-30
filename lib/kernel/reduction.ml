@@ -52,6 +52,38 @@ let rec from_vterm : vterm -> term = function
                       term=from_vterm ci.term }
 and from_vfun_info {id; dom; body} = {id; dom=from_vterm dom; body=from_vterm body}
 
+(** Performs substitution of a context inside a vterm.
+    Values are untagged since terms in the context may not be fully reduced (see rule Prod-Prod in reduce1) *)
+let rec subst ctx : vterm -> vterm = function
+  | Var y -> 
+    (match Context.lookup ~key:y ~ctx with
+     | None -> Var y
+     | Some t -> t)
+  | Universe i -> Universe i
+  | App (t,u) -> App (subst ctx t, subst ctx u)
+  | Lambda fi -> 
+    let y = new_identifier () in
+    let ctx' = Context.add ~key:fi.id ~value:(Var y) ctx in
+    Lambda { id = y; dom = subst ctx fi.dom; body = subst ctx' fi.body }
+  | Prod fi -> 
+    let y = new_identifier () in
+    let ctx' = Context.add ~key:fi.id ~value:(Var y) ctx in
+    Prod { id = y; dom = subst ctx fi.dom; body = subst ctx' fi.body }
+  | Unknown t | VUnknown t -> Unknown (subst ctx t)
+  | Err t | VErr t -> Err (subst ctx t)
+  | Cast { source; target; term=term' } -> 
+    Cast { source = subst ctx source;
+           target = subst ctx target;
+           term = subst ctx term' }
+  | VLambda (fi, ctx') -> 
+    let y = new_identifier () in
+    let ctx'' = Context.add ~key:fi.id ~value:(Var y) ctx' in
+    Lambda { id = y; dom = subst ctx' fi.dom; body = subst ctx'' fi.body }
+  | VProd (fi, ctx') -> 
+    let y = new_identifier () in
+    let ctx'' = Context.add ~key:fi.id ~value:(Var y) ctx' in
+    Prod { id = y; dom = subst ctx' fi.dom; body = subst ctx'' fi.body }
+
 (** Checks if a term corresponds to a type *)
 let is_type : vterm -> bool = function
 | VProd _ | Universe _ -> true
@@ -114,17 +146,21 @@ let reduce1 (term, ctx, cont) : state =
     (* Down-Err *)
   | (VErr (VUnknown (Universe _)), KCast_term (VUnknown (Universe _), target, _, cont)) ->
     (VErr target, ctx, cont)
-    (* Prod-Prod
+    (* Prod-Prod *)
   | (VLambda (term_fi, term_ctx), KCast_term (VProd (source_fi, source_ctx), VProd (target_fi, target_ctx), _, cont)) ->
-    let y = Var target_fi.id in (* TODO: Should be a new identifier *)
-    let inner_cast = Cast {source=target_fi.dom; target=term_fi.dom; term=y} in
-    let outer_cast = Cast {source=target_fi.dom; target=source_fi.dom; term=y} in
-    let inner_ctx = Context.add ~key:term_fi.id ~value:inner_cast term_ctx in
-    let body = y  (* TODO *) in
-    let fi = {id=term_fi.id; dom=target_fi.dom; body} in
+    let y_id = new_identifier () in
+    let y = Var y_id in
+    let inner_cast = Cast { source = target_fi.dom; target = term_fi.dom; term = y} in
+    let inner_body_ctx = Context.add ~key:term_fi.id ~value:inner_cast term_ctx in
+    let inner_body = subst inner_body_ctx term_fi.body in
+    let source_cast = Cast { source = target_fi.dom; target = source_fi.dom; term = y} in
+    let body_source_ctx = Context.add ~key:source_fi.id ~value:source_cast source_ctx in
+    let body_target_ctx = Context.add ~key:target_fi.id ~value:y target_ctx in
+    let body = Cast { source = subst body_source_ctx source_fi.body;
+                      target = subst body_target_ctx target_fi.body;
+                      term   = inner_body } in
+    let fi = {id=y_id; dom=target_fi.dom; body} in
     (VLambda (fi, term_ctx), ctx, cont)
-    *)
-  
     (* Univ-Univ *)
   | (t, KCast_term (Universe i, Universe j, _, cont)) when is_value t && i == j ->
     (t, ctx, cont)
