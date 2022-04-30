@@ -29,3 +29,13 @@ let rec remove ~key ~ctx =
   | [] -> []
   | (k, v) :: tl -> if k == key then tl else (k, v) :: remove ~key ~ctx
 (** Remove a declaration from the context *)
+
+let rec to_list = function
+| [] -> []
+| kv :: tl -> kv :: to_list tl
+(** Converts a context into a list of key-value pairs *)
+
+let rec of_list = function
+| [] -> []
+| kv :: tl -> kv :: of_list tl
+(** Converts a list of key-value pairs into a context *)

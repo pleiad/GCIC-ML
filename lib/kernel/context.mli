@@ -17,3 +17,9 @@ val lookup : key:'k -> ctx:('k, 'v) t -> 'v option
 
 val remove : key:'k -> ctx:('k, 'v) t -> ('k, 'v) t
 (** Remove a declaration from the context *)
+
+val to_list : ('k, 'v) t -> ('k * 'v) list
+(** Converts a context into a list of key-value pairs *)
+
+val of_list : ('k * 'v) list -> ('k, 'v) t
+(** Converts a list of key-value pairs into a context *)
