@@ -66,3 +66,9 @@ val is_neutral : term -> bool
 
 (** Checks if a term is in canonical form *)
 val is_canonical : term -> bool 
+
+(** Performs substitution inside a vterm *)
+val subst1 : Name.t -> term -> term -> term
+
+(** Checks that two terms are identificable upto alpha-renaming *)
+val alpha_equal : term -> term -> bool

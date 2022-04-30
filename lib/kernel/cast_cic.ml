@@ -130,3 +130,42 @@ let is_canonical : term -> bool = function
   | Err t -> is_unknown_or_error_canonical t
   | Cast {source=ty; target=Unknown (Universe i); term=_} -> is_germ i ty
   | t -> is_neutral t
+
+
+(** Performs substitution inside a term *)
+let rec subst1 x v = function
+  | Var y -> if x == y then Var y else v
+  | Universe i -> Universe i
+  | App (t,u) -> App (subst1 x v t, subst1 x v u)
+  | Lambda fi -> Lambda { fi with dom = subst1 x v fi.dom; body = (if x == fi.id then fi.body else subst1 x v fi.body) }
+  | Prod fi -> Prod { fi with dom = subst1 x v fi.dom; body = (if x == fi.id then fi.body else subst1 x v fi.body) }
+  | Unknown t -> Unknown (subst1 x v t)
+  | Err t -> Err (subst1 x v t)
+  | Cast { source; target; term } -> 
+    Cast { source = subst1 x v source;
+           target = subst1 x v target;
+           term = subst1 x v term }
+
+(** Checks that two terms are identificable upto alpha-renaming *)
+let rec alpha_equal t1 t2 =
+  match (t1, t2) with
+  | (Var x, Var y) -> x == y
+  | (Universe i, Universe j) -> i == j
+  | (App (t1, u1), App (t2, u2)) -> alpha_equal t1 t2 && alpha_equal u1 u2
+  | (Lambda fi1, Lambda fi2) ->
+    let x_id = new_identifier () in
+    let x = Var x_id in
+    let body1 = subst1 fi1.id x fi1.body in
+    let body2 = subst1 fi2.id x fi2.body in
+    alpha_equal fi1.dom fi2.dom && alpha_equal body1 body2
+  | (Prod fi1, Prod fi2) ->
+    let x_id = new_identifier () in
+    let x = Var x_id in
+    let body1 = subst1 fi1.id x fi1.body in
+    let body2 = subst1 fi2.id x fi2.body in
+    alpha_equal fi1.dom fi2.dom && alpha_equal body1 body2
+  | (Unknown t1, Unknown t2) -> alpha_equal t1 t2
+  | (Err t1, Err t2) -> alpha_equal t1 t2
+  | (Cast ci1, Cast ci2) ->
+    alpha_equal ci1.source ci2.source && alpha_equal ci1.target ci2.target && alpha_equal ci1.term ci2.term
+  | _ -> false
