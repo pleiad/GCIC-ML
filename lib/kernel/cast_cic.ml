@@ -25,11 +25,13 @@ type term =
   | Var of Name.t
   | Universe of int
   | App of term * term
-  | Lambda of { id: Name.t; dom: term; body: term }
-  | Prod of { id: Name.t; dom: term; cod: term }
+  | Lambda of fun_info
+  | Prod of fun_info
   | Unknown of term
   | Err of term
   | Cast of { source: term; target: term; term: term }
+
+and fun_info = { id: Name.t; dom: term; body: term }
 
 (** Returns the stringified version of a term *)
 let rec to_string (t : term) =
@@ -41,9 +43,9 @@ let rec to_string (t : term) =
   | Lambda {id; dom; body} ->
       asprintf "lambda %s : %s. %s" (Name.to_string id) (to_string dom)
         (to_string body)
-  | Prod {id; dom; cod} ->
+  | Prod {id; dom; body} ->
       asprintf "Prod %s : %s. %s" (Name.to_string id) (to_string dom)
-        (to_string cod)
+        (to_string body)
   | Unknown ty -> asprintf "?_%s" (to_string ty)
   | Err ty -> asprintf "err_%s" (to_string ty)
   | Cast {source; target; term} -> asprintf "<%s<-%s> %s" (to_string target) (to_string source) (to_string term)
@@ -83,13 +85,37 @@ let germ i h : term =
   | HProd ->
       let cprod = cast_universe_level i in
       let univ : term = Universe cprod in
-      if cprod >= 0 then Prod {id = Name.of_string "__"; dom = Unknown univ; cod = Unknown univ} else Err univ
+      if cprod >= 0 then Prod {id = Name.of_string "__"; dom = Unknown univ; body = Unknown univ} else Err univ
   | HUniverse j -> if j < i then (Universe j) else Err (Universe i)
 
 (** Checks if a term icorresponds to a germ at the provided universe level *)
 let is_germ i : term -> bool = function
-  | Prod {id=_; dom=Unknown (Universe j); cod=Unknown (Universe k)} when 
+  | Prod {id=_; dom=Unknown (Universe j); body=Unknown (Universe k)} when 
     cast_universe_level i == j && j == k && j >= 0 -> true
   | Err (Universe j) -> i == j
   | Universe j -> j < i
   | _ -> false
+
+(** Checks if a type t makes ?_t or err t canonical *)
+let is_unknown_or_error_canonical : term -> bool = function
+  | Universe _ | Unknown (Universe _) | Err (Universe _) -> true
+  | _ -> false
+
+(** Checks if a term is in neutral form *)
+let rec is_neutral : term -> bool = function
+  | Var _ -> true
+  | App (t, _) | Unknown t | Err t
+  | Cast {source=Unknown (Universe _); target=_;      term=t}
+  | Cast {source=Universe _;           target=t;      term=_}
+  | Cast {source=Prod _;               target=Prod _; term=t}
+  | Cast {source=Prod _;               target=t;      term=_}
+  | Cast {source=t;                    target=_;      term=_} -> is_neutral t
+  | _ -> false
+
+(** Checks if a term is in canonical form *)
+let is_canonical : term -> bool = function
+  | Universe _ | Lambda _ | Prod _ -> true
+  | Unknown t when is_unknown_or_error_canonical t -> true
+  | Err t when is_unknown_or_error_canonical t -> true
+  | Cast {source=ty; target=Unknown (Universe i); term=_} when is_germ i ty -> true
+  | t -> is_neutral t

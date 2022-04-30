@@ -16,11 +16,14 @@ type term =
 | Var of Name.t
 | Universe of int 
 | App of term * term 
-| Lambda of { id: Name.t; dom: term; body: term }
-| Prod of { id: Name.t; dom: term; cod: term }
+| Lambda of fun_info
+| Prod of fun_info
 | Unknown of term 
 | Err of term 
 | Cast of { source: term; target: term; term: term }
+
+and fun_info = { id: Name.t; dom: term; body: term }
+
 
 val to_string : term -> string
 
@@ -55,3 +58,9 @@ val germ : int -> head -> term
 
 (** Checks if a term icorresponds to a germ at the provided universe level *)
 val is_germ : int -> term -> bool
+
+(** Checks if a term is in neutral form *)
+val is_neutral : term -> bool 
+
+(** Checks if a term is in canonical form *)
+val is_canonical : term -> bool 
