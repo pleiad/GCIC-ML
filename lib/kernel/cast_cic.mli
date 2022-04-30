@@ -11,6 +11,8 @@ module type ID = sig
   
 module Name : ID 
 
+val new_identifier : unit -> Name.t
+
 (** Terms in CastCIC *)
 type term =
 | Var of Name.t

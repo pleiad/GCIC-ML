@@ -20,6 +20,16 @@ end
 
 module Name : ID = String_id
 
+(** Global counter used to create new identifiers *)
+let id_counter : int ref = ref 0
+
+(** Returns a new identifier name *)
+let new_identifier () : Name.t =
+  let id = Name.of_string ("#" ^ string_of_int !id_counter) in
+  id_counter := !id_counter + 1;
+  id
+
+
 (** Terms in CastCIC *)
 type term =
   | Var of Name.t
