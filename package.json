@@ -16,7 +16,7 @@
       "@opam/ocamlformat": "^0.21",
       "@opam/ocaml-lsp-server": "^1.10.5",
       "@opam/bisect_ppx": "^2.8.1",
-      "@opam/ppx_jane": "^0.11.0"
+      "@opam/ppx_jane": "^0.15.0"
   }
 
 }
