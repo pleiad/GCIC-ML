@@ -1,2 +1,6 @@
-(test
- (name gcic))
+(library
+ (name test_gcic)
+ (inline_tests)
+ (libraries gcic)
+ (preprocess
+  (pps ppx_jane)))
