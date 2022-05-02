@@ -2,7 +2,8 @@
   "scripts": {
     "watch": "dune build -w",
     "test": "dune runtest",
-    "coverage": "dune runtest --instrument-with bisect_ppx --force; bisect-ppx-report html",
+    "coverage": "dune runtest --instrument-with=bisect_ppx --force",
+    "report": "bisect-ppx-report html",
     "run": "dune exec gcic"
   },
   "dependencies": {
