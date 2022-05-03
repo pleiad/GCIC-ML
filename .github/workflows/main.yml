@@ -27,3 +27,4 @@ jobs:
       - run: esy install 
       - run: esy b dune build
       - run: esy b dune runtest
+      - run: esy b bisect-ppx-report send-to Codecov
