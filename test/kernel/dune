@@ -1,6 +1,3 @@
-(library
+(test
  (name test_kernel)
- (inline_tests)
- (libraries kernel)
- (preprocess
-   (pps ppx_jane)))
+ (libraries kernel alcotest))

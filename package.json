@@ -19,6 +19,7 @@
       "@opam/ocaml-lsp-server": "^1.10.5",
       "@opam/bisect_ppx": "^2.8.1",
       "@opam/ppx_jane": "*",
+      "@opam/alcotest": "*",
       "@opam/patdiff": "*"
   }
 
