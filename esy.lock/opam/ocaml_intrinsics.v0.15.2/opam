@@ -14,13 +14,13 @@ depends: [
   "dune"              {>= "2.0.0"}
   "dune-configurator"
 ]
-available: (arch = "x86_32" | arch = "x86_64") & os != "win32"
+available: (arch = "x86_32" | arch = "x86_64" | arch = "arm64") & os != "win32"
 synopsis: "Intrinsics"
 description: "
 Provides functions to invoke amd64 instructions (such as clz,popcnt,rdtsc,rdpmc)
      when available, or compatible software implementation on other targets.
 "
 url {
-src: "https://github.com/janestreet/ocaml_intrinsics/archive/refs/tags/v0.15.1.tar.gz"
-checksum: "sha256=837186acef28c51d92a55a58eaa32b0e07a06a0ca1d13fb5403736011f175ad4"
+src: "https://github.com/janestreet/ocaml_intrinsics/archive/refs/tags/v0.15.2.tar.gz"
+checksum: "sha256=92064a7fcebf1654d44f4d29abec0a9650505c3929b6d38fb293c2b69e5ca5ca"
 }
