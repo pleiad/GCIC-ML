@@ -6,7 +6,7 @@ mkShell {
     ocaml stdio 
     bisect_ppx ppx_jane
     dune_2 menhir merlin ocamlformat findlib ocaml-lsp  
-    alcotest
+    alcotest qcheck qcheck-alcotest
   ]) ++ [inotify-tools];
 
   shellHook = ''

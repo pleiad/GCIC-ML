@@ -20,6 +20,8 @@
       "@opam/bisect_ppx": "^2.8.1",
       "@opam/ppx_jane": "*",
       "@opam/alcotest": "*",
+      "@opam/qcheck": "*",
+      "@opam/qcheck-alcotest": "*",
       "@opam/patdiff": "*"
   }
 
