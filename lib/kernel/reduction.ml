@@ -107,7 +107,8 @@ let reduce1 (term, ctx, cont) : state =
 
 (** Transitive clousure of reduce1 with fuel *)
 let rec reduce_fueled (fuel : int) ((term, _, cont) as s) : vterm =
-  if fuel < 0 || (is_value term && cont == KHole)
+  if fuel < 0 then failwith "not enough fuel" else
+  if is_value term && cont == KHole
      then term
      else reduce_fueled (fuel-1) (reduce1 s)
 
