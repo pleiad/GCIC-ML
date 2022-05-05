@@ -2,8 +2,7 @@
 
 open Cast_cic
 open Reduction
-
-let ( let* ) = Result.bind
+open Std
 
 type type_error = string
 
