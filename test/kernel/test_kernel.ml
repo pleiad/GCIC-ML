@@ -3,4 +3,5 @@ let () =
     [ ("Context module", Test_context.tests);
       ("Cast_cic module", Test_castcic.tests);
       ("Reduction module", Test_reduction.tests);
+      ("Typing module", Test_typing.tests);
        ]

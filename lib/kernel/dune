@@ -1,6 +1,6 @@
 (library
  (name kernel)
- (modules cast_cic context typing reduction reduction_term)
+ (modules cast_cic context typing reduction)
  (preprocess
    (pps bisect_ppx))
  (libraries parsing))

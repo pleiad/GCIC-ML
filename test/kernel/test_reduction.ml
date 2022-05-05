@@ -11,6 +11,7 @@ let unknown t = Unknown t
 let err t = Err t
 let cast source target term = Cast { source; target; term }
 
+(* TODO: Check weights and distribution in subterms *)
 let cast_cic_gen =
   QCheck.Gen.(
     sized
@@ -30,25 +31,41 @@ let cast_cic_gen =
                    (1, map3 cast (self (n / 3)) (self (n / 3)) (self (n / 3)));
                  ]))
 
-let arbitrary_cast_cic =
-  (* let open QCheck.Iter in *)
-  (* let print_cast_cic = to_string in *)
-  (* let rec shrink_cast_cic = function
-       | Var x ->  QCheck.Shrink.int (x |> Name.to_string |> int_of_string) >|= var
-       | Universe i -> QCheck.Shrink.int i >|= var
-       | App t1 t2 ->
-         of_list [ t1; t2 ]
-           <+> (shrink_cast_cic t1 >|= fun t1' -> app t1't2)
-           <+> (shrink_cast_cic t2 >|= fun t2' -> app t1 t2')
-       | _ -> var 1
+(* TODO: Add shrinker *)
+let arbitrary_cast_cic = QCheck.make cast_cic_gen ~print:to_string
 
-     in *)
-  QCheck.make cast_cic_gen ~print:to_string
-
-let passing =
+let reduction_to_canonical =
   QCheck.(
-    Test.make ~count:100 ~name:"Reduction" arbitrary_cast_cic (fun t ->
+    Test.make ~count:1000 ~name:"well-typed terms reduce to canonical"
+      arbitrary_cast_cic (fun t ->
         assume (Typing.infer_type Context.empty t |> Result.is_ok);
         Reduction.reduce t |> is_canonical))
 
-let tests = List.map QCheck_alcotest.to_alcotest [ passing ]
+(* TODO: Improve this with proper testable  *)
+let test_unknown_reduce () =
+  Alcotest.(check bool)
+    "reduce prod unknown to lambda" true
+    (match
+       Reduction.reduce
+         (Unknown
+            (Prod { id = name_of_int 1; dom = Universe 5; body = Universe 0 }))
+     with
+    | Lambda { id = _; dom = Universe 5; body = Unknown (Universe 0) } -> true
+    | _ -> false)
+
+let test_error_reduce () =
+  Alcotest.(check bool)
+    "reduce prod error to lambda" true
+    (match
+       Reduction.reduce
+         (Err (Prod { id = name_of_int 1; dom = Universe 5; body = Universe 0 }))
+     with
+    | Lambda { id = _; dom = Universe 5; body = Err (Universe 0) } -> true
+    | _ -> false)
+
+let tests =
+  [
+    ("reduce unknown", `Quick, test_unknown_reduce);
+    ("reduce error", `Quick, test_error_reduce);
+    QCheck_alcotest.to_alcotest reduction_to_canonical;
+  ]
