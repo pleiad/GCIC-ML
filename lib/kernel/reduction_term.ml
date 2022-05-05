@@ -95,6 +95,7 @@ let is_type : vterm -> bool = function
 
 (** Checks if a term corresponds to a tagged value *)
 let is_value = function
+| VUnknown (VProd _) | VErr (VProd _) -> false
 | Universe _ | VLambda _ | VProd _ | VUnknown _ | VErr _ -> true
 | _ -> false
 
