@@ -126,6 +126,8 @@ type continuation =
 (* Just an alias *)
 type state = vterm * vcontext * continuation
 
+exception Stuck_term
+
 (** One step reduction of terms *)
 let reduce1 (term, ctx, cont) : state =
   match term, cont with
@@ -209,7 +211,7 @@ let reduce1 (term, ctx, cont) : state =
   | (Err t, _) -> (t, ctx, KErr (ctx, cont))
   | (Cast {source; target; term}, _) -> (target, ctx, KCast_target (source, term, ctx, cont))
 
-  | (_, _) -> failwith "stuck term"
+  | (_, _) -> raise Stuck_term
 
 (** Transitive clousure of reduce1 with fuel *)
 let rec reduce_fueled (fuel : int) ((term, _, cont) as s) : vterm =
@@ -227,3 +229,30 @@ let reduce_in ctx t : term =
 
 (** Reduces a term *)
 let reduce : term -> term = reduce_in Context.empty
+
+(** Fills a continuation with the given term *)
+let rec fill_hole term cont =
+  match cont with
+  | KHole -> term
+  | KApp_l (u, _, cont) -> fill_hole (App (term, u)) cont
+  | KApp_r (t, _, cont) -> fill_hole (App (Lambda t, term)) cont
+  | KLambda (id, body, _, cont) -> fill_hole (Lambda {id; dom = term; body}) cont
+  | KProd (id, body, _, cont) -> fill_hole (Prod {id; dom = term; body}) cont
+  | KUnknown (_, cont) -> fill_hole (Unknown term) cont
+  | KErr (_, cont) -> fill_hole (Err term) cont
+  | KCast_source (target, term', _, cont) ->
+    fill_hole (Cast { source = term; target; term = term' }) cont
+  | KCast_target (source, term', _, cont) ->
+    fill_hole (Cast { source; target = term; term = term' }) cont
+  | KCast_term (source, target, _, cont) ->
+    fill_hole (Cast { source; target; term }) cont
+
+(** One step reduction *)
+let step ctx term =
+  let vt = to_vterm term in
+  let vctx = to_vcontext ctx in
+  let s = (vt, vctx, KHole) in
+  (try Ok (reduce1 s) with Stuck_term -> Error "stuck_term") |>
+  Result.map (fun (t, _, cont) -> fill_hole t cont |> from_vterm)
+
+
