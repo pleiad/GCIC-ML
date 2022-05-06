@@ -1,6 +1,6 @@
 open Kernel
 
-let varname x = Cast_cic.Name.of_string x
+let varname x = Ast.Name.of_string x
 
 (* let tests_is_empty () =
   Alcotest.(check (result (bool, string)))

@@ -1,6 +1,6 @@
 (** This module specifies the typing relation *)
 
-open Cast_cic
+open Ast
 open Reduction
 open Std
 

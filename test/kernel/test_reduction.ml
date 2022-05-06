@@ -1,14 +1,14 @@
 open Kernel
 
-let name_of_int n = string_of_int n |> Cast_cic.Name.of_string
-let id = Cast_cic.Name.of_string "x"
+let name_of_int n = string_of_int n |> Ast.Name.of_string
+let id = Ast.Name.of_string "x"
 
 let strong_normalization =
   QCheck.(
     Test.make ~count:1000 ~name:"strong normalization" Arbitrary.term
       (fun t ->
         assume (Typing.infer_type Context.empty t |> Result.is_ok);
-        Reduction.reduce t |> Cast_cic.is_canonical))
+        Reduction.reduce t |> Ast.is_canonical))
 
 let subject_reduction_empty_ctx =
   let ctx = Context.empty in
@@ -28,12 +28,12 @@ let progress_empty_ctx =
     Test.make ~count:1000 ~name:"progress in empty ctx" Arbitrary.term
       (fun t ->
         assume (Typing.infer_type ctx t |> Result.is_ok);
-        (Cast_cic.is_canonical t || (Reduction.step ctx t |> Result.is_ok))
+        (Ast.is_canonical t || (Reduction.step ctx t |> Result.is_ok))
         ))
 
 (* TODO: Improve this with proper testable  *)
 let test_unknown_reduce () =
-  let open Cast_cic in
+  let open Ast in
   let expected = Lambda { id; dom = Universe 5; body = Unknown (Universe 0) } in
   Alcotest.check Testable.term
     "reduce prod unknown to lambda" expected
@@ -41,7 +41,7 @@ let test_unknown_reduce () =
          (Unknown (Prod { id; dom = Universe 5; body = Universe 0 })))
 
 let test_error_reduce () =
-  let open Cast_cic in
+  let open Ast in
   let expected = Lambda { id; dom = Universe 5; body = Err (Universe 0) } in
   Alcotest.check Testable.term
     "reduce prod error to lambda" expected

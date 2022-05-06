@@ -1,6 +1,6 @@
 (** This module specifies the operational semantics *)
 
-open Cast_cic
+open Ast
 
 (** Reduces a term in the given context *)
 val reduce_in : context -> term -> term
