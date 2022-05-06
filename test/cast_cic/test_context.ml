@@ -1,4 +1,4 @@
-open! Kernel.Context
+open! Cast_cic.Context
 
 let example1 = add ~key:"x" ~value:1 empty
 

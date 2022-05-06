@@ -1,4 +1,4 @@
-open Kernel
+open Cast_cic
 
 let varname x = Ast.Name.of_string x
 

@@ -1,4 +1,4 @@
-open Kernel.Ast
+open Cast_cic.Ast
 
 let term =
   let name_of_int n = string_of_int n |> Name.of_string in

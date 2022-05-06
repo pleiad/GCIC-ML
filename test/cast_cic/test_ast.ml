@@ -1,4 +1,4 @@
-open! Kernel.Ast
+open! Cast_cic.Ast
 
 
 let tests_head () =

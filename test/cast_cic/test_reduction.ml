@@ -1,4 +1,4 @@
-open Kernel
+open Cast_cic
 
 let name_of_int n = string_of_int n |> Ast.Name.of_string
 let id = Ast.Name.of_string "x"

@@ -1,5 +1,5 @@
 (library
- (name kernel)
+ (name cast_cic)
  (modules std ast context typing reduction)
  (preprocess
    (pps bisect_ppx))

@@ -1,4 +1,4 @@
-open Kernel
+open Cast_cic
 
 let head =
   let open Ast in
