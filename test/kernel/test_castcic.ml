@@ -1,5 +1,4 @@
 open! Kernel.Cast_cic
-open Arbitrary
 
 
 let tests_head () =
@@ -22,7 +21,7 @@ let tests_is_neutral () =
 let neutrals_are_canonical =
   QCheck.(
     Test.make ~count:1000 ~name:"neutral terms are canonical"
-      arbitrary_cast_cic_term (fun t ->
+      Arbitrary.term (fun t ->
         assume (is_neutral t);
         is_canonical t))
 

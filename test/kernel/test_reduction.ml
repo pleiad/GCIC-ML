@@ -1,12 +1,11 @@
 open Kernel
-open Arbitrary
 
 let name_of_int n = string_of_int n |> Cast_cic.Name.of_string
 let id = Cast_cic.Name.of_string "x"
 
 let strong_normalization =
   QCheck.(
-    Test.make ~count:1000 ~name:"strong normalization" arbitrary_cast_cic_term
+    Test.make ~count:1000 ~name:"strong normalization" Arbitrary.term
       (fun t ->
         assume (Typing.infer_type Context.empty t |> Result.is_ok);
         Reduction.reduce t |> Cast_cic.is_canonical))
@@ -14,7 +13,7 @@ let strong_normalization =
 let subject_reduction_empty_ctx =
   let ctx = Context.empty in
   QCheck.(
-    Test.make ~count:1000 ~name:"subject reduction in empty ctx" arbitrary_cast_cic_term
+    Test.make ~count:1000 ~name:"subject reduction in empty ctx" Arbitrary.term
       (fun t ->
         let ty = Typing.infer_type ctx t in
         assume (Result.is_ok ty);
@@ -26,7 +25,7 @@ let subject_reduction_empty_ctx =
 let progress_empty_ctx =
   let ctx = Context.empty in
   QCheck.(
-    Test.make ~count:1000 ~name:"progress in empty ctx" arbitrary_cast_cic_term
+    Test.make ~count:1000 ~name:"progress in empty ctx" Arbitrary.term
       (fun t ->
         assume (Typing.infer_type ctx t |> Result.is_ok);
         (Cast_cic.is_canonical t || (Reduction.step ctx t |> Result.is_ok))
