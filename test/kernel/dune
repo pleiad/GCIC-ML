@@ -1,3 +1,0 @@
-(test
- (name test_kernel)
- (libraries kernel alcotest qcheck qcheck-alcotest))
