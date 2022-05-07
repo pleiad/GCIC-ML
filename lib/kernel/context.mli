@@ -23,3 +23,5 @@ val to_list : ('k, 'v) t -> ('k * 'v) list
 
 val of_list : ('k * 'v) list -> ('k, 'v) t
 (** Converts a list of key-value pairs into a context *)
+
+val to_string : ('k -> string) -> ('v -> string) -> ('k, 'v) t -> string
