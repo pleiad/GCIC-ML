@@ -35,7 +35,7 @@ let term =
  QCheck.make term_gen ~print:to_string
 
  let context arbitrary_key arbitrary_value =
-  let open Kernel.Context in
+  let open Cast_cic.Context in
   let context_gen =
     QCheck.Gen.(
       sized
