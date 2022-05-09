@@ -106,6 +106,14 @@ let is_germ i : term -> bool = function
   | Universe j -> j < i
   | _ -> false
 
+(** Checks if a term corresponds to a germ for a level >= to the provided universe level *)
+  (* This only works for products - see rule Prod-Germ  *)
+  let is_germ_for_gte_level i : term -> bool = function
+  | Prod {id=_; dom=Unknown (Universe j); body=Unknown (Universe k)} -> 
+    j >= cast_universe_level i  && j == k && j >= 0
+  | Err (Universe j) -> j == i && cast_universe_level i < 0
+  | _ -> false
+
 
 (** Checks if a term is in neutral form *)
 let rec is_neutral : term -> bool = function

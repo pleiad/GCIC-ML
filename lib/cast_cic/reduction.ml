@@ -219,9 +219,8 @@ let reduce1 (term, ctx, cont) : state =
      (VErr source, ctx, cont)
      
     (* Prod-Germ *)
-    (* Missing the fact that the product cannot be a germ *)
   | (f, KCast_term ((VProd _ as source), (VUnknown (Universe i) as target), _, cont)) 
-      when is_value f && not (of_vterm source |> is_germ i) ->
+      when is_value f && not (of_vterm source |> is_germ_for_gte_level i) ->
     let middle = to_vterm (germ i HProd) in
     let inner_cast = Cast {source; target=middle; term=f} in
     let outer_cast = Cast {source=middle; target; term=inner_cast} in
@@ -233,13 +232,14 @@ let reduce1 (term, ctx, cont) : state =
     when i == j && (of_vterm source |> is_germ i)  ->
     (Cast {source; target; term}, ctx, cont)
 
+    (* TODO: Check if this can be replaced with is_germ_for_gte_level *)
     (* Size-Err Universe *)
   | (_, KCast_term (Universe j, VUnknown (Universe i), _, cont)) 
     when j >= i -> (VErr (VUnknown (Universe i)), ctx, cont)
 
     (* Size-Err Prod *)
-    | (_, KCast_term (VProd ({id=_; dom=VUnknown (Universe j); body=Unknown (Universe _)}, _), VUnknown (Universe i), _, cont)) 
-    when j > cast_universe_level i -> (VErr (VUnknown (Universe i)), ctx, cont)
+    | (_, KCast_term (VProd ({id=_; dom=VUnknown (Universe j); body=Unknown (Universe k)}, _), VUnknown (Universe i), _, cont)) 
+    when j == k && j > cast_universe_level i -> (VErr (VUnknown (Universe i)), ctx, cont)
   
 
   (* Congruence rules *)
