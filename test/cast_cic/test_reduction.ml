@@ -3,6 +3,12 @@ open Cast_cic
 let name_of_int n = string_of_int n |> Ast.Name.of_string
 let id = Ast.Name.of_string "x"
 
+let idf =
+  let open Ast in
+  Lambda { id; dom = Universe 0; body = Var id }
+
+let unknown i = Ast.Unknown (Ast.Universe i)
+
 let strong_normalization =
   QCheck.(
     Test.make ~count:1000 ~name:"strong normalization" Arbitrary.term (fun t ->
@@ -75,33 +81,37 @@ let t =
 
 let test_casts_reduce () =
   let open Ast in
-  Alcotest.check
-    (Alcotest.result Testable.term Alcotest.string)
-    "Prod-Germ reduces" (Error "stuck")
-    (* (let unk1 = Unknown (Universe 1) in
-       let middle = germ 1 HProd in
-       Cast
-         {
-           source = middle;
-           target = unk1;
-           term =
-             Cast
-               {
-                 source = Prod { id; dom = Universe 1; body = Universe 1 };
-                 target = middle;
-                 term = Lambda { id; dom = Universe 1; body = Var id };
-               };
-         }) *)
-    (try
-       Ok
-         (Reduction.reduce
-            (Cast
-               {
-                 source = Prod { id; dom = Universe 1; body = Universe 1 };
-                 target = Unknown (Universe 1);
-                 term = Lambda { id; dom = Universe 1; body = Var id };
-               }))
-     with _ -> Error "stuck")
+  (let canonical_cast =
+     Cast
+       {
+         source =
+           Prod { id; dom = Unknown (Universe 0); body = Unknown (Universe 0) };
+         target = Unknown (Universe 1);
+         term = idf;
+       }
+   in
+   Alcotest.check Testable.term "Canonical cast" canonical_cast
+     (Reduction.reduce canonical_cast));
+  let unk0 = unknown 0 in
+  let inner_cast = Cast { source = unk0; target = Universe 0; term = Var id } in
+  let outer_cast =
+    Cast { source = Universe 0; target = unk0; term = inner_cast }
+  in
+  let term = Lambda { id; dom = unk0; body = outer_cast } in
+  Alcotest.check Testable.term "Prod-Germ"
+    (Cast
+       {
+         source = Prod { id; dom = unk0; body = unk0 };
+         target = unknown 1;
+         term;
+       })
+    (Reduction.reduce
+       (Cast
+          {
+            source = Prod { id; dom = Universe 0; body = Universe 0 };
+            target = unknown 1;
+            term = idf;
+          }))
 
 (* From the GCIC paper, this is the elaboration of delta (from which omega is built) *)
 let delta' i =
@@ -109,9 +119,9 @@ let delta' i =
   let dom =
     Cast
       {
-        source = Unknown (Universe (i + 1));
+        source = unknown (i + 1);
         target = Universe i;
-        term = Unknown (Unknown (Universe (i + 1)));
+        term = Unknown (unknown (i + 1));
       }
   in
   Lambda
@@ -124,7 +134,7 @@ let delta' i =
             Cast
               {
                 source = dom;
-                target = Unknown (Universe (cast_universe_level i));
+                target = unknown (cast_universe_level i);
                 term = Var id;
               } );
     }
@@ -145,7 +155,7 @@ let omega i =
       Cast
         {
           source =
-            Prod { id; dom; body = Unknown (Universe (cast_universe_level i)) };
+            Prod { id; dom; body = unknown (cast_universe_level i) };
           target = dom;
           term = d';
         } )

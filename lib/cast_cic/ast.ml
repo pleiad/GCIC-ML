@@ -48,7 +48,7 @@ let rec to_string (t : term) =
   let open Format in
   match t with
   | Var x -> Name.to_string x
-  | Universe i -> asprintf "Universe_%i" i
+  | Universe i -> asprintf "▢%i" i
   | App (t, t') -> asprintf "(%s %s)" (to_string t) (to_string t')
   | Lambda {id; dom; body} ->
       asprintf "lambda %s : %s. %s" (Name.to_string id) (to_string dom)
@@ -58,7 +58,7 @@ let rec to_string (t : term) =
         (to_string body)
   | Unknown ty -> asprintf "?_%s" (to_string ty)
   | Err ty -> asprintf "err_%s" (to_string ty)
-  | Cast {source; target; term} -> asprintf "<%s<-%s> %s" (to_string target) (to_string source) (to_string term)
+  | Cast {source; target; term} -> asprintf "<%s <- %s> %s" (to_string target) (to_string source) (to_string term)
 
 (** Context *)
 type context = (Name.t, term) Context.t
