@@ -22,6 +22,7 @@
     "@opam/alcotest": "*",
     "@opam/patdiff": "*",
     "@opam/qcheck": "*",
-    "@opam/qcheck-alcotest": "*"
+    "@opam/qcheck-alcotest": "*",
+    "@opam/utop": "*"
   }
 }
