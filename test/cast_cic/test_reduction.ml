@@ -154,27 +154,29 @@ let omega i =
     ( d',
       Cast
         {
-          source =
-            Prod { id; dom; body = unknown (cast_universe_level i) };
+          source = Prod { id; dom; body = unknown (cast_universe_level i) };
           target = dom;
           term = d';
         } )
 
 (* This is only valid for GCIC variants N and lift *)
-let test_omega_reduce () =
+let test_omega_reduce =
   let open Ast in
-  Alcotest.check Testable.term "Omega fails" (Err (Unknown (Universe 0)))
-    (Reduction.reduce (omega 1))
+  QCheck.(
+    Test.make ~count:100 ~name:"Omega fails" small_nat (fun i ->
+        assume (i > 0);
+        Ast.alpha_equal (Reduction.reduce (omega i)) (Err (unknown (i - 1)))))
+
 
 let test_inf_prod_elab_reduces () =
   let open Ast in
-  Alcotest.check Testable.term "Inf-Prod? reduces" (Unknown (Universe 0))
+  Alcotest.check Testable.term "Inf-Prod? reduces" (unknown 0)
     (Reduction.reduce
        (Cast
           {
-            source = Unknown (Universe 1);
+            source = unknown 1;
             target = Universe 0;
-            term = Unknown (Unknown (Universe 1));
+            term = Unknown (unknown 1);
           }))
 
 let tests =
@@ -183,7 +185,7 @@ let tests =
     ("reduce error", `Quick, test_error_reduce);
     ("reduce app", `Quick, test_app_reduce);
     ("reduce casts", `Quick, test_casts_reduce);
-    ("reduce omega", `Quick, test_omega_reduce);
+    QCheck_alcotest.to_alcotest test_omega_reduce;
     ("reduce Inf-Prod?", `Quick, test_inf_prod_elab_reduces);
     QCheck_alcotest.to_alcotest strong_normalization;
     QCheck_alcotest.to_alcotest subject_reduction_empty_ctx;
