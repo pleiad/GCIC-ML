@@ -63,11 +63,118 @@ let test_error_reduce () =
             term = Err (Unknown (Universe 1));
           }))
 
+(* This one actually gets stuck, which is fine - but it should be considered ok, right? *)
+let t =
+  let open Ast in
+  Cast
+    {
+      source = Prod { id; dom = Universe 1; body = Universe 1 };
+      target = Unknown (Universe 1);
+      term = Lambda { id; dom = Universe 1; body = Var id };
+    }
+
+let test_casts_reduce () =
+  let open Ast in
+  Alcotest.check
+    (Alcotest.result Testable.term Alcotest.string)
+    "Prod-Germ reduces" (Error "stuck")
+    (* (let unk1 = Unknown (Universe 1) in
+       let middle = germ 1 HProd in
+       Cast
+         {
+           source = middle;
+           target = unk1;
+           term =
+             Cast
+               {
+                 source = Prod { id; dom = Universe 1; body = Universe 1 };
+                 target = middle;
+                 term = Lambda { id; dom = Universe 1; body = Var id };
+               };
+         }) *)
+    (try
+       Ok
+         (Reduction.reduce
+            (Cast
+               {
+                 source = Prod { id; dom = Universe 1; body = Universe 1 };
+                 target = Unknown (Universe 1);
+                 term = Lambda { id; dom = Universe 1; body = Var id };
+               }))
+     with _ -> Error "stuck")
+
+(* From the GCIC paper, this is the elaboration of delta (from which omega is built) *)
+let delta' i =
+  let open Ast in
+  let dom =
+    Cast
+      {
+        source = Unknown (Universe (i + 1));
+        target = Universe i;
+        term = Unknown (Unknown (Universe (i + 1)));
+      }
+  in
+  Lambda
+    {
+      id;
+      dom;
+      body =
+        App
+          ( Cast { source = dom; target = germ i HProd; term = Var id },
+            Cast
+              {
+                source = dom;
+                target = Unknown (Universe (cast_universe_level i));
+                term = Var id;
+              } );
+    }
+
+let omega i =
+  let open Ast in
+  let d' = delta' i in
+  let dom =
+    Cast
+      {
+        source = Unknown (Universe (i + 1));
+        target = Universe i;
+        term = Unknown (Unknown (Universe (i + 1)));
+      }
+  in
+  App
+    ( d',
+      Cast
+        {
+          source =
+            Prod { id; dom; body = Unknown (Universe (cast_universe_level i)) };
+          target = dom;
+          term = d';
+        } )
+
+(* This is only valid for GCIC variants N and lift *)
+let test_omega_reduce () =
+  let open Ast in
+  Alcotest.check Testable.term "Omega fails" (Err (Unknown (Universe 0)))
+    (Reduction.reduce (omega 1))
+
+let test_inf_prod_elab_reduces () =
+  let open Ast in
+  Alcotest.check Testable.term "Inf-Prod? reduces" (Unknown (Universe 0))
+    (Reduction.reduce
+       (Cast
+          {
+            source = Unknown (Universe 1);
+            target = Universe 0;
+            term = Unknown (Unknown (Universe 1));
+          }))
+
 let tests =
   [
     ("reduce unknown", `Quick, test_unknown_reduce);
     ("reduce error", `Quick, test_error_reduce);
     ("reduce app", `Quick, test_app_reduce);
+    ("reduce casts", `Quick, test_casts_reduce);
+    ("reduce omega", `Quick, test_omega_reduce);
+    ("reduce Inf-Prod?", `Quick, test_inf_prod_elab_reduces);
     QCheck_alcotest.to_alcotest strong_normalization;
     QCheck_alcotest.to_alcotest subject_reduction_empty_ctx;
     QCheck_alcotest.to_alcotest progress_empty_ctx;
