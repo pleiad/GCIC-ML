@@ -100,8 +100,8 @@ let germ i h : term =
 
 (** Checks if a term icorresponds to a germ at the provided universe level *)
 let is_germ i : term -> bool = function
-  | Prod {id=_; dom=Unknown (Universe j); body=Unknown (Universe k)} when 
-    cast_universe_level i == j && j == k && j >= 0 -> true
+  | Prod {id=_; dom=Unknown (Universe j); body=Unknown (Universe k)} -> 
+    cast_universe_level i == j && j == k && j >= 0
   | Err (Universe j) -> i == j
   | Universe j -> j < i
   | _ -> false
