@@ -35,3 +35,8 @@ let to_list ctx = ctx
 
 let of_list ctx = ctx
 (** Converts a list of key-value pairs into a context *)
+
+let rec to_string string_of_key string_of_value = function
+| [] -> "[]"
+| (k, v) :: tl -> 
+  "(" ^ string_of_key k ^ ", " ^ string_of_value v ^ ") ; " ^ to_string string_of_key string_of_value tl
