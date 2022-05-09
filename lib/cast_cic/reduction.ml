@@ -24,6 +24,9 @@ open Ast
   and vcontext = (Name.t, vterm) Context.t
   
   (** Converts a term of the original AST into a term with tagged values *)
+  (* This could probably be "smarter", checking if the terms are canonical and 
+     producing a more accurate tagged term. It would probably require a context 
+     as well (e.g. for closures). *)
   let rec to_vterm : term -> vterm = function
     | Var x -> Var x
     | Universe i -> Universe i
@@ -113,15 +116,24 @@ open Ast
 (** The representation of a continuation of the CEK machine *)
 type continuation =
 | KHole
-| KApp_l of (vterm * vcontext * continuation)
-| KApp_r of (vfun_info * vcontext * continuation)
-| KLambda of (Name.t * vterm * vcontext * continuation)
-| KProd of (Name.t * vterm * vcontext * continuation)
-| KUnknown of (vcontext * continuation)
-| KErr of (vcontext * continuation)
-| KCast_source of (vterm * vterm * vcontext * continuation)
-| KCast_target of (vterm * vterm * vcontext * continuation)
-| KCast_term of (vterm * vterm * vcontext * continuation)
+  (* Reducing the rhs of an app *)
+  | KApp_l of (vterm * vcontext * continuation)
+  (* Reducing the lhs of an app *)
+  | KApp_r of (vfun_info * vcontext * continuation)
+  (* Reducing the domain of a lambda *)
+  | KLambda of (Name.t * vterm * vcontext * continuation)
+  (* Reducing the domain of a product *)
+  | KProd of (Name.t * vterm * vcontext * continuation)
+  (* Reducing the type of an unknown *)
+  | KUnknown of (vcontext * continuation)
+  (* Reducing the type of an error *)
+  | KErr of (vcontext * continuation)
+  (* Reducing the source of a cast *)
+  | KCast_source of (vterm * vterm * vcontext * continuation)
+  (* Reducing the target of a cast *)
+  | KCast_target of (vterm * vterm * vcontext * continuation)
+  (* Reducing the term of a cast *)
+  | KCast_term of (vterm * vterm * vcontext * continuation)
 
 (* Just an alias *)
 type state = vterm * vcontext * continuation
@@ -137,10 +149,16 @@ let reduce1 (term, ctx, cont) : state =
     (match Context.lookup ~key:x ~ctx with
      | Some v -> (v, ctx, cont)
      | None   -> failwith ("free identifier: " ^ Name.to_string x))
-     (* Beta *)
+     (* Since ids are considered neutral, ie, valid terms, this should just return it back 
+  instead of failing, no? *)
+     (* | None   -> (term, ctx, cont) *)
+
+    (* Beta *)
+    (* Using a call-by-value approach *)
   | (u, KApp_r (fi, ctx, cont)) when is_value u ->
     let ctx' = Context.add ~key:fi.id ~value:(from_value u) ctx in
     (fi.body, ctx', cont)
+
     (* Prod-Unk *)
   | (VUnknown (VProd (fi, ctx')), _) ->
     (VLambda ({id=fi.id; dom=fi.dom; body=Unknown fi.body}, ctx') , ctx, cont)
@@ -153,6 +171,7 @@ let reduce1 (term, ctx, cont) : state =
     (* Down-Err *)
   | (VErr (VUnknown (Universe _)), KCast_term (VUnknown (Universe _), target, _, cont)) ->
     (VErr target, ctx, cont)
+
     (* Prod-Prod *)
   | (VLambda (term_fi, term_ctx), KCast_term (VProd (source_fi, source_ctx), VProd (target_fi, target_ctx), _, cont)) ->
     let y_id = new_identifier () in
@@ -168,6 +187,7 @@ let reduce1 (term, ctx, cont) : state =
                       term   = inner_body } in
     let fi = {id=y_id; dom=target_fi.dom; body} in
     (VLambda (fi, term_ctx), ctx, cont)
+
     (* Univ-Univ *)
   | (t, KCast_term (Universe i, Universe j, _, cont)) when is_value t && i == j ->
     (t, ctx, cont)
