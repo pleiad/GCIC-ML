@@ -3,6 +3,7 @@
 open Ast
 open Reduction
 open Std
+open Common.Id
 
 type type_error = string
 

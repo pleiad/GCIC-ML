@@ -2,6 +2,7 @@
 (* The implementation is based on a CEK machine (https://en.wikipedia.org/wiki/CEK_Machine) *)
 
 open Ast
+open Common.Id
 
 (** Extended AST with tagged values
 

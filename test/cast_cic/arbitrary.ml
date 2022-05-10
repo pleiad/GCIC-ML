@@ -1,4 +1,5 @@
 open Cast_cic.Ast
+open Common.Id
 
 let term =
   let name_of_int n = string_of_int n |> Name.of_string in

@@ -1,8 +1,9 @@
 open Cast_cic
+open Common.Id
 
 let empty_ctx = Context.empty
-let name_of_int n = string_of_int n |> Ast.Name.of_string
-let id = Ast.Name.of_string "__"
+let name_of_int n = string_of_int n |> Name.of_string
+let id = Name.of_string "__"
 
 let idf =
   let open Ast in

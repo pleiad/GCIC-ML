@@ -1,6 +1,7 @@
 (** This module specifies the typing relation *)
 
 open Ast
+open Common.Id
 
 type type_error
 (** A typing error *)

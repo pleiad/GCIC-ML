@@ -3,4 +3,4 @@
  (modules std ast context typing reduction)
  (preprocess
    (pps bisect_ppx))
- (libraries parsing))
+ (libraries parsing common))

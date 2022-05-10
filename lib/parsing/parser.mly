@@ -4,6 +4,7 @@
 %{
   [@@@coverage exclude_file]
   open Ast
+  open Common.Id
 %}
 
 /* Token definitions 
