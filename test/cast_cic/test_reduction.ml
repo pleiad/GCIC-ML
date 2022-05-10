@@ -120,6 +120,15 @@ let test_casts_reduce () =
                   term = Unknown (unknown 1);
                 };
             term = idf;
+          }));
+  Alcotest.check Testable.term "Codom-Err"
+    (Err (Err (Universe 1)))
+    (Reduction.reduce
+       (Cast
+          {
+            source = Universe 1;
+            target = Err (Universe 1);              
+            term = idf;
           }))
 
 (* This is only valid for GCIC variants N and lift *)
@@ -129,7 +138,6 @@ let test_omega_reduce =
     Test.make ~count:100 ~name:"Omega fails" small_nat (fun i ->
         assume (i > 0);
         Ast.alpha_equal (Reduction.reduce (omega i)) (Err (unknown (i - 1)))))
-
 
 let test_inf_prod_elab_reduces () =
   let open Ast in

@@ -204,8 +204,8 @@ let reduce1 (term, ctx, cont) : state =
   | (t, KCast_term (VErr (Universe _), target, _, cont)) when is_value t -> (VErr target, ctx, cont)
 
     (* Codom-Err *)
-  | (t, KCast_term ((VErr (Universe _) as source), target, _, cont)) when is_value t && is_type target ->
-     (VErr source, ctx, cont)
+  | (t, KCast_term (source, (VErr (Universe _) as target), _, cont)) when is_value t && is_type source ->
+     (VErr target, ctx, cont)
      
     (* Prod-Germ *)
   | (f, KCast_term ((VProd _ as source), (VUnknown (Universe i) as target), _, cont)) 
