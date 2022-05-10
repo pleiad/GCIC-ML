@@ -109,6 +109,24 @@ let tests_subst () =
     (Prod { id = x; dom = v; body = Var x })
     (subst1 x v (Prod { id = x; dom = Var x; body = Var x }))
 
+let tests_to_string () =
+  let idx = Var (Name.of_string "x") in
+  let idy = Var (Name.of_string "y") in
+  Alcotest.(check string) "App" "(x y)" (to_string (App (idx, idy)));
+  Alcotest.(check string)
+    "lambda" "lambda x : ?_y. x"
+    (to_string
+       (Lambda { id = Name.of_string "x"; dom = Unknown idy; body = idx }));
+  Alcotest.(check string)
+    "Prod" "Prod x : ▢1. err_▢1"
+    (to_string
+       (Prod
+          { id = Name.of_string "x"; dom = Universe 1; body = Err (Universe 1) }));
+  Alcotest.(check string)
+    "Cast" "<▢1 <- ▢1> ▢1"
+    (to_string
+       (Cast { source = Universe 1; target = Universe 1; term = Universe 1 }))
+
 let tests =
   [
     ("head", `Quick, tests_head);
@@ -118,6 +136,7 @@ let tests =
     ("is_germ", `Quick, tests_is_germ);
     ("alpha_equal", `Quick, tests_alpha_equal);
     ("subst", `Quick, tests_subst);
+    ("to_string", `Quick, tests_to_string);
     QCheck_alcotest.to_alcotest tests_head_not_type;
     QCheck_alcotest.to_alcotest neutrals_are_canonical;
   ]
