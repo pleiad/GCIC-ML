@@ -1,15 +1,49 @@
 open! Cast_cic.Ast
 open Common
 
+let is_type : term -> bool = function Prod _ | Universe _ -> true | _ -> false
+
 let tests_head () =
-  Alcotest.(check (result Testable.head string))
-    "head of Var is Error" (Error "invalid term to get head constructor")
-    (head (Var (Name.of_string "x")));
   Alcotest.(check (result Testable.head string))
     "head of Prod is Prod" (Ok HProd)
     (head (Prod { id; dom = Universe 1; body = Universe 1 }));
   Alcotest.(check (result Testable.head string))
     "head of Univ is Univ" (Ok (HUniverse 1)) (head (Universe 1))
+
+let tests_head_not_type =
+  QCheck.(
+    Test.make ~count:20 ~name:"head of not types is error" Arbitrary.term
+      (fun t ->
+        assume (not (is_type t));
+        head t |> Result.is_error))
+
+let tests_is_canonical () =
+  Alcotest.(check bool)
+    "cast from Prod germ to unknown is canonical" true
+    (is_canonical
+       (Cast { source = germ 1 HProd; target = unknown 1; term = Universe 57 }));
+  Alcotest.(check bool)
+    "cast from Prod germ to unknown is not canonical" false
+    (is_canonical
+       (Cast { source = germ 2 HProd; target = unknown 1; term = Universe 57 }));
+  Alcotest.(check bool)
+    "cast from Univ germ to unknown is canonical" true
+    (is_canonical
+       (Cast
+          {
+            source = germ 1 (HUniverse 0);
+            target = unknown 1;
+            term = Universe 57;
+          }));
+  Alcotest.(check bool)
+    "cast from Univ germ to unknown is not canonical" true
+    (is_canonical
+       (Cast
+          {
+            source = germ 1 (HUniverse 1);
+            target = unknown 1;
+            term = Universe 57;
+          }))
 
 let tests_is_neutral () =
   Alcotest.(check bool)
@@ -42,23 +76,48 @@ let tests_is_germ () =
   Alcotest.(check bool)
     "Univ is not germ at gte level" false (is_germ 0 (Universe 0))
 
-let tests_alpha_equal () = 
+let tests_alpha_equal () =
   Alcotest.(check bool)
-    "Apps are equal" true (
-      let idx = Name.of_string "x" in
-      let idy = Name.of_string "y" in
-      let fn id = Lambda { id; dom= unknown 1; body= App (Var id, Var id)} in 
-      let app1 = App (fn idx, fn idx) in 
-      let app2 = App (fn idy, fn idy) in 
-      alpha_equal app1 app2
-    )
+    "Apps are equal" true
+    (let idx = Name.of_string "x" in
+     let idy = Name.of_string "y" in
+     let fn id = Lambda { id; dom = unknown 1; body = App (Var id, Var id) } in
+     let app1 = App (fn idx, fn idx) in
+     let app2 = App (fn idy, fn idy) in
+     alpha_equal app1 app2)
+
+let tests_subst () =
+  let x = Name.of_string "x" in
+  let y = Name.of_string "y" in
+  let v = unknown 1 in
+  Alcotest.(check Testable.term)
+    "Not matching vars are not subst" (Var y) (subst1 x v (Var y));
+  Alcotest.(check Testable.term)
+    "Lambda subst body included"
+    (Lambda { id; dom = v; body = v })
+    (subst1 x v (Lambda { id; dom = Var x; body = Var x }));
+  Alcotest.(check Testable.term)
+    "Lambda subst body not included"
+    (Lambda { id = x; dom = v; body = Var x })
+    (subst1 x v (Lambda { id = x; dom = Var x; body = Var x }));
+  Alcotest.(check Testable.term)
+    "Prod subst body included"
+    (Prod { id; dom = v; body = v })
+    (subst1 x v (Prod { id; dom = Var x; body = Var x }));
+  Alcotest.(check Testable.term)
+    "Prod subst body not included"
+    (Prod { id = x; dom = v; body = Var x })
+    (subst1 x v (Prod { id = x; dom = Var x; body = Var x }))
 
 let tests =
   [
     ("head", `Quick, tests_head);
+    ("is_canonical", `Quick, tests_is_canonical);
     ("is_neutral", `Quick, tests_is_neutral);
     ("germ", `Quick, tests_germ);
     ("is_germ", `Quick, tests_is_germ);
     ("alpha_equal", `Quick, tests_alpha_equal);
+    ("subst", `Quick, tests_subst);
+    QCheck_alcotest.to_alcotest tests_head_not_type;
     QCheck_alcotest.to_alcotest neutrals_are_canonical;
   ]
