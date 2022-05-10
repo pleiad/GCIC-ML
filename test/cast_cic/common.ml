@@ -1,5 +1,6 @@
 open Cast_cic
 
+let empty_ctx = Context.empty
 let name_of_int n = string_of_int n |> Ast.Name.of_string
 let id = Ast.Name.of_string "x"
 
