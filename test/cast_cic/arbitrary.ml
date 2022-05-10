@@ -23,12 +23,12 @@ let term =
                   [
                     (1, map var nat);
                     (1, map universe nat);
-                    (1, map2 app (self (n / 2)) (self (n / 2)));
-                    (1, map3 lambda nat (self (n / 2)) (self (n / 2)));
-                    (1, map3 prod nat (self (n / 2)) (self (n / 2)));
-                    (1, map unknown (self n));
-                    (1, map err (self n));
-                    (1, map3 cast (self (n / 3)) (self (n / 3)) (self (n / 3)));
+                    (2, map2 app (self (n / 2)) (self (n / 2)));
+                    (2, map3 lambda nat (self (n / 2)) (self (n / 2)));
+                    (2, map3 prod nat (self (n / 2)) (self (n / 2)));
+                    (2, map unknown (self n));
+                    (2, map err (self n));
+                    (2, map3 cast (self (n / 3)) (self (n / 3)) (self (n / 3)));
                   ])) in
 
 (* TODO: Add shrinker *)
