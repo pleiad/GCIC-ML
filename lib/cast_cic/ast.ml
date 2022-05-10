@@ -101,8 +101,8 @@ let germ i h : term =
 (** Checks if a term icorresponds to a germ at the provided universe level *)
 let is_germ i : term -> bool = function
   | Prod {id=_; dom=Unknown (Universe j); body=Unknown (Universe k)} -> 
-    cast_universe_level i == j && j == k && j >= 0
-  | Err (Universe j) -> i == j
+    cast_universe_level i = j && j = k && j >= 0
+  | Err (Universe j) -> i = j
   | Universe j -> j < i
   | _ -> false
 
@@ -110,8 +110,8 @@ let is_germ i : term -> bool = function
   (* This only works for products - see rule Prod-Germ  *)
   let is_germ_for_gte_level i : term -> bool = function
   | Prod {id=_; dom=Unknown (Universe j); body=Unknown (Universe k)} -> 
-    j >= cast_universe_level i  && j == k && j >= 0
-  | Err (Universe j) -> j == i && cast_universe_level i < 0
+    j >= cast_universe_level i  && j = k && j >= 0
+  | Err (Universe j) -> j = i && cast_universe_level i < 0
   | _ -> false
 
 
@@ -145,11 +145,11 @@ let is_canonical : term -> bool = function
 
 (** Performs substitution inside a term *)
 let rec subst1 x v = function
-  | Var y -> if x == y then v else Var y
+  | Var y -> if x = y then v else Var y
   | Universe i -> Universe i
   | App (t,u) -> App (subst1 x v t, subst1 x v u)
-  | Lambda fi -> Lambda { fi with dom = subst1 x v fi.dom; body = (if x == fi.id then fi.body else subst1 x v fi.body) }
-  | Prod fi -> Prod { fi with dom = subst1 x v fi.dom; body = (if x == fi.id then fi.body else subst1 x v fi.body) }
+  | Lambda fi -> Lambda { fi with dom = subst1 x v fi.dom; body = (if x = fi.id then fi.body else subst1 x v fi.body) }
+  | Prod fi -> Prod { fi with dom = subst1 x v fi.dom; body = (if x = fi.id then fi.body else subst1 x v fi.body) }
   | Unknown t -> Unknown (subst1 x v t)
   | Err t -> Err (subst1 x v t)
   | Cast { source; target; term } -> 
@@ -160,8 +160,8 @@ let rec subst1 x v = function
 (** Checks that two terms are identificable upto alpha-renaming *)
 let rec alpha_equal t1 t2 =
   match (t1, t2) with
-  | (Var x, Var y) -> x == y
-  | (Universe i, Universe j) -> i == j
+  | (Var x, Var y) -> x = y
+  | (Universe i, Universe j) -> i = j
   | (App (t1, u1), App (t2, u2)) -> alpha_equal t1 t2 && alpha_equal u1 u2
   | (Lambda fi1, Lambda fi2) ->
     let x_id = new_identifier () in
