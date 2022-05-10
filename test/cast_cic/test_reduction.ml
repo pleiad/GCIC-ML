@@ -121,15 +121,12 @@ let test_casts_reduce () =
                 };
             term = idf;
           }));
-  Alcotest.check Testable.term "Codom-Err"
-    (Err (Err (Universe 1)))
+  Alcotest.check Testable.term "Codom-Err" (Err (Err (Universe 1)))
     (Reduction.reduce
-       (Cast
-          {
-            source = Universe 1;
-            target = Err (Universe 1);              
-            term = idf;
-          }))
+       (Cast { source = Universe 1; target = Err (Universe 1); term = idf }));
+  Alcotest.check Testable.term "Univ-Univ" idf
+    (Reduction.reduce
+       (Cast { source = Universe 1; target = Universe 1; term = idf }))
 
 (* This is only valid for GCIC variants N and lift *)
 let test_omega_reduce =
