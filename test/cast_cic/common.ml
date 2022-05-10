@@ -35,7 +35,8 @@ let omega i =
                   target = unknown (cast_universe_level i);
                   term = Var id;
                 } );
-      } in
+      }
+  in
   let d' = delta' i in
   let dom =
     Cast

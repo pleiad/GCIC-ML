@@ -46,7 +46,6 @@ val cast_universe_level : int -> int
 
 (** Head constructors *)
 type head = HProd | HUniverse of int
-(* | Inductive *)
 
 val head : term -> (head, string) result
 (** Returns the head constructor of a type *)
@@ -70,4 +69,5 @@ val is_canonical : term -> bool
 val subst1 : Name.t -> term -> term -> term
 (** Performs substitution inside a vterm *)
 
-val alpha_equal : term -> term -> bool(** Checks that two terms are identificable upto alpha-renaming *)
+val alpha_equal : term -> term -> bool
+(** Checks that two terms are identifiable up to alpha-renaming *)

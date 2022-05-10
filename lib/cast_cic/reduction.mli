@@ -2,11 +2,11 @@
 
 open Ast
 
-(** Reduces a term in the given context *)
 val reduce_in : context -> term -> term
+(** Reduces a term in the given context *)
 
-(** Reduces a term *)
 val reduce : term -> term
+(** Reduces a term *)
 
-(** One step reduction *)
 val step : context -> term -> (term, string) result
+(** One step reduction *)
