@@ -84,24 +84,41 @@ let test_casts_reduce () =
    in
    Alcotest.check Testable.term "Canonical cast" canonical_cast
      (Reduction.reduce canonical_cast));
-  let unk0 = unknown 0 in
-  let inner_cast = Cast { source = unk0; target = Universe 0; term = Var id } in
-  let outer_cast =
-    Cast { source = Universe 0; target = unk0; term = inner_cast }
-  in
-  let term = Lambda { id; dom = unk0; body = outer_cast } in
-  Alcotest.check Testable.term "Prod-Germ"
-    (Cast
-       {
-         source = Prod { id; dom = unk0; body = unk0 };
-         target = unknown 1;
-         term;
-       })
+  (let unk0 = unknown 0 in
+   let inner_cast =
+     Cast { source = unk0; target = Universe 0; term = Var id }
+   in
+   let outer_cast =
+     Cast { source = Universe 0; target = unk0; term = inner_cast }
+   in
+   let term = Lambda { id; dom = unk0; body = outer_cast } in
+   Alcotest.check Testable.term "Prod-Germ"
+     (Cast
+        {
+          source = Prod { id; dom = unk0; body = unk0 };
+          target = unknown 1;
+          term;
+        })
+     (Reduction.reduce
+        (Cast
+           {
+             source = Prod { id; dom = Universe 0; body = Universe 0 };
+             target = unknown 1;
+             term = idf;
+           })));
+  Alcotest.check Testable.term "Dom-Err"
+    (Err (unknown 1))
     (Reduction.reduce
        (Cast
           {
-            source = Prod { id; dom = Universe 0; body = Universe 0 };
-            target = unknown 1;
+            source = Err (Universe 1);
+            target =
+              Cast
+                {
+                  source = unknown 1;
+                  target = Universe 1;
+                  term = Unknown (unknown 1);
+                };
             term = idf;
           }))
 

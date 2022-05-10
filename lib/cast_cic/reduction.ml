@@ -113,17 +113,6 @@ open Ast
   | VUnknown (VProd _) | VErr (VProd _) -> false
   | Universe _ | VLambda _ | VProd _ | VUnknown _ | VErr _ | VCast _ -> true
   | _ -> false
-  
-  (** Untags values *)
-  (* let rec of_value : vterm -> vterm = function
-  | VLambda (fi, _) -> Lambda {fi with dom=of_value fi.dom}
-  | VProd (fi, _) -> Prod {fi with dom=of_value fi.dom}
-  | VUnknown t -> Unknown (of_value t)
-  | VErr t -> Err (of_value t)
-  | VCast {source; target; term} -> Cast { source= of_value source; 
-                                           target= of_value target;
-                                           term= of_value term  }
-  | t -> t *)
 
 (** The representation of a continuation of the CEK machine *)
 type continuation =
@@ -142,9 +131,9 @@ type continuation =
   | KErr of (vcontext * continuation)
   (* Reducing the source of a cast *)
   | KCast_source of (vterm * vterm * vcontext * continuation)
-  (* Reducing the target of a cast *)
+  (* Reducing the target of a cast. Source and term are stored in the state *)
   | KCast_target of (vterm * vterm * vcontext * continuation)
-  (* Reducing the term of a cast *)
+  (* Reducing the term of a cast. Source and target are stored in the state *)
   | KCast_term of (vterm * vterm * vcontext * continuation)
 
 (* Just an alias *)
@@ -212,7 +201,7 @@ let reduce1 (term, ctx, cont) : state =
      (VErr target, ctx, cont)
 
     (* Dom-Err *)
-  | (t, KCast_term (target, VErr (Universe _), _, cont)) when is_value t -> (VErr target, ctx, cont)
+  | (t, KCast_term (VErr (Universe _), target, _, cont)) when is_value t -> (VErr target, ctx, cont)
 
     (* Codom-Err *)
   | (t, KCast_term ((VErr (Universe _) as source), target, _, cont)) when is_value t && is_type target ->
