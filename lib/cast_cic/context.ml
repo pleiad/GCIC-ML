@@ -19,6 +19,7 @@ let add ~key ~value (ctx : ('k, 'v) t) : ('k, 'v) t = (key, value) :: ctx
 let rec lookup ~key ~ctx : 'v =
   match ctx with
   | [] -> None
+  (* Careful with this comparison *)
   | (k, v) :: tl -> if k == key then Some v else lookup ~key ~ctx:tl
 
 (** Returns the value associated to the given key.
@@ -27,7 +28,8 @@ let rec lookup ~key ~ctx : 'v =
 let rec remove ~key ~ctx =
   match ctx with
   | [] -> []
-  | (k, v) :: tl -> if k == key then tl else (k, v) :: remove ~key ~ctx
+  (* Careful with this comparison *)
+  | (k, v) :: tl -> if k == key then tl else (k, v) :: remove ~key ~ctx:tl
 (** Remove a declaration from the context *)
 
 let to_list ctx = ctx 
