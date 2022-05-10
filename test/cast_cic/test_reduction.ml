@@ -1,5 +1,6 @@
 open Cast_cic
 open Example
+open Common
 
 let strong_normalization =
   QCheck.(

@@ -1,18 +1,18 @@
 (** This module specifies the structure of CastCIC *)
-open Common.Id
+open Common
 
 (** Global counter used to create new identifiers *)
 let id_counter : int ref = ref 0
 
 (** Returns a new identifier name *)
-let new_identifier () : Name.t =
-  let id = Name.of_string ("#" ^ string_of_int !id_counter) in
+let new_identifier () : Id.Name.t =
+  let id = Id.Name.of_string ("#" ^ string_of_int !id_counter) in
   id_counter := !id_counter + 1;
   id
 
 (** Terms in CastCIC *)
 type term =
-  | Var of Name.t
+  | Var of Id.Name.t
   | Universe of int
   | App of term * term
   | Lambda of fun_info
@@ -21,20 +21,20 @@ type term =
   | Err of term
   | Cast of { source : term; target : term; term : term }
 
-and fun_info = { id : Name.t; dom : term; body : term }
+and fun_info = { id : Id.Name.t; dom : term; body : term }
 
 (** Returns the stringified version of a term *)
 let rec to_string (t : term) =
   let open Format in
   match t with
-  | Var x -> Name.to_string x
+  | Var x -> Id.Name.to_string x
   | Universe i -> asprintf "▢%i" i
   | App (t, t') -> asprintf "(%s %s)" (to_string t) (to_string t')
   | Lambda { id; dom; body } ->
-      asprintf "lambda %s : %s. %s" (Name.to_string id) (to_string dom)
+      asprintf "lambda %s : %s. %s" (Id.Name.to_string id) (to_string dom)
         (to_string body)
   | Prod { id; dom; body } ->
-      asprintf "Prod %s : %s. %s" (Name.to_string id) (to_string dom)
+      asprintf "Prod %s : %s. %s" (Id.Name.to_string id) (to_string dom)
         (to_string body)
   | Unknown ty -> asprintf "?_%s" (to_string ty)
   | Err ty -> asprintf "err_%s" (to_string ty)
@@ -42,7 +42,7 @@ let rec to_string (t : term) =
       asprintf "<%s <- %s> %s" (to_string target) (to_string source)
         (to_string term)
 
-type context = (Name.t, term) Context.t
+type context = (Id.Name.t, term) Context.t
 (** Context *)
 
 (** GCIC variants: Gradual, Normalizing and Shift *)
@@ -78,7 +78,7 @@ let germ i h : term =
       let univ : term = Universe cprod in
       if cprod >= 0 then
         Prod
-          { id = Name.of_string "__"; dom = Unknown univ; body = Unknown univ }
+          { id = Id.Name.of_string "__"; dom = Unknown univ; body = Unknown univ }
       else Err univ
   | HUniverse j -> if j < i then Universe j else Err (Universe i)
 

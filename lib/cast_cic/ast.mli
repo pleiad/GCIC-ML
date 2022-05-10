@@ -1,11 +1,11 @@
 (** This module specifies the structure of CastCIC *)
-open Common.Id
+open Common
 
-val new_identifier : unit -> Name.t
+val new_identifier : unit -> Id.Name.t
 
 (** Terms in CastCIC *)
 type term =
-  | Var of Name.t
+  | Var of Id.Name.t
   | Universe of int
   | App of term * term
   | Lambda of fun_info
@@ -14,11 +14,11 @@ type term =
   | Err of term
   | Cast of { source : term; target : term; term : term }
 
-and fun_info = { id : Name.t; dom : term; body : term }
+and fun_info = { id : Id.Name.t; dom : term; body : term }
 
 val to_string : term -> string
 
-type context = (Name.t, term) Context.t
+type context = (Id.Name.t, term) Context.t
 (** Context *)
 
 (** GCIC variants: Gradual, Normalizing and Shift *)
@@ -56,7 +56,7 @@ val is_neutral : term -> bool
 val is_canonical : term -> bool
 (** Checks if a term is in canonical form *)
 
-val subst1 : Name.t -> term -> term -> term
+val subst1 : Id.Name.t -> term -> term -> term
 (** Performs substitution inside a vterm *)
 
 val alpha_equal : term -> term -> bool

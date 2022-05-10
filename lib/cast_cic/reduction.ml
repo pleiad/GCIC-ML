@@ -2,14 +2,14 @@
 (* The implementation is based on a CEK machine (https://en.wikipedia.org/wiki/CEK_Machine) *)
 
 open Ast
-open Common.Id
+open Common
 
 (** Extended AST with tagged values
 
     We are using this representation because otherwise we have to 
     constantly query whether a term is canonical, when reducing the stack *)
 type vterm =
-  | Var of Name.t
+  | Var of Id.Name.t
   | Universe of int
   | App of vterm * vterm
   | Lambda of vfun_info
@@ -24,8 +24,8 @@ type vterm =
   | VErr of vterm
   | VCast of vcast_info
 
-and vfun_info = { id : Name.t; dom : vterm; body : vterm }
-and vcontext = (Name.t, vterm) Context.t
+and vfun_info = { id : Id.Name.t; dom : vterm; body : vterm }
+and vcontext = (Id.Name.t, vterm) Context.t
 and vcast_info = { source : vterm; target : vterm; term : vterm }
 
 (* This could probably be "smarter", checking if the terms are canonical and
@@ -138,9 +138,9 @@ type continuation =
   (* Reducing the lhs of an app *)
   | KApp_r of (vfun_info * vcontext * continuation)
   (* Reducing the domain of a lambda *)
-  | KLambda of (Name.t * vterm * vcontext * continuation)
+  | KLambda of (Id.Name.t * vterm * vcontext * continuation)
   (* Reducing the domain of a product *)
-  | KProd of (Name.t * vterm * vcontext * continuation)
+  | KProd of (Id.Name.t * vterm * vcontext * continuation)
   (* Reducing the type of an unknown *)
   | KUnknown of (vcontext * continuation)
   (* Reducing the type of an error *)
@@ -166,7 +166,7 @@ let reduce1 (term, ctx, cont) : state =
       match Context.lookup ~key:x ~ctx with
       | Some v -> (v, ctx, cont)
       | None ->
-          failwith ("free identifier: " ^ Name.to_string x)
+          failwith ("free identifier: " ^ Id.Name.to_string x)
           
     (* Beta *)
     (* Using a call-by-value approach *))

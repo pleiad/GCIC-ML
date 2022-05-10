@@ -1,6 +1,6 @@
 (library
  (name common)
- (modules id)
+ (modules id context std)
  (preprocess
    (pps bisect_ppx))
  )

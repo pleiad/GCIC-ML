@@ -1,8 +1,8 @@
 open Cast_cic.Ast
-open Common.Id
+open Common
 
 let term =
-  let name_of_int n = string_of_int n |> Name.of_string in
+  let name_of_int n = string_of_int n |> Id.Name.of_string in
   let var n = Var (name_of_int n) in
   let universe n = Universe n in
   let app t1 t2 = App (t1, t2) in
@@ -37,7 +37,7 @@ let term =
   QCheck.make term_gen ~print:to_string
 
 let context arbitrary_key arbitrary_value =
-  let open Cast_cic.Context in
+  let open Common.Context in
   let context_gen =
     QCheck.Gen.(
       sized

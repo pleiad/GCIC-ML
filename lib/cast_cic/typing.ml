@@ -2,8 +2,8 @@
 
 open Ast
 open Reduction
-open Std
-open Common.Id
+open Common
+open Common.Std
 
 type type_error = string
 
@@ -49,7 +49,7 @@ and check_type (ctx : context) (t : term) (ty : term) :
   are_convertible ctx ty ty'
 
 and infer_prod (ctx : context) (t : term) :
-    (Name.t * term * term, type_error) result =
+    (Id.Name.t * term * term, type_error) result =
   let* ty = infer_type ctx t in
   match reduce_in ctx ty with
   | Prod { id; dom; body } -> Ok (id, dom, body)
