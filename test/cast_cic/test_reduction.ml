@@ -34,18 +34,14 @@ let test_app_reduce () =
 
 let test_unknown_reduce () =
   let open Ast in
+  let unk0 = unknown 0 in
   Alcotest.check Testable.term "Prod-Unk universe"
-    (Lambda { id; dom = Universe 5; body = Unknown (Universe 0) })
+    (Lambda { id; dom = Universe 5; body = unk0 })
     (Reduction.reduce
        (Unknown (Prod { id; dom = Universe 5; body = Universe 0 })));
-  Alcotest.check Testable.term "Down-Unk universe" (Unknown (Universe 0))
+  Alcotest.check Testable.term "Down-Unk universe" unk0
     (Reduction.reduce
-       (Cast
-          {
-            source = Unknown (Universe 0);
-            target = Universe 0;
-            term = Unknown (Unknown (Universe 1));
-          }))
+       (Cast { source = unk0; target = Universe 0; term = Unknown (unknown 1) }))
 
 let test_error_reduce () =
   let open Ast in
@@ -54,31 +50,15 @@ let test_error_reduce () =
     (Reduction.reduce (Err (Prod { id; dom = Universe 5; body = Universe 0 })));
   Alcotest.check Testable.term "Down-Err universe" (Err (Universe 0))
     (Reduction.reduce
-       (Cast
-          {
-            source = Unknown (Universe 0);
-            target = Universe 0;
-            term = Err (Unknown (Universe 1));
-          }))
-
-(* This one actually gets stuck, which is fine - but it should be considered ok, right? *)
-let t =
-  let open Ast in
-  Cast
-    {
-      source = Prod { id; dom = Universe 1; body = Universe 1 };
-      target = Unknown (Universe 1);
-      term = Lambda { id; dom = Universe 1; body = Var id };
-    }
+       (Cast { source = unknown 0; target = Universe 0; term = Err (unknown 1) }))
 
 let test_casts_reduce () =
   let open Ast in
   (let canonical_cast =
      Cast
        {
-         source =
-           Prod { id; dom = Unknown (Universe 0); body = Unknown (Universe 0) };
-         target = Unknown (Universe 1);
+         source = Prod { id; dom = unknown 0; body = unknown 0 };
+         target = unknown 1;
          term = idf;
        }
    in
@@ -124,15 +104,21 @@ let test_casts_reduce () =
   Alcotest.check Testable.term "Codom-Err" (Err (Err (Universe 1)))
     (Reduction.reduce
        (Cast { source = Universe 1; target = Err (Universe 1); term = idf }));
+  (* This one might be better with a qcheck? *)
   Alcotest.check Testable.term "Univ-Univ" idf
     (Reduction.reduce
-       (Cast { source = Universe 1; target = Universe 1; term = idf }))
+       (Cast { source = Universe 1; target = Universe 1; term = idf }));
+  (* This one might be better with a qcheck? *)
+  Alcotest.check Testable.term "Size-Err Univ"
+    (Err (unknown 0))
+    (Reduction.reduce
+       (Cast { source = Universe 0; target = unknown 0; term = idf }))
 
 (* This is only valid for GCIC variants N and lift *)
 let test_omega_reduce =
   let open Ast in
   QCheck.(
-    Test.make ~count:100 ~name:"Omega fails" small_nat (fun i ->
+    Test.make ~count:100 ~name:"Qcheck Omega fails" small_nat (fun i ->
         assume (i > 0);
         Ast.alpha_equal (Reduction.reduce (omega i)) (Err (unknown (i - 1)))))
 
