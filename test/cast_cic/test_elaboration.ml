@@ -2,17 +2,17 @@ open Cast_cic
 open Example
 
 let delta i =
-  let open Gcic.Ast in
+  let open Kernel.Ast in
   Lambda { id; dom = Unknown (i + 1); body = App (Var id, Var id) }
 
 let omega i =
-  let open Gcic.Ast in
+  let open Kernel.Ast in
   let d = delta i in
   App (d, d)
 
 let tests_base_elaborations () =
-  let open Gcic.Ast in
-  let idf : Gcic.Ast.term = Lambda { id; dom = Universe 1; body = Var id } in
+  let open Kernel.Ast in
+  let idf : Kernel.Ast.term = Lambda { id; dom = Universe 1; body = Var id } in
   Alcotest.(check (pair Testable.term Testable.term))
     "Universe elaborates ok" (Universe 0, Universe 1)
     (Elaboration.elaborate empty_ctx (Universe 0) |> Result.get_ok);
