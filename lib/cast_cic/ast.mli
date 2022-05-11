@@ -60,4 +60,7 @@ val subst1 : Id.Name.t -> term -> term -> term
 (** Performs substitution inside a vterm *)
 
 val alpha_equal : term -> term -> bool
-(** Checks that two terms are identifiable up to alpha-renaming *)
+(** Checks if two terms are identifiable up to alpha-renaming *)
+
+val alpha_consistent : term -> term -> bool 
+(** Checks if two terms are alpha consistent *)
