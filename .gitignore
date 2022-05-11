@@ -31,3 +31,9 @@ _opam/
 # esy
 _esy/
 node_modules/
+
+# vscode
+.vscode/
+
+# bisect
+_coverage/

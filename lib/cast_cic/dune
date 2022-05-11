@@ -1,0 +1,6 @@
+(library
+ (name cast_cic)
+ (modules ast typing reduction)
+ (preprocess
+   (pps bisect_ppx))
+ (libraries parsing common))

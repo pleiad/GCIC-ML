@@ -25,4 +25,6 @@ jobs:
           cache-key: ${{ hashFiles('esy.lock/index.json') }}
 
       - run: esy install 
-      - run: esy build
+      - run: esy dune build
+      - run: esy dune runtest
+      - run: esy bisect-ppx-report send-to Codecov

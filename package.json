@@ -1,4 +1,11 @@
 {
+  "scripts": {
+    "watch": "dune build -w",
+    "test": "dune runtest",
+    "coverage": "dune runtest --instrument-with=bisect_ppx --force",
+    "report": "bisect-ppx-report html",
+    "run": "dune exec gcic"
+  },
   "dependencies": {
     "ocaml": "4.13.x",
     "@opam/dune": "*",
@@ -6,9 +13,16 @@
     "@opam/menhir": "*"
   },
   "devDependencies": {
-      "@opam/merlin": "*",
-      "@opam/ocamlformat": "^0.21",
-      "@opam/ocaml-lsp-server": "^1.10.5"
+    "@opam/easy-format": "1.3.2",
+    "@opam/merlin": "*",
+    "@opam/ocamlformat": "^0.21",
+    "@opam/ocaml-lsp-server": "^1.10.5",
+    "@opam/bisect_ppx": "^2.8.1",
+    "@opam/ppx_jane": "*",
+    "@opam/alcotest": "*",
+    "@opam/patdiff": "*",
+    "@opam/qcheck": "*",
+    "@opam/qcheck-alcotest": "*",
+    "@opam/utop": "*"
   }
-
 }
