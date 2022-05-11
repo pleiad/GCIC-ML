@@ -44,7 +44,6 @@ let rec elaborate ctx (term : Gcic.Ast.term) :
       let* t', id, dom, body = elab_prod ctx t in
       let* u' = check_elab ctx u dom in
       Ok (Ast.App (t', u'), (Ast.subst1 id u' body))
-  | _ -> Error "not implemented"
 
 and check_elab ctx t (ty : Ast.term) : (Ast.term, elaboration_error) result =
   let* t', ty' = elaborate ctx t in
