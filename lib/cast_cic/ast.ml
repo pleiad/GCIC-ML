@@ -1,5 +1,5 @@
-(** This module specifies the structure of CastCIC *)
 open Common
+(** This module specifies the structure of CastCIC *)
 
 (** Global counter used to create new identifiers *)
 let id_counter : int ref = ref 0
@@ -78,7 +78,11 @@ let germ i h : term =
       let univ : term = Universe cprod in
       if cprod >= 0 then
         Prod
-          { id = Id.Name.of_string "__"; dom = Unknown univ; body = Unknown univ }
+          {
+            id = Id.Name.of_string "__";
+            dom = Unknown univ;
+            body = Unknown univ;
+          }
       else Err univ
   | HUniverse j -> if j < i then Universe j else Err (Universe i)
 
@@ -182,4 +186,30 @@ let rec alpha_equal t1 t2 =
       alpha_equal ci1.source ci2.source
       && alpha_equal ci1.target ci2.target
       && alpha_equal ci1.term ci2.term
+  | _ -> false
+
+(** Checks if two terms are alpha consistent *)
+let rec alpha_consistent t1 t2 : bool =
+  match (t1, t2) with
+  | Var x, Var y -> x = y
+  | Universe i, Universe j -> i = j
+  | App (t1, u1), App (t2, u2) ->
+      alpha_consistent t1 t2 && alpha_consistent u1 u2
+  | Lambda fi1, Lambda fi2 ->
+      let x_id = new_identifier () in
+      let x = Var x_id in
+      let body1 = subst1 fi1.id x fi1.body in
+      let body2 = subst1 fi2.id x fi2.body in
+      alpha_consistent fi1.dom fi2.dom && alpha_consistent body1 body2
+  | Prod fi1, Prod fi2 ->
+      let x_id = new_identifier () in
+      let x = Var x_id in
+      let body1 = subst1 fi1.id x fi1.body in
+      let body2 = subst1 fi2.id x fi2.body in
+      alpha_consistent fi1.dom fi2.dom && alpha_consistent body1 body2
+  | Err t1, Err t2 -> alpha_consistent t1 t2
+  | _, Cast ci2 -> alpha_consistent t1 ci2.term
+  | Cast ci1, _ -> alpha_consistent ci1.term t2
+  | _, Unknown _ -> true
+  | Unknown _, _ -> true
   | _ -> false
