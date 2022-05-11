@@ -1,4 +1,4 @@
 (library
  (name gcic)
  (libraries parsing)
- (modules compile ast))
+ (modules compile))

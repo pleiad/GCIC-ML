@@ -3,4 +3,4 @@
  (modules ast typing reduction elaboration)
  (preprocess
    (pps bisect_ppx))
- (libraries parsing common gcic))
+ (libraries parsing common kernel))

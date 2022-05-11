@@ -14,9 +14,9 @@ let are_consistent t1 t2 : bool =
   let t2_red = Reduction.reduce t2 in
   Ast.alpha_consistent t1_red t2_red
 
-let rec elaborate ctx (term : Gcic.Ast.term) :
+let rec elaborate ctx (term : Kernel.Ast.term) :
     (elaboration, elaboration_error) result =
-  let open Gcic.Ast in
+  let open Kernel.Ast in
   match term with
   | Var x -> (
       match Context.lookup ~key:x ~ctx with
