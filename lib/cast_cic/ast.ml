@@ -207,7 +207,6 @@ let rec alpha_consistent t1 t2 : bool =
       let body1 = subst1 fi1.id x fi1.body in
       let body2 = subst1 fi2.id x fi2.body in
       alpha_consistent fi1.dom fi2.dom && alpha_consistent body1 body2
-  | Err t1, Err t2 -> alpha_consistent t1 t2
   | _, Cast ci2 -> alpha_consistent t1 ci2.term
   | Cast ci1, _ -> alpha_consistent ci1.term t2
   | _, Unknown _ -> true
