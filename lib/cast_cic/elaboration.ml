@@ -1,5 +1,5 @@
-open Common
 (** This module specifies the elaboration from GCIC to CastCIC *)
+open Common
 
 open Common.Std
 
