@@ -3,8 +3,22 @@ open Common
 
 open Common.Std
 
-type elaboration_error = string
+type elaboration_error = {
+    error_code: string;
+    message: string;
+    term: Kernel.Ast.term;
+}
 (** An error originating from elaboration  *)
+
+let inconsistent_err term = { error_code = "inconsistent_terms"; message="terms are not consistent"; term}
+let constrained_prod_err term = { error_code = "constrained_prod_elab"; message="term does not elaborate to product"; term}
+let constrained_univ_err term = { error_code = "constrained_univ_elab"; message="term does not elaborate to universe"; term}
+let free_id_err term = { error_code = "free_id"; message="free identifier"; term}
+let impossible_err term = { error_code = "impossible"; message="impossible state"; term}
+
+let string_of_error ({error_code; message; term}: elaboration_error) : string =
+  Format.asprintf "[%s] elaboration of term (%s) failed: %s" error_code (Kernel.Ast.to_string term) message
+(** Gets a string representation of the error *)
 
 type elaboration = Ast.term * Ast.term
 (** The elaboration result  *)
@@ -21,7 +35,7 @@ let rec elaborate ctx (term : Kernel.Ast.term) :
   | Var x -> (
       match Context.lookup ~key:x ~ctx with
       | Some v -> Ok (Ast.Var x, v)
-      | None -> Error "free identifier")
+      | None -> Error (free_id_err term))
   | Universe i -> Ok (Ast.Universe i, Ast.Universe (i + 1))
   | Prod { id; dom; body } ->
       let* elab_dom, i = elab_univ ctx dom in
@@ -49,7 +63,7 @@ and check_elab ctx t (ty : Ast.term) : (Ast.term, elaboration_error) result =
   let* t', ty' = elaborate ctx t in
   if are_consistent ty' ty then
     Ok (Ast.Cast { source = ty'; target = ty; term = t' })
-  else Error "terms are not consistent"
+  else Error (inconsistent_err t)
 
 and elab_univ ctx term : (Ast.term * int, elaboration_error) result =
   let* t, ty = elaborate ctx term in
@@ -57,7 +71,7 @@ and elab_univ ctx term : (Ast.term * int, elaboration_error) result =
   | Universe i -> Ok (t, i)
   | Unknown (Universe i) ->
       Ok (Ast.Cast { source = ty; target = Universe (i - 1); term = t }, i - 1)
-  | _ -> Error "term does not elaborate to type"
+  | _ -> Error (constrained_univ_err term)
 
 and elab_prod ctx term :
     (Ast.term * Id.Name.t * Ast.term * Ast.term, elaboration_error) result =
@@ -66,7 +80,8 @@ and elab_prod ctx term :
   | Prod { id; dom; body } -> Ok (t, id, dom, body)
   | Unknown (Universe i) when Ast.cast_universe_level i >= 0 -> (
       let open Ast in
-      match germ i HProd with
+      let prod_germ = germ i HProd in
+      match prod_germ with
       | Prod fi as prod_germ ->
           Ok
             ( Cast { source = ty; target = prod_germ; term = t },
@@ -74,5 +89,5 @@ and elab_prod ctx term :
               fi.dom,
               fi.body )
       (* if cast level is gt 0, then germ should never reach this*)
-      | _ -> Error "impossible state")
-  | _ -> Error "term does not elaborate to product"
+      | _ -> Error (impossible_err term))
+  | _ -> Error (constrained_prod_err term)

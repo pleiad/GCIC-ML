@@ -1,7 +1,14 @@
 (** This module specifies the elaboration from GCIC to CastCIC *)
 
-type elaboration_error 
+type elaboration_error = {
+    error_code: string;
+    message: string;
+    term: Kernel.Ast.term;
+}
 (** An error originating from elaboration  *)
+
+val string_of_error : elaboration_error -> string 
+(** Gets a string representation of the error *)
 
 type elaboration = Ast.term * Ast.term 
 (** The elaboration result  *)
