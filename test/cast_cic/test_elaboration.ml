@@ -94,14 +94,27 @@ let test_delta_elaborates () =
     (Elaboration.elaborate empty_ctx (delta 1) |> Result.get_ok)
 
 let test_omega_elaborates () =
-   Alcotest.(check (pair Testable.term Testable.term))
-     "omega elaborates ok"
-     (Example.omega 1, unknown (Ast.cast_universe_level 1))
-     (Elaboration.elaborate empty_ctx (omega 1) |> Result.get_ok)
+  Alcotest.(check (pair Testable.term Testable.term))
+    "omega elaborates ok"
+    (Example.omega 1, unknown (Ast.cast_universe_level 1))
+    (Elaboration.elaborate empty_ctx (omega 1) |> Result.get_ok)
+
+(* The type for the elaborated term matches the inferred type *)
+let correct_elaboration =
+  QCheck.(
+    Test.make ~count:1000 ~name:"correct elaboration" Arbitrary.gcic_term
+      (fun t ->
+        let elab_term = Elaboration.elaborate Common.Context.empty t in
+        assume (elab_term |> Result.is_ok);
+        let t', ty = Result.get_ok elab_term in
+        match Typing.infer_type Common.Context.empty t' with
+        | Ok ty' -> Ast.alpha_equal ty ty'
+        | Error _ -> false))
 
 let tests =
   [
     ("base elaborations", `Quick, tests_base_elaborations);
     ("delta 1 elaborates", `Quick, test_delta_elaborates);
-    ("oemga 1 elaborates", `Quick, test_omega_elaborates)
+    ("oemga 1 elaborates", `Quick, test_omega_elaborates);
+    QCheck_alcotest.to_alcotest correct_elaboration;
   ]
