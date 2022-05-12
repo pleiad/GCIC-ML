@@ -19,6 +19,6 @@ let compile (line : string) =
     let open Cast_cic in
     (match of_parsed_term term |> Elaboration.elaborate Context.empty with 
     | Ok (elab, _) -> Reduction.reduce elab |> Ast.to_string 
-    | Error _ -> "failed to elaborate")    
+    | Error e -> Elaboration.string_of_error e)    
   | Error e -> e
 
