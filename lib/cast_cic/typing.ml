@@ -9,9 +9,9 @@ type type_error = string
 
 let error_msg x = x
 
-let are_convertible ctx t1 t2 : (unit, type_error) result =
-  let v1 = reduce_in ctx t1 in
-  let v2 = reduce_in ctx t2 in
+let are_convertible t1 t2 : (unit, type_error) result =
+  let v1 = reduce t1 in
+  let v2 = reduce t2 in
   if alpha_equal v1 v2 then Ok () else Error "not convertible"
 
 let rec infer_type (ctx : context) (t : term) : (term, type_error) result =
@@ -46,15 +46,15 @@ let rec infer_type (ctx : context) (t : term) : (term, type_error) result =
 and check_type (ctx : context) (t : term) (ty : term) :
     (unit, type_error) result =
   let* ty' = infer_type ctx t in
-  are_convertible ctx ty ty'
+  are_convertible ty ty'
 
 and infer_prod (ctx : context) (t : term) :
     (Id.Name.t * term * term, type_error) result =
   let* ty = infer_type ctx t in
-  match reduce_in ctx ty with
+  match reduce ty with
   | Prod { id; dom; body } -> Ok (id, dom, body)
   | _ -> Error "not a product"
 
 and infer_univ (ctx : context) (t : term) : (int, type_error) result =
   let* ty = infer_type ctx t in
-  match reduce_in ctx ty with Universe i -> Ok i | _ -> Error "not a universe"
+  match reduce ty with Universe i -> Ok i | _ -> Error "not a universe"
