@@ -42,7 +42,7 @@ let test_unknown_reduce () =
        (Unknown (Prod { id; dom = Universe 5; body = Universe 0 })));
   Alcotest.check Testable.term "Down-Unk universe" unk0
     (Reduction.reduce
-       (Cast { source = unk0; target = Universe 0; term = Unknown (unknown 1) }))
+       (Cast { source = unknown 1; target = Universe 0; term = Unknown (unknown 1) }))
 
 let test_error_reduce () =
   let open Ast in
@@ -65,20 +65,18 @@ let test_casts_reduce () =
    in
    Alcotest.check Testable.term "Canonical cast" canonical_cast
      (Reduction.reduce canonical_cast));
-  (let unk0 = unknown 0 in
-   let inner_cast =
-     Cast { source = unk0; target = Universe 0; term = Var id }
-   in
-   let outer_cast =
-     Cast { source = Universe 0; target = unk0; term = inner_cast }
-   in
-   let term = Lambda { id; dom = unk0; body = outer_cast } in
+  (let prod_germ = germ 1 HProd in 
    Alcotest.check Testable.term "Prod-Germ"
      (Cast
         {
-          source = Prod { id; dom = unk0; body = unk0 };
+          source = prod_germ;
           target = unknown 1;
-          term;
+          term = Cast
+          {
+            source = Prod { id; dom = Universe 0; body = Universe 0 };
+            target = prod_germ;
+            term = idf;
+          };
         })
      (Reduction.reduce
         (Cast
@@ -96,13 +94,13 @@ let test_casts_reduce () =
             target =
               Cast
                 {
-                  source = unknown 1;
+                  source = unknown 2;
                   target = Universe 1;
-                  term = Unknown (unknown 1);
+                  term = Unknown (unknown 2);
                 };
             term = idf;
-          }));
-  Alcotest.check Testable.term "Codom-Err" (Err (Err (Universe 1)))
+          }))
+  (* Alcotest.check Testable.term "Codom-Err" (Err (Err (Universe 1)))
     (Reduction.reduce
        (Cast { source = Universe 1; target = Err (Universe 1); term = idf }));
   (* This one might be better with a qcheck? *)
@@ -113,7 +111,7 @@ let test_casts_reduce () =
   Alcotest.check Testable.term "Size-Err Univ"
     (Err (unknown 0))
     (Reduction.reduce
-       (Cast { source = Universe 0; target = unknown 0; term = idf }))
+       (Cast { source = Universe 0; target = unknown 0; term = idf })) *)
 
 (* This is only valid for GCIC variants N and lift *)
 let test_omega_reduce =

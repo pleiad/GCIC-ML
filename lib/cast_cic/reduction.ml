@@ -8,7 +8,7 @@ open Common
 
     We are using this representation because otherwise we have to 
     constantly query whether a term is canonical, when reducing the stack *)
-type vterm =
+(* type vterm =
   | Var of Id.Name.t
   | Universe of int
   | App of vterm * vterm
@@ -117,43 +117,49 @@ let rec subst ctx : vterm -> vterm = function
   | VProd (fi, ctx') ->
       let y = new_identifier () in
       let ctx'' = Context.add ~key:fi.id ~value:(Var y) ctx' in
-      Prod { id = y; dom = subst ctx' fi.dom; body = subst ctx'' fi.body }
+      Prod { id = y; dom = subst ctx' fi.dom; body = subst ctx'' fi.body } *)
 
 (** Checks if a term corresponds to a type *)
-let is_type : vterm -> bool = function
-  | VProd _ | Universe _ -> true
+let is_type : term -> bool = function
+  | Prod _ | Universe _ -> true
   | _ -> false
 
+let equal_head t1 t2 : bool = 
+  match head t1, head t2 with 
+  | Ok HProd, Ok HProd -> true 
+  | Ok (HUniverse i), Ok (HUniverse j) -> i = j 
+  | _, _ -> assert false   
+
 (** Checks if a term corresponds to a tagged value *)
-let is_value = function
+(* let is_value = function
   | VUnknown (VProd _) | VErr (VProd _) -> false
   | Universe _ | VLambda _ | VProd _ | VUnknown _ | VErr _ | VCast _ -> true
-  | _ -> false
+  | _ -> false *)
 
 (** The representation of a continuation of the CEK machine *)
 type continuation =
   | KHole
   (* Reducing the rhs of an app *)
-  | KApp_l of (vterm * vcontext * continuation)
+  | KApp_l of (term * context * continuation)
   (* Reducing the lhs of an app *)
-  | KApp_r of (vfun_info * vcontext * continuation)
+  (* | KApp_r of (vfun_info * context * continuation) *)
   (* Reducing the domain of a lambda *)
-  | KLambda of (Id.Name.t * vterm * vcontext * continuation)
+  (* | KLambda of (Id.Name.t * term * context * continuation) *)
   (* Reducing the domain of a product *)
-  | KProd of (Id.Name.t * vterm * vcontext * continuation)
+  (* | KProd of (Id.Name.t * term * context * continuation) *)
   (* Reducing the type of an unknown *)
-  | KUnknown of (vcontext * continuation)
+  | KUnknown of (context * continuation)
   (* Reducing the type of an error *)
-  | KErr of (vcontext * continuation)
+  | KErr of (context * continuation)
   (* Reducing the source of a cast *)
-  | KCast_source of (vterm * vterm * vcontext * continuation)
+  | KCast_source of (term * term * context * continuation)
   (* Reducing the target of a cast. Source and term are stored in the state *)
-  | KCast_target of (vterm * vterm * vcontext * continuation)
+  | KCast_target of (term * term * context * continuation)
   (* Reducing the term of a cast. Source and target are stored in the state *)
-  | KCast_term of (vterm * vterm * vcontext * continuation)
+  | KCast_term of (term * term * context * continuation)
 
 (* Just an alias *)
-type state = vterm * vcontext * continuation
+type state = term * context * continuation
 
 exception Stuck_term
 
@@ -161,151 +167,127 @@ exception Stuck_term
 let reduce1 (term, ctx, cont) : state =
   match (term, cont) with
   (* Redexes *)
-    (* Delta *)
-  | Var x, _ -> (
-      match Context.lookup ~key:x ~ctx with
-      | Some v -> (v, ctx, cont)
-      | None ->
-          failwith ("free identifier: " ^ Id.Name.to_string x)
-          
     (* Beta *)
-    (* Using a call-by-value approach *))
-  | u, KApp_r (fi, ctx, cont) when is_value u ->
-      let ctx' = Context.add ~key:fi.id ~value:u ctx in
-      (fi.body, ctx', cont)
+  | Lambda {id; dom=_; body}, KApp_l (u, ctx, cont) -> 
+    (subst1 id u body, ctx, cont)
+
       (* Prod-Unk *)
-  | VUnknown (VProd (fi, ctx')), _ ->
-      ( VLambda ({ id = fi.id; dom = fi.dom; body = Unknown fi.body }, ctx'),
-        ctx,
-        cont )
+  | Unknown (Prod fi), _ ->
+      (Lambda { fi with body = Unknown fi.body }, ctx,        cont )
       (* Prod-Err *)
-  | VErr (VProd (fi, ctx')), _ ->
-      ( VLambda ({ id = fi.id; dom = fi.dom; body = Err fi.body }, ctx'),
+  | Err (Prod fi), _ ->
+      ( Lambda { fi with body = Err fi.body },
         ctx,
         cont )
       (* Down-Unk *)
-  | ( VUnknown (VUnknown (Universe _)),
-      KCast_term (VUnknown (Universe _), target, _, cont) ) ->
-      (VUnknown target, ctx, cont) 
+  | Cast { source= Unknown (Universe i); target; term= Unknown (Unknown (Universe j))},
+      _ when i = j (* is this necessary? *)  ->
+      (Unknown target, ctx, cont) 
       (* Down-Err *)
-  | ( VErr (VUnknown (Universe _)),
-      KCast_term (VUnknown (Universe _), target, _, cont) ) ->
-      (VErr target, ctx, cont) 
+  | Cast { source= Unknown (Universe _); target; term= Err (Unknown (Universe _))},
+      _ ->
+      (Err target, ctx, cont) 
       (* Prod-Prod *)
-  | ( VLambda (term_fi, term_ctx),
-      KCast_term
-        (VProd (source_fi, source_ctx), VProd (target_fi, target_ctx), _, cont)
-    ) ->
-      let y_id = new_identifier () in
-      let y = Var y_id in
-      let inner_cast =
-        Cast { source = target_fi.dom; target = term_fi.dom; term = y }
-      in
-      let inner_body_ctx =
-        Context.add ~key:term_fi.id ~value:inner_cast term_ctx
-      in
-      let inner_body = subst inner_body_ctx term_fi.body in
-      let source_cast =
-        Cast { source = target_fi.dom; target = source_fi.dom; term = y }
-      in
-      let body_source_ctx =
-        Context.add ~key:source_fi.id ~value:source_cast source_ctx
-      in
-      let body_target_ctx = Context.add ~key:target_fi.id ~value:y target_ctx in
-      let body =
-        Cast
-          {
-            source = subst body_source_ctx source_fi.body;
-            target = subst body_target_ctx target_fi.body;
-            term = inner_body;
-          }
-      in
-      let fi = { id = y_id; dom = target_fi.dom; body } in
-      (VLambda (fi, term_ctx), ctx, cont)
-      (* Univ-Univ *)
-  | t, KCast_term (Universe i, Universe j, _, cont) when is_value t && i == j ->
-      (t, ctx, cont) 
-      (* Head-Err *)
-  | t, KCast_term (source, target, _, cont)
-    when is_value t && is_type source && is_type target ->
-      (VErr target, ctx, cont) 
+  | Cast { source= Prod source_fi; target= Prod target_fi; term = Lambda {id=_; dom; body}}, _ -> 
+    let y, x = target_fi.id, source_fi.id in
+    let inner_cast =
+      Cast { source = target_fi.dom; target = dom; term = Var y }
+    in
+    let inner_body = subst1 x inner_cast body in
+    let source_cast =
+      Cast { source = target_fi.dom; target = source_fi.dom; term = Var y }
+    in
+    let new_body =
+      Cast
+        {
+          source = subst1 x source_cast source_fi.body;
+          target = target_fi.body;
+          term = inner_body;
+        }
+    in
+    (Lambda { id = y; dom = target_fi.dom; body=new_body }, ctx, cont)
+
+    (* Univ-Univ *)
+  | Cast {source= Universe i; target=Universe j; term}, _ when i == j ->
+      (term, ctx, cont) 
+    (* Head-Err *)
+  | Cast {source; target; term=_}, _ 
+    when is_type source && is_type target && not (equal_head source target) ->
+      (Err target, ctx, cont) 
       (* Dom-Err *)
-  | t, KCast_term (VErr (Universe _), target, _, cont) when is_value t ->
-      (VErr target, ctx, cont) 
+  | Cast {source= Err (Universe _); target; term=_}, _ ->  (Err target, ctx, cont) 
       (* Codom-Err *)
-  | t, KCast_term (source, (VErr (Universe _) as target), _, cont)
-    when is_value t && is_type source ->
-      (VErr target, ctx, cont) 
+  | Cast {source; target=(Err (Universe _)) as tgt; term=_}, _ when is_type source ->
+      (Err tgt, ctx, cont) 
       (* Prod-Germ *)
-  | ( f,
-      KCast_term
-        ((VProd _ as source), (VUnknown (Universe i) as target), _, cont) )
-    when is_value f && not (of_vterm source |> is_germ_for_gte_level i) ->
-      let middle = to_vterm (germ i HProd) in
-      let inner_cast = Cast { source; target = middle; term = f } in
-      let outer_cast = Cast { source = middle; target; term = inner_cast } in
+  | Cast {source= (Prod _) as src; target=(Unknown (Universe i)) as tgt; term}, _ 
+    when not (is_germ_for_gte_level i src) ->
+      let middle = germ i HProd in
+      let inner_cast = Cast { source=src; target = middle; term } in
+      let outer_cast = Cast { source = middle; target=tgt; term = inner_cast } in
       (outer_cast, ctx, cont)
       (* Up-Down *)
-  | ( VCast { source; target = VUnknown (Universe i); term },
-      KCast_term (VUnknown (Universe j), target, _, cont) )
+  | Cast {source= Unknown (Universe i);
+          target; 
+          term=Cast { source=p; target=Unknown (Universe j); term=t}}, _
   (* Is i == j necessary or type checking ensures? *)
-    when i == j && of_vterm source |> is_germ i ->
-      (Cast { source; target; term }, ctx, cont)
-      (* TODO: Check if this can be replaced with is_germ_for_gte_level *)
-      (* Size-Err Universe *)
-  | _, KCast_term (Universe j, VUnknown (Universe i), _, cont) when j >= i ->
-      (VErr (VUnknown (Universe i)), ctx, cont)
+    when i == j && is_germ i p ->
+      (Cast { source=p; target; term=t }, ctx, cont)
+
+    (* TODO: Check if this can be replaced with is_germ_for_gte_level *)
+    (* Size-Err Universe *)
+  | Cast {source=Universe j; target= (Unknown (Universe i)) as tgt; term=_}, _ 
+   when j >= i ->
+      (Err tgt, ctx, cont)
   (* Size-Err Prod *)
-  | ( _,
-      KCast_term
-        ( VProd
-            ( {
+  | Cast
+        {source= Prod
+            {
                 id = _;
-                dom = VUnknown (Universe j);
+                dom = Unknown (Universe j);
                 body = Unknown (Universe k);
-              },
-              _ ),
-          VUnknown (Universe i),
-          _,
-          cont ) )
+              }              ;
+          target=(Unknown (Universe i)) as tgt;
+          term=_}, _
     when j == k && j > cast_universe_level i ->
-      (VErr (VUnknown (Universe i)), ctx, cont)
+      (Err tgt, ctx, cont)
+
   (* Congruence rules *)
-  | dom, KLambda (id, body, _, cont) when is_value dom ->
-      (VLambda ({ id; dom; body }, ctx), ctx, cont)
-  | dom, KProd (id, body, _, cont) when is_value dom ->
-      (VProd ({ id; dom; body }, ctx), ctx, cont)
-  | VLambda (fi, ctx'), KApp_l (u, _, cont) -> (u, ctx, KApp_r (fi, ctx', cont))
-  | t, KUnknown (_, cont) when is_value t -> (VUnknown t, ctx, cont)
-  | t, KErr (_, cont) when is_value t -> (VErr t, ctx, cont)
-  | target, KCast_target (source, term, _, cont) when is_value target ->
+  | t, KUnknown (_, cont) when is_canonical t -> (Unknown t, ctx, cont)
+  | t, KErr (_, cont) when is_canonical t -> (Err t, ctx, cont)
+  | target, KCast_target (source, term, _, cont) when is_canonical target ->
       (source, ctx, KCast_source (target, term, ctx, cont))
-  | source, KCast_source (target, term, _, cont) when is_value source ->
-      (term, ctx, KCast_term (source, target, ctx, cont))
-  | term, KCast_term (source, (VUnknown (Universe i) as target), _, cont)
-    when of_vterm source |> is_germ i && is_value term ->
-      (VCast { source; target; term }, ctx, cont)
+  | source, KCast_source (target, term, _, cont) when is_canonical source ->
+        (term, ctx, KCast_term (source, target, ctx, cont))
+  | term, KCast_term (source, (Unknown (Universe i) as target), _, cont)
+        when is_germ i source ->
+          (Cast { source; target; term }, ctx, cont)
   | App (t, u), _ -> (t, ctx, KApp_l (u, ctx, cont))
-  | Lambda fi, _ -> (fi.dom, ctx, KLambda (fi.id, fi.body, ctx, cont))
-  | Prod fi, _ -> (fi.dom, ctx, KProd (fi.id, fi.body, ctx, cont))
   | Unknown t, _ -> (t, ctx, KUnknown (ctx, cont))
   | Err t, _ -> (t, ctx, KErr (ctx, cont))
   | Cast { source; target; term }, _ ->
-      (target, ctx, KCast_target (source, term, ctx, cont))
+    (target, ctx, KCast_target (source, term, ctx, cont))      
+        (* | dom, KLambda (id, body, _, cont) when is_value dom ->
+            (VLambda ({ id; dom; body }, ctx), ctx, cont) *)
+        (* | dom, KProd (id, body, _, cont) when is_value dom ->
+            (VProd ({ id; dom; body }, ctx), ctx, cont) *)
+  (* | Lambda fi, _ -> (fi.dom, ctx, KLambda (fi.id, fi.body, ctx, cont)) *)
+  (* | Prod fi, _ -> (fi.dom, ctx, KProd (fi.id, fi.body, ctx, cont)) *)
+  
   | _, _ -> raise Stuck_term
 
 (** Transitive clousure of reduce1 with fuel *)
-let rec reduce_fueled (fuel : int) ((term, _, cont) as s) : vterm =
+let rec reduce_fueled (fuel : int) ((term, _, cont) as s) : term =
   if fuel < 0 then failwith "not enough fuel"
-  else if is_value term && cont == KHole then term
+  else if is_canonical term && cont == KHole then term
   else reduce_fueled (fuel - 1) (reduce1 s)
 
 (** Reduces a term in the given context *)
 let reduce_in ctx t : term =
-  let t' = to_vterm t in
-  let ctx' = to_vcontext ctx in
-  let initial_state = (t', ctx', KHole) in
-  reduce_fueled 10000 initial_state |> of_vterm
+  (* let t' = to_vterm t in *)
+  (* let ctx' = to_vcontext ctx in *)
+  let initial_state = (t, ctx, KHole) in
+  reduce_fueled 10000 initial_state
 
 (** Reduces a term *)
 let reduce : term -> term = reduce_in Context.empty
@@ -315,10 +297,10 @@ let rec fill_hole term cont =
   match cont with
   | KHole -> term
   | KApp_l (u, _, cont) -> fill_hole (App (term, u)) cont
-  | KApp_r (t, _, cont) -> fill_hole (App (Lambda t, term)) cont
-  | KLambda (id, body, _, cont) ->
-      fill_hole (Lambda { id; dom = term; body }) cont
-  | KProd (id, body, _, cont) -> fill_hole (Prod { id; dom = term; body }) cont
+  (* | KApp_r (t, _, cont) -> fill_hole (App (Lambda t, term)) cont *)
+  (* | KLambda (id, body, _, cont) ->
+      fill_hole (Lambda { id; dom = term; body }) cont *)
+  (* | KProd (id, body, _, cont) -> fill_hole (Prod { id; dom = term; body }) cont *)
   | KUnknown (_, cont) -> fill_hole (Unknown term) cont
   | KErr (_, cont) -> fill_hole (Err term) cont
   | KCast_source (target, term', _, cont) ->
@@ -330,8 +312,8 @@ let rec fill_hole term cont =
 
 (** One step reduction *)
 let step ctx term =
-  let vt = to_vterm term in
-  let vctx = to_vcontext ctx in
-  let s = (vt, vctx, KHole) in
+  (* let vt = to_vterm term in *)
+  (* let vctx = to_vcontext ctx in *)
+  let s = (term, ctx, KHole) in
   (try Ok (reduce1 s) with Stuck_term -> Error "stuck_term")
-  |> Result.map (fun (t, _, cont) -> fill_hole t cont |> of_vterm)
+  |> Result.map (fun (t, _, cont) -> fill_hole t cont)
