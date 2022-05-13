@@ -17,14 +17,12 @@ let id = alpha+
 let type = "Type"
 let whitespace = [' ' '\t']+
 let newline = '\r' | '\n' | "\r\n"
-let lambda = "lambda"
-let product = "Prod"
+let lambda = "fun"
 let unknown = "?"
 
 rule read = parse
 | type          { KWD_UNIVERSE }
 | lambda        { KWD_LAMBDA }
-| product       { KWD_PROD }
 | unknown       { KWD_UNKNOWN }
 | id            { ID (Lexing.lexeme lexbuf) }
 | digit+        { INT (int_of_string (Lexing.lexeme lexbuf)) }
@@ -32,6 +30,7 @@ rule read = parse
 | ')'           { RPAREN }
 | ':'           { COLON }
 | '.'           { DOT }
+| "->"          { ARROW }
 | whitespace    { read lexbuf }
 | newline       { Lexing.new_line lexbuf ; read lexbuf }
 | eof           { EOF }

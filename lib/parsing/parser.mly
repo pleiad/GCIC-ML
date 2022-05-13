@@ -11,15 +11,11 @@
 
     These are the output of the lexer rules
 */
-%token  <int> INT
-%token  <string> ID
-%token  COLON
-%token  DOT
-%token  LPAREN RPAREN
-%token  KWD_UNIVERSE
-%token  KWD_LAMBDA
-%token  KWD_PROD
-%token  KWD_UNKNOWN
+%token <int> INT
+%token <string> ID
+%token COLON DOT ARROW
+%token LPAREN RPAREN
+%token KWD_UNIVERSE KWD_LAMBDA KWD_UNKNOWN
 %token EOF
 
 /* Specify starting production */
@@ -35,9 +31,18 @@
 program:
   t=term; EOF   { t }
 
+id :
+| id=ID { Name.of_string id }
+
+prod_arg :
+(* (x : A) -> B *)
+| LPAREN; id=id; COLON; dom=term; RPAREN                  { (id, dom) }
+(* A -> B *)
+| dom=term                                             { (Name.of_string "_", dom) }
+
 term :
-| KWD_LAMBDA; id=ID; COLON; ty=term; DOT; body=term    { Lambda (Name.of_string id, ty, body) }
-| KWD_PROD; id=ID; COLON; ty=term; DOT; body=term      { Prod (Name.of_string id, ty, body) }
+| KWD_LAMBDA; id=id; COLON; ty=term; DOT; body=term    { Lambda (id, ty, body) }
+| arg=prod_arg; ARROW; body=term                       { Prod (fst arg, snd arg, body) }
 | t=fact                                               { t } 
 
 fact :
