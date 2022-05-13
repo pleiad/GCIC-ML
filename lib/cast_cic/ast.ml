@@ -1,5 +1,5 @@
-(** This module specifies the structure of CastCIC *)
 open Common
+(** This module specifies the structure of CastCIC *)
 
 (** Global counter used to create new identifiers *)
 let id_counter : int ref = ref 0
@@ -71,18 +71,21 @@ let head : term -> (head, string) result = function
 
 (** Returns the least precise type for the given head constructor, 
     at the provided level *)
-let germ i h : term =
-  match h with
+let germ i : head -> term = function
   | HProd ->
       let cprod = cast_universe_level i in
-      let univ : term = Universe cprod in
+      let univ = Universe cprod in
       if cprod >= 0 then
         Prod
-          { id = Id.Name.of_string "__"; dom = Unknown univ; body = Unknown univ }
+          {
+            id = Id.Name.of_string "__";
+            dom = Unknown univ;
+            body = Unknown univ;
+          }
       else Err univ
   | HUniverse j -> if j < i then Universe j else Err (Universe i)
 
-(** Checks if a term icorresponds to a germ at the provided universe level *)
+(** Checks if a term corresponds to a germ at the provided universe level *)
 let is_germ i : term -> bool = function
   | Prod { id = _; dom = Unknown (Universe j); body = Unknown (Universe k) } ->
       cast_universe_level i = j && j = k && j >= 0
@@ -90,9 +93,11 @@ let is_germ i : term -> bool = function
   | Universe j -> j < i
   | _ -> false
 
-(* This only works for products - see rule Prod-Germ  *)
-
-(** Checks if a term corresponds to a germ for a level >= to the provided universe level *)
+(** Checks if a term corresponds to a germ for a level >= to the provided universe level.
+    We are adding this predicate mostly for the Prod-Germ rule in reduction, 
+    where we need to check that the type being cast to ? is not a germ for any 
+    j >= i. We cannot build an arbitrary j there, so we resort to this.  
+  *)
 let is_germ_for_gte_level i : term -> bool = function
   | Prod { id = _; dom = Unknown (Universe j); body = Unknown (Universe k) } ->
       j >= cast_universe_level i && j = k && j >= 0
@@ -114,10 +119,10 @@ let rec is_neutral : term -> bool = function
   | _ -> false
 
 (** Checks if a type t makes ?_t or err t canonical *)
-let is_unknown_or_error_canonical (t : term) : bool =
-  match t with
+let is_unknown_or_error_canonical term : bool =
+  match term with
   | Universe _ | Unknown (Universe _) | Err (Universe _) -> true
-  | _ -> is_neutral t
+  | _ -> is_neutral term
 
 (** Checks if a term is in canonical form *)
 let is_canonical : term -> bool = function
@@ -158,7 +163,7 @@ let rec subst1 x v = function
           term = subst1 x v term;
         }
 
-(** Checks that two terms are identificable upto alpha-renaming *)
+(** Checks if two terms are identifiable up to alpha-renaming *)
 let rec alpha_equal t1 t2 =
   match (t1, t2) with
   | Var x, Var y -> x = y
@@ -182,4 +187,29 @@ let rec alpha_equal t1 t2 =
       alpha_equal ci1.source ci2.source
       && alpha_equal ci1.target ci2.target
       && alpha_equal ci1.term ci2.term
+  | _ -> false
+
+(** Checks if two terms are alpha consistent *)
+let rec alpha_consistent t1 t2 : bool =
+  match (t1, t2) with
+  | Var x, Var y -> x = y
+  | Universe i, Universe j -> i = j
+  | App (t1, u1), App (t2, u2) ->
+      alpha_consistent t1 t2 && alpha_consistent u1 u2
+  | Lambda fi1, Lambda fi2 ->
+      let x_id = new_identifier () in
+      let x = Var x_id in
+      let body1 = subst1 fi1.id x fi1.body in
+      let body2 = subst1 fi2.id x fi2.body in
+      alpha_consistent fi1.dom fi2.dom && alpha_consistent body1 body2
+  | Prod fi1, Prod fi2 ->
+      let x_id = new_identifier () in
+      let x = Var x_id in
+      let body1 = subst1 fi1.id x fi1.body in
+      let body2 = subst1 fi2.id x fi2.body in
+      alpha_consistent fi1.dom fi2.dom && alpha_consistent body1 body2
+  | _, Cast ci2 -> alpha_consistent t1 ci2.term
+  | Cast ci1, _ -> alpha_consistent ci1.term t2
+  | _, Unknown _ -> true
+  | Unknown _, _ -> true
   | _ -> false

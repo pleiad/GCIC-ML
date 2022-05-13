@@ -1,5 +1,5 @@
-(** This module specifies the structure of CastCIC *)
 open Common
+(** This module specifies the structure of CastCIC *)
 
 val new_identifier : unit -> Id.Name.t
 
@@ -57,7 +57,10 @@ val is_canonical : term -> bool
 (** Checks if a term is in canonical form *)
 
 val subst1 : Id.Name.t -> term -> term -> term
-(** Performs substitution inside a vterm *)
+(** Performs substitution inside a term *)
 
 val alpha_equal : term -> term -> bool
-(** Checks that two terms are identifiable up to alpha-renaming *)
+(** Checks if two terms are identifiable up to alpha-renaming *)
+
+val alpha_consistent : term -> term -> bool
+(** Checks if two terms are alpha consistent *)

@@ -11,35 +11,36 @@ let idf =
 
 let unknown i = Ast.Unknown (Ast.Universe i)
 
-let omega i =
+(* From the GCIC paper, this is the elaboration of delta (from which omega is built) *)
+let delta' i =
   let open Ast in
-  (* From the GCIC paper, this is the elaboration of delta (from which omega is built) *)
-  let delta' i =
-    let dom =
-      Cast
-        {
-          source = unknown (i + 1);
-          target = Universe i;
-          term = Unknown (unknown (i + 1));
-        }
-    in
-    Lambda
+  let dom =
+    Cast
       {
-        id;
-        dom;
-        body =
-          App
-            ( Cast { source = dom; target = germ i HProd; term = Var id },
-              Cast
-                {
-                  source = dom;
-                  target = unknown (cast_universe_level i);
-                  term = Var id;
-                } );
+        source = unknown (i + 1);
+        target = Universe i;
+        term = Unknown (unknown (i + 1));
       }
   in
+  Lambda
+    {
+      id;
+      dom;
+      body =
+        App
+          ( Cast { source = dom; target = germ i HProd; term = Var id },
+            Cast
+              {
+                source = dom;
+                target = unknown (cast_universe_level i);
+                term = Var id;
+              } );
+    }
+
+let omega i =
+  let open Ast in
   let d' = delta' i in
-  let dom =
+  let dom = 
     Cast
       {
         source = Unknown (Universe (i + 1));

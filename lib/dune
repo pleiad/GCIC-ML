@@ -1,4 +1,4 @@
 (library
  (name gcic)
- (libraries parsing)
+ (libraries parsing kernel cast_cic)
  (modules compile))
