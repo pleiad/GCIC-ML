@@ -16,3 +16,9 @@ let parse_term lexbuf =
   | Parser.Error ->
       let error_msg = asprintf "%s: syntax error@." (print_error_position lexbuf) in
       Error error_msg
+
+let term_of_string str =
+  let linebuf = Lexing.from_string str in
+  match parse_term linebuf with
+  | Ok term -> term
+  | Error _ -> failwith "Cannot parse"

@@ -28,13 +28,10 @@ rule read = parse
 | unknown       { KWD_UNKNOWN }
 | id            { ID (Lexing.lexeme lexbuf) }
 | digit+        { INT (int_of_string (Lexing.lexeme lexbuf)) }
-| '{'           { LBRACK }
-| '}'           { RBRACK }
 | '('           { LPAREN }
 | ')'           { RPAREN }
 | ':'           { COLON }
 | '.'           { DOT }
-| '@'           { AT }
 | whitespace    { read lexbuf }
 | newline       { Lexing.new_line lexbuf ; read lexbuf }
 | eof           { EOF }

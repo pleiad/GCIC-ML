@@ -15,9 +15,7 @@
 %token  <string> ID
 %token  COLON
 %token  DOT
-%token  LBRACK RBRACK
 %token  LPAREN RPAREN
-%token  AT
 %token  KWD_UNIVERSE
 %token  KWD_LAMBDA
 %token  KWD_PROD
@@ -38,17 +36,19 @@ program:
   t=term; EOF   { t }
 
 term :
-| t=base_term                                          { t }
-| KWD_LAMBDA; id=ID; COLON; ty=term; DOT; body=term    { Lambda(Name.of_string id, ty, body) }
-| KWD_PROD; id=ID; COLON; ty=term; DOT; body=term      { Prod(Name.of_string id, ty, body) }
-| t=base_term; t2=base_term                            { App(t, t2) }
+| KWD_LAMBDA; id=ID; COLON; ty=term; DOT; body=term    { Lambda (Name.of_string id, ty, body) }
+| KWD_PROD; id=ID; COLON; ty=term; DOT; body=term      { Prod (Name.of_string id, ty, body) }
+| t=fact                                               { t } 
 
+fact :
+| t=fact; u=atom                                       { App (t, u) }
+| t=atom                                               { t }
 
-base_term: 
-| LPAREN; t=term ; RPAREN                           { t }
-| id=ID                                             { Var(Name.of_string id) }
-| KWD_UNIVERSE; i=INT                               { Universe i }
-| KWD_UNKNOWN; AT ; LBRACK; i=INT; RBRACK           { Unknown i }
+atom : 
+| LPAREN; t=term ; RPAREN                              { t }
+| id=ID                                                { Var (Name.of_string id) }
+| KWD_UNIVERSE; i=INT                                  { Universe i }
+| KWD_UNKNOWN; i=INT                                   { Unknown i }
 
 
 

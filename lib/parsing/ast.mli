@@ -12,3 +12,5 @@ type term =
 
 (** Returns the stringified version of a term *)
 val to_string : term -> string 
+
+val eq_term : term -> term -> bool
