@@ -11,6 +11,7 @@ let idf =
 
 let unknown i = Ast.Unknown (Ast.Universe i)
 
+(* From the GCIC paper, this is the elaboration of delta (from which omega is built) *)
 let delta' i =
   let open Ast in
   let dom =
@@ -38,7 +39,6 @@ let delta' i =
 
 let omega i =
   let open Ast in
-  (* From the GCIC paper, this is the elaboration of delta (from which omega is built) *)
   let d' = delta' i in
   let dom = 
     Cast
@@ -53,6 +53,6 @@ let omega i =
       Cast
         {
           source = Prod { id; dom; body = unknown (cast_universe_level i) };
-          target = unknown i;
+          target = dom;
           term = d';
         } )
