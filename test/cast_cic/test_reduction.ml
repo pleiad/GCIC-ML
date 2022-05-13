@@ -15,7 +15,7 @@ let subject_reduction_empty_ctx =
       (fun t ->
         let ty = Typing.infer_type ctx t in
         assume (Result.is_ok ty);
-        let t' = Reduction.step ctx t in
+        let t' = Reduction.step t in
         assume (Result.is_ok t');
         Typing.check_type ctx (Result.get_ok t') (Result.get_ok ty)
         |> Result.is_ok))
@@ -25,7 +25,7 @@ let progress_empty_ctx =
   QCheck.(
     Test.make ~count:1000 ~name:"progress in empty ctx" Arbitrary.term (fun t ->
         assume (Typing.infer_type ctx t |> Result.is_ok);
-        Ast.is_canonical t || Reduction.step ctx t |> Result.is_ok))
+        Ast.is_canonical t || Reduction.step t |> Result.is_ok))
 
 let test_app_reduce () =
   let open Ast in
@@ -99,8 +99,8 @@ let test_casts_reduce () =
                   term = Unknown (unknown 2);
                 };
             term = idf;
-          }))
-  (* Alcotest.check Testable.term "Codom-Err" (Err (Err (Universe 1)))
+          }));
+  Alcotest.check Testable.term "Codom-Err" (Err (Err (Universe 1)))
     (Reduction.reduce
        (Cast { source = Universe 1; target = Err (Universe 1); term = idf }));
   (* This one might be better with a qcheck? *)
@@ -111,7 +111,7 @@ let test_casts_reduce () =
   Alcotest.check Testable.term "Size-Err Univ"
     (Err (unknown 0))
     (Reduction.reduce
-       (Cast { source = Universe 0; target = unknown 0; term = idf })) *)
+       (Cast { source = Universe 0; target = unknown 0; term = idf }))
 
 (* This is only valid for GCIC variants N and lift *)
 let test_omega_reduce =
