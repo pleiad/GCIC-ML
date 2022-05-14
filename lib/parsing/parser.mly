@@ -45,7 +45,7 @@ arg :
 term :
 | KWD_LAMBDA; args=args; DOT;   body=term                         { Lambda (args, body) }
 | KWD_FORALL; args=args; COMMA; body=term                         { Prod (args, body) }
-| dom=term; ARROW; body=term                                      { Prod ([(None, dom)], body) }
+| dom=fact; ARROW; body=term                                      { Prod ([(None, dom)], body) }
 | KWD_LET; id=id; COLON; ty=term; EQUAL; t1=term; KWD_IN; t2=term { LetIn (id, ty, t1, t2) }
 | t=fact                                                          { t } 
 
