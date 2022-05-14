@@ -1,5 +1,4 @@
 /* This is the specification for the parser */
-// TODO: Manage applications better, probably with a stratified grammar approach or directives?
 
 %{
   [@@@coverage exclude_file]
@@ -56,8 +55,8 @@ fact :
 | t=atom                                               { t }
 
 atom : 
-| LPAREN; t=term ; RPAREN                              { t }
-| id=ID                                                { Var (Name.of_string id) }
+| LPAREN; t=term; RPAREN                               { t }
+| id=id                                                { Var id }
 | KWD_UNIVERSE; i=INT                                  { Universe i }
 | KWD_UNKNOWN; i=INT                                   { Unknown i }
 
