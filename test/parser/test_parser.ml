@@ -27,13 +27,6 @@ let tests_application () =
     (Ok (App (App (App (var "f", Universe 0), var "x"), var "y")))
     (term_of_string "f Type0 x y")
 
-let test_omega () = 
-  let delta = Lambda ([(arg "x", Unknown 1)], App (var "x", var "x")) in
-  Alcotest.check pterm
-    "omega at level 0"
-    (Ok (App (delta, delta)))
-    (term_of_string "(fun (x : ?1) . x x) (fun (x : ?1) . x x)")
-
 let product_notation () =
   Alcotest.check pterm
     "non-dependent product notation"
@@ -51,6 +44,21 @@ let product_notation () =
     "n-ary non-dependent product"
     (Ok (Prod ([(arg "x", Unknown 0); (arg "y", funt (Unknown 1) (Universe 2))], Universe 3)))
     (term_of_string "forall (x : ?0) (y : ?1 -> Type2), Type3")
+
+let tests_let () =
+  Alcotest.check pterm
+    "let binding"
+    (Ok (LetIn (name "x", Universe 0, Unknown 0, var "x")))
+    (term_of_string "let x : Type0 = ?0 in x");
+  Alcotest.(check bool)
+    "let is reserved"
+    true
+    (term_of_string "let" |> Result.is_error);
+  Alcotest.(check bool)
+    "in is reserved"
+    true
+    (term_of_string "in" |> Result.is_error)
+
 
 let tests_unicode () =
   Alcotest.check pterm
@@ -74,6 +82,7 @@ let tests =
   [
     ("products", `Quick, product_notation );
     ("application", `Quick, tests_application);
+    ("let binding", `Quick, tests_let);
     ("unicode", `Quick, tests_unicode);
   ]
 

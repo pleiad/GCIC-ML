@@ -12,6 +12,9 @@ let rec of_parsed_term (t : Parsing.Ast.term) : Kernel.Ast.term =
   | Lambda (args, body) -> List.fold_right expand_lambda args (of_parsed_term body)
   | Prod (args, body) -> List.fold_right expand_prod args (of_parsed_term body)
   | Unknown i -> Unknown i
+  | LetIn (id, ty, t1, t2) -> 
+    let f = Kernel.Ast.Lambda {id; dom=of_parsed_term ty; body=of_parsed_term t2} in
+    App (f, of_parsed_term t1)
 and expand_lambda (id, dom) body = Lambda {id=from_opt_name id; dom=of_parsed_term dom; body}
 and expand_prod (id, dom) body = Prod {id=from_opt_name id; dom=of_parsed_term dom; body}
 

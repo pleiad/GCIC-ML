@@ -13,9 +13,10 @@
 */
 %token <int> INT
 %token <string> ID
-%token COLON DOT COMMA ARROW
+%token COLON DOT COMMA ARROW EQUAL
 %token LPAREN RPAREN
 %token KWD_UNIVERSE KWD_LAMBDA KWD_UNKNOWN KWD_FORALL
+%token KWD_LET KWD_IN
 %token EOF
 
 /* Specify starting production */
@@ -42,10 +43,11 @@ arg :
 | args=nonempty_list(arg) { List.flatten(args) }
 
 term :
-| KWD_LAMBDA; args=args; DOT;   body=term                 { Lambda (args, body) }
-| KWD_FORALL; args=args; COMMA; body=term                 { Prod (args, body) }
-| dom=term; ARROW; body=term                              { Prod ([(None, dom)], body) }
-| t=fact                                                  { t } 
+| KWD_LAMBDA; args=args; DOT;   body=term                         { Lambda (args, body) }
+| KWD_FORALL; args=args; COMMA; body=term                         { Prod (args, body) }
+| dom=term; ARROW; body=term                                      { Prod ([(None, dom)], body) }
+| KWD_LET; id=id; COLON; ty=term; EQUAL; t1=term; KWD_IN; t2=term { LetIn (id, ty, t1, t2) }
+| t=fact                                                          { t } 
 
 fact :
 | t=fact; u=atom                                       { App (t, u) }

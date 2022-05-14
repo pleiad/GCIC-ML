@@ -9,6 +9,7 @@ type term =
 | Lambda of (Name.t option * term) list * term 
 | Prod of (Name.t option * term) list * term 
 | Unknown of int
+| LetIn of (Name.t * term * term * term)
 
 (** Returns the stringified version of a term *)
 val to_string : term -> string 

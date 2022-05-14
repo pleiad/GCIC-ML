@@ -26,11 +26,14 @@ let rec token lexbuf =
   | lambda         -> KWD_LAMBDA 
   | forall         -> KWD_FORALL 
   | unknown        -> KWD_UNKNOWN 
+  | "let"          -> KWD_LET 
+  | "in"           -> KWD_IN 
   | id             -> ID (lexeme lexbuf) 
   | number         -> INT (int_of_string (lexeme lexbuf)) 
   | arrow          -> ARROW 
   | '('            -> LPAREN 
   | ')'            -> RPAREN 
+  | '='            -> EQUAL 
   | ':'            -> COLON 
   | '.'            -> DOT 
   | ','            -> COMMA 

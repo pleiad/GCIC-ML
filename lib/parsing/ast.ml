@@ -11,6 +11,7 @@ type term =
   | Lambda of (Name.t option * term) list * term
   | Prod of (Name.t option * term) list * term
   | Unknown of int
+  | LetIn of (Name.t * term * term * term)
 
 (** Returns the stringified version of a term *)
 let rec to_string = function
@@ -22,6 +23,10 @@ let rec to_string = function
   | Prod (args, b) ->
       asprintf "forall %s, %s" (string_of_args args) (to_string b)
   | Unknown i -> asprintf "?_%i" i
+  | LetIn (id, ty, t1, t2) ->
+      asprintf "let %s : %s = %s in %s" (Name.to_string id)
+        (to_string ty) (to_string t1) (to_string t2)
+
 and string_of_arg (id, dom) =
   let string_of_name = function
   | None -> "_"
@@ -39,6 +44,8 @@ let rec eq_term t1 t2 =
   | (Prod (args1,body1), Prod (args2,body2)) ->
      eq_args args1 args2 && eq_term body1 body2
   | (Unknown i, Unknown j) -> i == j
+  | (LetIn (id1, ty1, t11, t12), LetIn (id2, ty2, t21, t22)) ->
+    id1 = id2 && eq_term ty1 ty2 && eq_term t11 t21 && eq_term t12 t22
   | _ -> false
 and eq_arg (id1, dom1) (id2, dom2) = id1 = id2 && eq_term dom1 dom2 
 and eq_args args1 args2 = List.for_all2 eq_arg args1 args2
