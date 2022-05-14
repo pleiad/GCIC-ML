@@ -26,7 +26,12 @@ program: ID RPAREN
 ## In state 19, spurious reduction of production term -> fact
 ##
 
-<YOUR SYNTAX ERROR MESSAGE HERE>
+Arguments to function application can only be universes, uknowns, identifiers, or any parenthesised expression.
+Examples:
+> $0 Type0
+> $0 ?0
+> $0 someArg
+> $0 (?0 -> ?1)
 
 program: KWD_FORALL LPAREN ID COLON ID RPAREN COMMA RPAREN
 ##
@@ -38,7 +43,8 @@ program: KWD_FORALL LPAREN ID COLON ID RPAREN COMMA RPAREN
 ## KWD_FORALL nonempty_list(arg) COMMA
 ##
 
-<YOUR SYNTAX ERROR MESSAGE HERE>
+I'm currently parsing a pi type.
+After the comma, the body of the types is expected.
 
 program: KWD_FORALL LPAREN ID COLON ID RPAREN DOT
 ##
@@ -56,7 +62,9 @@ program: KWD_FORALL LPAREN ID COLON ID RPAREN DOT
 ## In state 24, spurious reduction of production nonempty_list(arg) -> arg
 ##
 
-<YOUR SYNTAX ERROR MESSAGE HERE>
+I'm currenlty parsing the arguments of a pi type.
+I expect more arguments of the form (x y z : t) or a comma followed
+by the body of the pi type.
 
 program: KWD_FORALL RPAREN
 ##
@@ -68,7 +76,12 @@ program: KWD_FORALL RPAREN
 ## KWD_FORALL
 ##
 
-<YOUR SYNTAX ERROR MESSAGE HERE>
+I'm currently parsing a pi type.
+After the $0, the type's parameters are expected.
+For example:
+> $0 (x : □0)
+> $0 (x y z : □0)
+> $0 (x : □0) (y z : ?0) 
 
 program: KWD_LAMBDA LPAREN ID COLON ID KWD_LET
 ##
@@ -86,7 +99,8 @@ program: KWD_LAMBDA LPAREN ID COLON ID KWD_LET
 ## In state 19, spurious reduction of production term -> fact
 ##
 
-<YOUR SYNTAX ERROR MESSAGE HERE>
+I'm currenlty parsing the type of the arguments of a lambda expression.
+I expect a function application or a closing parenthesis.
 
 program: KWD_LAMBDA LPAREN ID COLON ID RPAREN COMMA
 ##
@@ -104,7 +118,9 @@ program: KWD_LAMBDA LPAREN ID COLON ID RPAREN COMMA
 ## In state 24, spurious reduction of production nonempty_list(arg) -> arg
 ##
 
-<YOUR SYNTAX ERROR MESSAGE HERE>
+I'm currenlty parsing the arguments of a lambda expression.
+I expect more arguments of the form (x y z : t) or a dot followed
+by the body of the lambda.
 
 program: KWD_LAMBDA LPAREN ID COLON ID RPAREN DOT RPAREN
 ##
@@ -116,7 +132,8 @@ program: KWD_LAMBDA LPAREN ID COLON ID RPAREN DOT RPAREN
 ## KWD_LAMBDA nonempty_list(arg) DOT
 ##
 
-<YOUR SYNTAX ERROR MESSAGE HERE>
+I'm currently parsing a lambda expression.
+After the dot, the body of the lambda is expected.
 
 program: KWD_LAMBDA LPAREN ID COLON ID RPAREN RPAREN
 ##
@@ -129,7 +146,9 @@ program: KWD_LAMBDA LPAREN ID COLON ID RPAREN RPAREN
 ## arg
 ##
 
-<YOUR SYNTAX ERROR MESSAGE HERE>
+I'm currenlty parsing the arguments of a lambda expression.
+I expect more arguments of the form (x y z : t) or a dot followed
+by the body of the lambda.
 
 program: KWD_LAMBDA LPAREN ID COLON RPAREN
 ##
@@ -141,7 +160,8 @@ program: KWD_LAMBDA LPAREN ID COLON RPAREN
 ## LPAREN nonempty_list(id) COLON
 ##
 
-<YOUR SYNTAX ERROR MESSAGE HERE>
+I'm currenlty parsing the type of the arguments of a lambda expression.
+I expect a type.
 
 program: KWD_LAMBDA LPAREN ID RPAREN
 ##
@@ -154,7 +174,11 @@ program: KWD_LAMBDA LPAREN ID RPAREN
 ## id
 ##
 
-<YOUR SYNTAX ERROR MESSAGE HERE>
+I'm currenlty parsing the arguments of a lambda expression.
+I expect more identifiers or a colon followed by a type.
+For example:
+> $1 $0 foo bar : ?0)
+> $1 $0 : ?0)
 
 program: KWD_LAMBDA LPAREN RPAREN
 ##
