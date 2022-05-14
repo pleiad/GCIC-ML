@@ -190,7 +190,8 @@ program: KWD_LAMBDA LPAREN RPAREN
 ## LPAREN
 ##
 
-<YOUR SYNTAX ERROR MESSAGE HERE>
+I'm currenlty parsing the arguments of a lambda expression.
+I expect a nonempty list of identifiers.
 
 program: KWD_LAMBDA RPAREN
 ##
@@ -202,7 +203,11 @@ program: KWD_LAMBDA RPAREN
 ## KWD_LAMBDA
 ##
 
-<YOUR SYNTAX ERROR MESSAGE HERE>
+I'm currently parsing the arguments of a lambda expression.
+I expect a nonempty list of arguments of the form `(id ... id : type)`.
+For example:
+> $0 (x : a)
+> $0 (x y z : a)
 
 program: KWD_LET ID COLON ID EQUAL ID KWD_IN RPAREN
 ##
@@ -214,7 +219,8 @@ program: KWD_LET ID COLON ID EQUAL ID KWD_IN RPAREN
 ## KWD_LET id COLON term EQUAL term KWD_IN
 ##
 
-<YOUR SYNTAX ERROR MESSAGE HERE>
+I'm currently parsing the in-term of a let expression.
+After the `in`, an expression is expected.
 
 program: KWD_LET ID COLON ID EQUAL ID RPAREN
 ##
