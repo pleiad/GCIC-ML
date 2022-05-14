@@ -20,8 +20,7 @@ and expand_prod (id, dom) body = Prod {id=from_opt_name id; dom=of_parsed_term d
 
 (** Compiles a string and returns the stringified version of the AST *)
 let compile (line : string) =
-  let linebuf = Sedlexing.Utf8.from_string line in
-  match Lex_and_parse.parse_term linebuf with
+  match Lex_and_parse.parse_term line with
   | Ok term -> 
     let open Cast_cic in
     (match of_parsed_term term |> Elaboration.elaborate Context.empty with 

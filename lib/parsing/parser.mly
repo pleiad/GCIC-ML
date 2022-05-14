@@ -19,6 +19,8 @@
 %token KWD_LET KWD_IN
 %token EOF
 
+%on_error_reduce term
+
 /* Specify starting production */
 %start program
 /* Types for the result of productions */
