@@ -13,9 +13,9 @@
 */
 %token <int> INT
 %token <string> ID
-%token COLON DOT ARROW
+%token COLON DOT COMMA ARROW
 %token LPAREN RPAREN
-%token KWD_UNIVERSE KWD_LAMBDA KWD_UNKNOWN
+%token KWD_UNIVERSE KWD_LAMBDA KWD_UNKNOWN KWD_FORALL
 %token EOF
 
 /* Specify starting production */
@@ -32,18 +32,20 @@ program:
   t=term; EOF   { t }
 
 id :
-| id=ID { Name.of_string id }
+| x=ID { Name.of_string x }
 
-prod_arg :
-(* (x : A) -> B *)
-| LPAREN; id=id; COLON; dom=term; RPAREN                  { (id, dom) }
-(* A -> B *)
-| dom=term                                             { (Name.of_string "_", dom) }
+arg :
+(* (x y z : A) *)
+| LPAREN; ids=nonempty_list(id); COLON; dom=term; RPAREN  { List.map (fun id -> (Some id, dom)) ids }
+
+%inline args :
+| args=nonempty_list(arg) { List.flatten(args) }
 
 term :
-| KWD_LAMBDA; id=id; COLON; ty=term; DOT; body=term    { Lambda (id, ty, body) }
-| arg=prod_arg; ARROW; body=term                       { Prod (fst arg, snd arg, body) }
-| t=fact                                               { t } 
+| KWD_LAMBDA; args=args; DOT;   body=term                 { Lambda (args, body) }
+| KWD_FORALL; args=args; COMMA; body=term                 { Prod (args, body) }
+| dom=term; ARROW; body=term                              { Prod ([(None, dom)], body) }
+| t=fact                                                  { t } 
 
 fact :
 | t=fact; u=atom                                       { App (t, u) }

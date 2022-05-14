@@ -3,6 +3,6 @@
 
 (** Given a lex buffer to read a GCIC term from, parse the
 term and return the AST if successful *)
-val parse_term : Lexing.lexbuf -> (Ast.term, string) result
+val parse_term : Sedlexing.lexbuf -> (Ast.term, string) result
 
-val term_of_string : string -> Ast.term
+val term_of_string : string -> (Ast.term, string) result

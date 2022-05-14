@@ -4,9 +4,9 @@ with pkgs;
 mkShell {
   nativeBuildInputs = (with ocaml-ng.ocamlPackages_4_13; [
     ocaml stdio 
-    bisect_ppx ppx_jane
-    dune_2 menhir merlin ocamlformat findlib ocaml-lsp  
-    alcotest qcheck qcheck-alcotest
+    menhir menhirLib sedlex_2
+    dune_2 merlin ocamlformat findlib ocaml-lsp  utop
+    alcotest qcheck qcheck-alcotest bisect_ppx
   ]) ++ [inotify-tools];
 
   shellHook = ''
