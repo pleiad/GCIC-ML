@@ -73,6 +73,3 @@ let parse_term text =
   | Lexer.SyntaxError msg ->
       let error_msg = asprintf "%s" msg in
       Error error_msg
-
-let term_of_string text =
-  parse_term text

@@ -1,5 +1,9 @@
 (menhir
  (modules parser)
+ ;; The flags: (https://cambium.inria.fr/~fpottier/menhir/manual.pdf)
+ ;; --table: Enables incremental parsing. Needed for the error messages.
+ ;; --dump --explain: Produces information of the parser automaton. Useful for debugging.
+ ;; --strict: Compilation fails if the parser has shift-reduce conflicts.
  (flags --table --dump --strict --explain))
 
 (library
@@ -8,6 +12,8 @@
  (libraries common sedlex menhirLib)
  (preprocess
   (pps sedlex.ppx)))
+
+;; Taken from https://gitlab.inria.fr/fpottier/menhir/-/blob/master/demos/calc-syntax-errors/dune
 
 ;; This section deals with the .messages file.
 

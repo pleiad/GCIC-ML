@@ -18,6 +18,7 @@
 %token KWD_LET KWD_IN
 %token EOF
 
+/* This reduces the number of error states */
 %on_error_reduce term
 
 /* Specify starting production */

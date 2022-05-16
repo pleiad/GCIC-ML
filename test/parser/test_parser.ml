@@ -17,66 +17,66 @@ let tests_application () =
   Alcotest.check pterm
     "nullary application"
     (Ok (Universe 0))
-    (term_of_string "Type0");
+    (parse_term "Type0");
   Alcotest.check pterm
     "unary application"
     (Ok (App (Unknown 1, Unknown 0)))
-    (term_of_string "?1 ?0");
+    (parse_term "?1 ?0");
   Alcotest.check pterm
     "n-ary application"
     (Ok (App (App (App (var "f", Universe 0), var "x"), var "y")))
-    (term_of_string "f Type0 x y")
+    (parse_term "f Type0 x y")
 
 let product_notation () =
   Alcotest.check pterm
     "non-dependent product notation"
     (Ok (funt (Universe 0) (Universe 1)))
-    (term_of_string "Type0 -> Type1");
+    (parse_term "Type0 -> Type1");
   Alcotest.check pterm
     "dependent product forall notation"
     (Ok (Prod ([(arg "x", Universe 0)], var "x")))
-    (term_of_string "forall (x : Type0), x");
+    (parse_term "forall (x : Type0), x");
   Alcotest.check pterm
     "n-ary non-dependent product"
     (Ok (funt (Universe 0) (funt (funt (Universe 1) (Universe 2)) (Universe 3))))
-    (term_of_string "Type0 -> (Type1 -> Type2) -> Type3");
+    (parse_term "Type0 -> (Type1 -> Type2) -> Type3");
   Alcotest.check pterm
     "n-ary non-dependent product"
     (Ok (Prod ([(arg "x", Unknown 0); (arg "y", funt (Unknown 1) (Universe 2))], Universe 3)))
-    (term_of_string "forall (x : ?0) (y : ?1 -> Type2), Type3")
+    (parse_term "forall (x : ?0) (y : ?1 -> Type2), Type3")
 
 let tests_let () =
   Alcotest.check pterm
     "let binding"
     (Ok (LetIn (name "x", Universe 0, Unknown 0, var "x")))
-    (term_of_string "let x : Type0 = ?0 in x");
+    (parse_term "let x : Type0 = ?0 in x");
   Alcotest.(check bool)
     "let is reserved"
     true
-    (term_of_string "let" |> Result.is_error);
+    (parse_term "let" |> Result.is_error);
   Alcotest.(check bool)
     "in is reserved"
     true
-    (term_of_string "in" |> Result.is_error)
+    (parse_term "in" |> Result.is_error)
 
 
 let tests_unicode () =
   Alcotest.check pterm
     "universe"
     (Ok (Universe 0))
-    (term_of_string "□0");
+    (parse_term "□0");
   Alcotest.check pterm
     "lambda"
     (Ok (Lambda ([(arg "x", var "a")], var "x")))
-    (term_of_string "λ(x:a).x");
+    (parse_term "λ(x:a).x");
   Alcotest.check pterm
     "forall"
     (Ok (Prod ([(arg "x", var "a")], var "x")))
-    (term_of_string "∀(x:a),x");
+    (parse_term "∀(x:a),x");
   Alcotest.check pterm
     "arrow"
     (Ok (Prod ([(None, var "a")], var "b")))
-    (term_of_string "a->b")
+    (parse_term "a->b")
 
 let tests =
   [

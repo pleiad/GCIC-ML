@@ -41,4 +41,4 @@ let rec token lexbuf =
   | newline        -> Sedlexing.new_line lexbuf; token lexbuf
   | eof            -> EOF 
   | any            -> raise (SyntaxError ("Unexpected char: " ^ lexeme lexbuf))
-  | _              -> raise (SyntaxError "Unexpected char")
+  | _              -> assert false
