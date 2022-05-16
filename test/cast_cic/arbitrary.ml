@@ -72,24 +72,21 @@ let gcic_term =
   QCheck.make term_gen ~print:to_string
 
 let context arbitrary_key arbitrary_value =
-  let open Common.Context in
+  let open Cast_cic.Context in
   let context_gen =
     QCheck.Gen.(
       sized
       @@ fix (fun self n ->
              match n with
-             | 0 -> return empty
+             | 0 -> return NameMap.empty
              | n ->
                  let* key = QCheck.gen arbitrary_key in
                  let* value = QCheck.gen arbitrary_value in
-                 map (add ~key ~value) (self (n - 1))))
+                 map (NameMap.add key value) (self (n - 1))))
   in
 
   let print_context =
-    let ( let* ) = Option.bind in
-    let* print_key = QCheck.get_print arbitrary_key in
-    let* print_value = QCheck.get_print arbitrary_value in
-    Some (to_string print_key print_value)
+    Some string_of_context 
   in
 
   (* TODO: Add shrinker *)

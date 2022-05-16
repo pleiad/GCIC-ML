@@ -7,6 +7,9 @@ module type ID = sig
   val of_string : string -> t
   val to_string : t -> string
   val ( = ) : t -> t -> bool
+
+  val compare: t -> t -> int
+
 end
 
 (** A string instance of the ID abstract type *)
@@ -16,6 +19,8 @@ module String_id = struct
   let of_string x = x
   let to_string x = x
   let ( = ) = String.equal
+
+  let compare = String.compare
 end
 
 module Name : ID = String_id

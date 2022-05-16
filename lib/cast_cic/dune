@@ -1,6 +1,6 @@
 (library
  (name cast_cic)
- (modules ast typing reduction elaboration)
+ (modules ast typing reduction elaboration context)
  (preprocess
-   (pps bisect_ppx))
+  (pps bisect_ppx))
  (libraries parsing common kernel))

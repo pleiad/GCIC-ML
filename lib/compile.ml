@@ -1,5 +1,4 @@
 open Parsing
-open Common
 
 
 let rec of_parsed_term (t : Parsing.Ast.term) : Kernel.Ast.term =
@@ -17,7 +16,7 @@ let compile (line : string) =
   match Lex_and_parse.parse_term linebuf with
   | Ok term -> 
     let open Cast_cic in
-    (match of_parsed_term term |> Elaboration.elaborate Context.empty with 
+    (match of_parsed_term term |> Elaboration.elaborate Context.NameMap.empty with 
     | Ok (elab, _) -> Reduction.reduce elab |> Ast.to_string 
     | Error e -> Elaboration.string_of_error e)    
   | Error e -> e

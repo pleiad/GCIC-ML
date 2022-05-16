@@ -18,9 +18,6 @@ and fun_info = { id : Id.Name.t; dom : term; body : term }
 
 val to_string : term -> string
 
-type context = (Id.Name.t, term) Context.t
-(** Context *)
-
 (** GCIC variants: Gradual, Normalizing and Shift *)
 type gcic_variant = G | N | S
 

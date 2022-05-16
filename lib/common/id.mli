@@ -7,6 +7,7 @@ module type ID = sig
     val of_string : string -> t
     val to_string : t -> string
     val ( = ) : t -> t -> bool
+    val compare: t -> t -> int
   end
   
   module Name : ID

@@ -2,6 +2,7 @@
 
 open Ast
 open Common.Id
+open Context
 
 type type_error
 (** A typing error *)

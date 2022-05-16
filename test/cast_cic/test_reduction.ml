@@ -1,15 +1,15 @@
 open Cast_cic
+open Cast_cic.Context
 open Example
-open Common
 
 let strong_normalization =
   QCheck.(
     Test.make ~count:1000 ~name:"strong normalization" Arbitrary.term (fun t ->
-        assume (Typing.infer_type Context.empty t |> Result.is_ok);
+        assume (Typing.infer_type NameMap.empty t |> Result.is_ok);
         Reduction.reduce t |> Ast.is_canonical))
 
 let subject_reduction_empty_ctx =
-  let ctx = Context.empty in
+  let ctx = NameMap.empty in
   QCheck.(
     Test.make ~count:1000 ~name:"subject reduction in empty ctx" Arbitrary.term
       (fun t ->
@@ -21,7 +21,7 @@ let subject_reduction_empty_ctx =
         |> Result.is_ok))
 
 let progress_empty_ctx =
-  let ctx = Context.empty in
+  let ctx = NameMap.empty in
   QCheck.(
     Test.make ~count:1000 ~name:"progress in empty ctx" Arbitrary.term (fun t ->
         assume (Typing.infer_type ctx t |> Result.is_ok);
@@ -42,7 +42,12 @@ let test_unknown_reduce () =
        (Unknown (Prod { id; dom = Universe 5; body = Universe 0 })));
   Alcotest.check Testable.term "Down-Unk universe" unk0
     (Reduction.reduce
-       (Cast { source = unknown 1; target = Universe 0; term = Unknown (unknown 1) }))
+       (Cast
+          {
+            source = unknown 1;
+            target = Universe 0;
+            term = Unknown (unknown 1);
+          }))
 
 let test_error_reduce () =
   let open Ast in
@@ -65,18 +70,19 @@ let test_casts_reduce () =
    in
    Alcotest.check Testable.term "Canonical cast" canonical_cast
      (Reduction.reduce canonical_cast));
-  (let prod_germ = germ 1 HProd in 
+  (let prod_germ = germ 1 HProd in
    Alcotest.check Testable.term "Prod-Germ"
      (Cast
         {
           source = prod_germ;
           target = unknown 1;
-          term = Cast
-          {
-            source = Prod { id; dom = Universe 0; body = Universe 0 };
-            target = prod_germ;
-            term = idf;
-          };
+          term =
+            Cast
+              {
+                source = Prod { id; dom = Universe 0; body = Universe 0 };
+                target = prod_germ;
+                term = idf;
+              };
         })
      (Reduction.reduce
         (Cast
