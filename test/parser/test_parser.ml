@@ -3,65 +3,87 @@ open Parsing.Lex_and_parse
 
 let name (id : string) = Common.Id.Name.of_string id
 let var (id : string) : term = Var (Common.Id.Name.of_string id)
+let arg (id : string) = Some (name id)
 
-let funt dom body = Prod (name "_", dom, body)
+let funt dom body = Prod ([(None, dom)], body)
 
 let term =
   let pprint_term ppf t = Format.pp_print_string ppf (to_string t) in
-  let term_eq = eq_term in
-  Alcotest.testable pprint_term term_eq
+  Alcotest.testable pprint_term eq_term
+
+let pterm = Alcotest.(result term string)
 
 let tests_application () =
-  Alcotest.check term
+  Alcotest.check pterm
     "nullary application"
-    (Universe 0)
-    (term_of_string "Type 0");
-  Alcotest.check term
+    (Ok (Universe 0))
+    (parse_term "Type0");
+  Alcotest.check pterm
     "unary application"
-    (App (Unknown 1, Unknown 0))
-    (term_of_string "?1 ?0");
-  Alcotest.check term
+    (Ok (App (Unknown 1, Unknown 0)))
+    (parse_term "?1 ?0");
+  Alcotest.check pterm
     "n-ary application"
-    (App (App (App (var "f", Universe 0), var "x"), var "y"))
-    (term_of_string "f (Type 0) x y")
-
-let test_omega () = 
-  let delta = Lambda (Common.Id.Name.of_string "x", Unknown 1, App (var "x", var "x")) in
-  Alcotest.check term
-    "omega at level 0"
-    (App (delta, delta))
-    (term_of_string "(fun x : ?1 . x x) (fun x : ?1 . x x)")
+    (Ok (App (App (App (var "f", Universe 0), var "x"), var "y")))
+    (parse_term "f Type0 x y")
 
 let product_notation () =
-  Alcotest.check term
+  Alcotest.check pterm
     "non-dependent product notation"
-    (funt (Universe 0) (Universe 1))
-    (term_of_string "Type0 -> Type1");
-  Alcotest.check term
-    "dependent product notation"
-    (Prod (name "x", Universe 0, var "x"))
-    (term_of_string "(x : Type0) -> x");
-  Alcotest.check term
+    (Ok (funt (Universe 0) (Universe 1)))
+    (parse_term "Type0 -> Type1");
+  Alcotest.check pterm
+    "dependent product forall notation"
+    (Ok (Prod ([(arg "x", Universe 0)], var "x")))
+    (parse_term "forall (x : Type0), x");
+  Alcotest.check pterm
     "n-ary non-dependent product"
-    (funt (Universe 0) (funt (funt (Universe 1) (Universe 2)) (Universe 3)))
-    (term_of_string "Type0 -> (Type1 -> Type2) -> Type3");
-  Alcotest.check term
+    (Ok (funt (Universe 0) (funt (funt (Universe 1) (Universe 2)) (Universe 3))))
+    (parse_term "Type0 -> (Type1 -> Type2) -> Type3");
+  Alcotest.check pterm
     "n-ary non-dependent product"
-    (Prod (name "x", Unknown 0, (Prod (name "y", funt (Unknown 1) (Universe 2), (Universe 3)))))
-    (term_of_string "(x : ?0) -> (y : ?1 -> Type2) -> Type3")
+    (Ok (Prod ([(arg "x", Unknown 0); (arg "y", funt (Unknown 1) (Universe 2))], Universe 3)))
+    (parse_term "forall (x : ?0) (y : ?1 -> Type2), Type3")
+
+let tests_let () =
+  Alcotest.check pterm
+    "let binding"
+    (Ok (LetIn (name "x", Universe 0, Unknown 0, var "x")))
+    (parse_term "let x : Type0 = ?0 in x");
+  Alcotest.(check bool)
+    "let is reserved"
+    true
+    (parse_term "let" |> Result.is_error);
+  Alcotest.(check bool)
+    "in is reserved"
+    true
+    (parse_term "in" |> Result.is_error)
+
+
+let tests_unicode () =
+  Alcotest.check pterm
+    "universe"
+    (Ok (Universe 0))
+    (parse_term "□0");
+  Alcotest.check pterm
+    "lambda"
+    (Ok (Lambda ([(arg "x", var "a")], var "x")))
+    (parse_term "λ(x:a).x");
+  Alcotest.check pterm
+    "forall"
+    (Ok (Prod ([(arg "x", var "a")], var "x")))
+    (parse_term "∀(x:a),x");
+  Alcotest.check pterm
+    "arrow"
+    (Ok (Prod ([(None, var "a")], var "b")))
+    (parse_term "a->b")
 
 let tests =
   [
+    ("products", `Quick, product_notation );
     ("application", `Quick, tests_application);
+    ("let binding", `Quick, tests_let);
+    ("unicode", `Quick, tests_unicode);
   ]
 
-let examples =
-  [
-    ("omega", `Quick, test_omega);
-  ]
-
-let () = Alcotest.run "Parser tests" [
-   ("application", tests);
-   ("products", [ "notation", `Quick, product_notation ]);
-   ("examples", examples)
-    ]
+let () = Alcotest.run "Parser tests" [ ("Parser module", tests); ]

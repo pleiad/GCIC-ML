@@ -6,9 +6,10 @@ type term =
 | Var of Name.t
 | Universe of int 
 | App of term * term 
-| Lambda of Name.t * term * term 
-| Prod of Name.t * term * term 
+| Lambda of (Name.t option * term) list * term 
+| Prod of (Name.t option * term) list * term 
 | Unknown of int
+| LetIn of (Name.t * term * term * term)
 
 (** Returns the stringified version of a term *)
 val to_string : term -> string 
