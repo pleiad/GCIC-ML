@@ -6,9 +6,10 @@ program: ID ARROW RPAREN
 ##
 ## The known suffix of the stack is as follows:
 ## fact ARROW
-##
 
-After an arrow, a term is expected.
+After an `$0` (arrow), a term is expected.
+For example:
+> $1 $0 Type0
 
 program: ID RPAREN
 ##
@@ -26,7 +27,7 @@ program: ID RPAREN
 ## In state 19, spurious reduction of production term -> fact
 ##
 
-Arguments to function application can only be universes, uknowns, identifiers, or any parenthesised expression.
+Arguments to function application can only be universes, unknowns, identifiers, or any parenthesised expression.
 Examples:
 > $0 Type0
 > $0 ?0
@@ -44,7 +45,9 @@ program: KWD_FORALL LPAREN ID COLON ID RPAREN COMMA RPAREN
 ##
 
 I'm currently parsing a pi type.
-After the comma, the body of the types is expected.
+After the `,` (comma), the body of the pi type is expected.
+For example:
+> $2 $1 $0 Type0
 
 program: KWD_FORALL LPAREN ID COLON ID RPAREN DOT
 ##
@@ -62,9 +65,12 @@ program: KWD_FORALL LPAREN ID COLON ID RPAREN DOT
 ## In state 24, spurious reduction of production nonempty_list(arg) -> arg
 ##
 
-I'm currenlty parsing the arguments of a pi type.
-I expect more arguments of the form (x y z : t) or a comma followed
+I'm currently parsing the arguments of a pi type.
+I expect more arguments of the form (x y z : t) or a `,` (comma) followed
 by the body of the pi type.
+For example:
+> $1 $0 (a b : Type0), ...
+> $1 $0, ...
 
 program: KWD_FORALL RPAREN
 ##
@@ -77,11 +83,11 @@ program: KWD_FORALL RPAREN
 ##
 
 I'm currently parsing a pi type.
-After the $0, the type's parameters are expected.
+After the `$0`, the type's parameters are expected.
 For example:
-> $0 (x : □0)
-> $0 (x y z : □0)
-> $0 (x : □0) (y z : ?0) 
+> $0 (x : □0), ...
+> $0 (x y z : □0), ...
+> $0 (x : □0) (y z : ?0), ...
 
 program: KWD_LAMBDA LPAREN ID COLON ID KWD_LET
 ##
@@ -99,8 +105,10 @@ program: KWD_LAMBDA LPAREN ID COLON ID KWD_LET
 ## In state 19, spurious reduction of production term -> fact
 ##
 
-I'm currenlty parsing the type of the arguments of a lambda expression.
-I expect a function application or a closing parenthesis.
+I'm currently parsing the type of the arguments of a lambda expression.
+I expect a type followed by a closing parenthesis `)`.
+For example:
+> $3 $2 $1 $0 ). ...
 
 program: KWD_LAMBDA LPAREN ID COLON ID RPAREN COMMA
 ##
@@ -118,9 +126,12 @@ program: KWD_LAMBDA LPAREN ID COLON ID RPAREN COMMA
 ## In state 24, spurious reduction of production nonempty_list(arg) -> arg
 ##
 
-I'm currenlty parsing the arguments of a lambda expression.
-I expect more arguments of the form (x y z : t) or a dot followed
+I'm currently parsing the arguments of a lambda expression.
+I expect more arguments of the form (x y z : t) or a `.` (dot) followed
 by the body of the lambda.
+For example:
+> $1 $0. ...
+> $1 $0 (id1 id2 : Type0). ...
 
 program: KWD_LAMBDA LPAREN ID COLON ID RPAREN DOT RPAREN
 ##
@@ -133,7 +144,9 @@ program: KWD_LAMBDA LPAREN ID COLON ID RPAREN DOT RPAREN
 ##
 
 I'm currently parsing a lambda expression.
-After the dot, the body of the lambda is expected.
+After the `.` (dot), the body of the lambda is expected.
+For example:
+> $2 $1 $0 Type0
 
 program: KWD_LAMBDA LPAREN ID COLON ID RPAREN RPAREN
 ##
@@ -146,9 +159,12 @@ program: KWD_LAMBDA LPAREN ID COLON ID RPAREN RPAREN
 ## arg
 ##
 
-I'm currenlty parsing the arguments of a lambda expression.
-I expect more arguments of the form (x y z : t) or a dot followed
+I'm currently parsing the arguments of a lambda expression.
+I expect more arguments of the form `(id ... id : type)` or a `.` (dot) followed
 by the body of the lambda.
+For example:
+> $1 $0. ...
+> $1 $0 (id1 id2 : Type0). ...
 
 program: KWD_LAMBDA LPAREN ID COLON RPAREN
 ##
@@ -160,8 +176,10 @@ program: KWD_LAMBDA LPAREN ID COLON RPAREN
 ## LPAREN nonempty_list(id) COLON
 ##
 
-I'm currenlty parsing the type of the arguments of a lambda expression.
-I expect a type.
+I'm currently parsing the type of the arguments of a lambda expression.
+After the `:` (colon), a term is expected.
+For example:
+> $2 $1 $0 Type0). ...
 
 program: KWD_LAMBDA LPAREN ID RPAREN
 ##
@@ -174,7 +192,7 @@ program: KWD_LAMBDA LPAREN ID RPAREN
 ## id
 ##
 
-I'm currenlty parsing the arguments of a lambda expression.
+I'm currently parsing the arguments of a lambda expression.
 I expect more identifiers or a colon followed by a type.
 For example:
 > $1 $0 foo bar : ?0)
@@ -190,8 +208,12 @@ program: KWD_LAMBDA LPAREN RPAREN
 ## LPAREN
 ##
 
-I'm currenlty parsing the arguments of a lambda expression.
+I'm currently parsing the arguments of a lambda expression.
 I expect a nonempty list of identifiers.
+For example:
+> (x : ?0). ...
+> (x y z : ?0). ...
+> (x : ?0) (y z : Type1). ...
 
 program: KWD_LAMBDA RPAREN
 ##
@@ -238,7 +260,10 @@ program: KWD_LET ID COLON ID EQUAL ID RPAREN
 ## In state 19, spurious reduction of production term -> fact
 ##
 
-<YOUR SYNTAX ERROR MESSAGE HERE>
+I'm currently parsing the bounded term of a let expression.
+After the `=`, an expression is expected followed by `in`.
+For example:
+> $5 $4 $3 ... $1 $0 in ...
 
 program: KWD_LET ID COLON ID EQUAL RPAREN
 ##
@@ -250,7 +275,10 @@ program: KWD_LET ID COLON ID EQUAL RPAREN
 ## KWD_LET id COLON term EQUAL
 ##
 
-<YOUR SYNTAX ERROR MESSAGE HERE>
+I'm currently parsing the bounded term of a let expression.
+After the `=`, an expression is expected followed by `in`.
+For example:
+> $4 $3 $2 ... $0 in ...
 
 program: KWD_LET ID COLON ID RPAREN
 ##
@@ -268,7 +296,11 @@ program: KWD_LET ID COLON ID RPAREN
 ## In state 19, spurious reduction of production term -> fact
 ##
 
-<YOUR SYNTAX ERROR MESSAGE HERE>
+I'm currently parsing the bounded term's type of a let expression.
+After the `:`, an expression is expected followed by `=`.
+For example:
+> $3 $2 $1 $0 = ...
+> $3 $2 $1 $0 x = ...
 
 program: KWD_LET ID COLON RPAREN
 ##
@@ -280,7 +312,11 @@ program: KWD_LET ID COLON RPAREN
 ## KWD_LET id COLON
 ##
 
-<YOUR SYNTAX ERROR MESSAGE HERE>
+I'm currently parsing the bounded term's type of a let expression.
+After the `:`, an expression is expected followed by `=`.
+For example:
+> $2 $1 $0 ?0 = ...
+> $2 $1 $0 foo Type0 ?1 = ...
 
 program: KWD_LET ID RPAREN
 ##
@@ -292,7 +328,11 @@ program: KWD_LET ID RPAREN
 ## KWD_LET id
 ##
 
-<YOUR SYNTAX ERROR MESSAGE HERE>
+I'm currently parsing a let expression.
+After the identifier, a `:` (colon) is expected followed by a type.
+For example:
+> $1 $0 : ?0 = ...
+> $1 $0 : foo Type0 ?1 = ...
 
 program: KWD_LET RPAREN
 ##
@@ -304,7 +344,11 @@ program: KWD_LET RPAREN
 ## KWD_LET
 ##
 
-<YOUR SYNTAX ERROR MESSAGE HERE>
+I'm currently parsing the binder of a let expression.
+After the `let`, an identifier is expected followed by `:`.
+For example:
+> $0 x : ?0 = ...
+> $0 f : foo Type0 ?1 = ...
 
 program: KWD_UNIVERSE RPAREN
 ##
@@ -316,7 +360,12 @@ program: KWD_UNIVERSE RPAREN
 ## KWD_UNIVERSE
 ##
 
-<YOUR SYNTAX ERROR MESSAGE HERE>
+I'm currently parsing the level of a universe.
+After the `$0`, a non-negative integer is expected.
+For example:
+> $0 0
+> Type1
+> □1
 
 program: KWD_UNKNOWN RPAREN
 ##
@@ -328,7 +377,11 @@ program: KWD_UNKNOWN RPAREN
 ## KWD_UNKNOWN
 ##
 
-<YOUR SYNTAX ERROR MESSAGE HERE>
+I'm currently parsing the universe level of an unknown term.
+After the `$0`, a non-negative integer is expected.
+For example:
+> $0 0
+> ?1
 
 program: LPAREN ID KWD_LET
 ##
@@ -346,7 +399,12 @@ program: LPAREN ID KWD_LET
 ## In state 19, spurious reduction of production term -> fact
 ##
 
-<YOUR SYNTAX ERROR MESSAGE HERE>
+I'm currently parsing a parenthesised term.
+After the `(` a term is expected followed by a closing parenthesis `)`.
+For example:
+> (f x y)
+> (foo ?0 y)
+> (fun (x : Type0). x)
 
 program: LPAREN RPAREN
 ##
@@ -358,7 +416,12 @@ program: LPAREN RPAREN
 ## LPAREN
 ##
 
-<YOUR SYNTAX ERROR MESSAGE HERE>
+I'm currently parsing a parenthesised term.
+After the `(` a term is expected followed by a closing parenthesis `)`.
+For example:
+> (f x y)
+> (foo ?0 y)
+> (fun (x : Type0). x)
 
 program: RPAREN
 ##
@@ -370,4 +433,7 @@ program: RPAREN
 ##
 ##
 
-<YOUR SYNTAX ERROR MESSAGE HERE>
+I'm currently parsing a program.
+For example:
+> let f : ?0 = Type0 in f
+> (fun (x : Type0). x)
