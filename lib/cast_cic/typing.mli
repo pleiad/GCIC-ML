@@ -3,6 +3,7 @@
 open Ast
 open Common.Id
 open Reduction
+open Context
 
 type type_error = [
   | `Err_not_convertible of term * term

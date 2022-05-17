@@ -43,11 +43,9 @@ let reduce1 (term, cont) : state =
   match (term, cont) with
   (* Redexes *)
   (* Beta *)
-  | Lambda { id; dom = _; body }, KApp_l u :: cont ->
-      (subst1 id u body, cont) 
+  | Lambda { id; dom = _; body }, KApp_l u :: cont -> (subst1 id u body, cont)
   (* Prod-Unk *)
-  | Unknown (Prod fi), _ ->
-      (Lambda { fi with body = Unknown fi.body }, cont) 
+  | Unknown (Prod fi), _ -> (Lambda { fi with body = Unknown fi.body }, cont)
   (* Prod-Err *)
   | Err (Prod fi), _ ->
       (Lambda { fi with body = Err fi.body }, cont) (* Down-Unk *)
@@ -59,7 +57,7 @@ let reduce1 (term, cont) : state =
         },
       _ )
     when i = j (* is this necessary? *) ->
-      (Unknown target, cont) 
+      (Unknown target, cont)
   (* Down-Err *)
   | ( Cast
         {
@@ -68,7 +66,7 @@ let reduce1 (term, cont) : state =
           term = Err (Unknown (Universe _));
         },
       _ ) ->
-      (Err target, cont) 
+      (Err target, cont)
   (* Prod-Prod *)
   | ( Cast
         {
@@ -96,18 +94,17 @@ let reduce1 (term, cont) : state =
       (Lambda { id = y; dom = target_fi.dom; body = new_body }, cont)
   (* Univ-Univ *)
   | Cast { source = Universe i; target = Universe j; term }, _ when i == j ->
-      (term, cont) 
+      (term, cont)
   (* Head-Err *)
   | Cast { source; target; term = _ }, _
     when is_type source && is_type target && not (equal_head source target) ->
-      (Err target, cont) 
+      (Err target, cont)
   (* Dom-Err *)
-  | Cast { source = Err (Universe _); target; term = _ }, _ ->
-      (Err target, cont) 
+  | Cast { source = Err (Universe _); target; term = _ }, _ -> (Err target, cont)
   (* Codom-Err *)
   | Cast { source; target = Err (Universe _) as tgt; term = _ }, _
     when is_type source ->
-      (Err tgt, cont) 
+      (Err tgt, cont)
   (* Prod-Germ *)
   | ( Cast { source = Prod _ as src; target = Unknown (Universe i) as tgt; term },
       _ )
@@ -129,7 +126,7 @@ let reduce1 (term, cont) : state =
   (* Is i == j necessary or type checking ensures? *)
     when i == j && is_germ i p ->
       (Cast { source = p; target; term = t }, cont)
-      (* TODO: Check if this can be replaced with is_germ_for_gte_level *)
+  (* TODO: Check if this can be replaced with is_germ_for_gte_level *)
   (* Size-Err Universe *)
   | ( Cast
         { source = Universe j; target = Unknown (Universe i) as tgt; term = _ },
@@ -152,7 +149,6 @@ let reduce1 (term, cont) : state =
       _ )
     when j == k && j > cast_universe_level i ->
       (Err tgt, cont)
-
   (* Congruence rules *)
   | term, KUnknown :: cont when is_canonical term -> (Unknown term, cont)
   | term, KErr :: cont when is_canonical term -> (Err term, cont)
@@ -176,7 +172,6 @@ let rec reduce_fueled (fuel : int) ((term, cont) as s) : term =
   if fuel < 0 then raise Not_enough_fuel
   else if is_canonical term && cont = [] then term
   else reduce_fueled (fuel - 1) (reduce1 s)
-
 
 (** Reduces a term *)
 let reduce term : (term, [> reduction_error ]) result = 

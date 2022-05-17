@@ -1,5 +1,8 @@
-open Common
+open Context
+(** This module specifies the elaboration from GCIC to CastCIC *)
+
 open Common.Std
+open Common.Id
 
 (** This module specifies the elaboration from GCIC to CastCIC *)
 
@@ -8,7 +11,7 @@ open Common.Std
 (**********************)
 
 type elaboration_error = [
-  | `Err_free_identifier of Id.Name.t
+  | `Err_free_identifier of Name.t
   | `Err_inconsistent of Kernel.Ast.term * Ast.term * Ast.term
   | `Err_constrained_universe of Kernel.Ast.term
   | `Err_constrained_product of Kernel.Ast.term
@@ -59,20 +62,19 @@ let rec elaborate ctx (term : Kernel.Ast.term) :
   let open Kernel.Ast in
   match term with
   | Var x -> (
-      match Context.lookup ~key:x ~ctx with
-      | Some ty -> Ok (Var x, ty)
-      | None -> Error (`Err_free_identifier x))
+      try Ok (Var x, NameMap.find x ctx)
+      with Not_found -> Error (`Err_free_identifier x))
   | Universe i -> Ok (Universe i, Universe (i + 1))
   | Prod { id; dom; body } ->
       let* elab_dom, i = elab_univ ctx dom in
-      let extended_ctx = Context.add ~key:id ~value:elab_dom ctx in
+      let extended_ctx = NameMap.add id elab_dom ctx in
       let* elab_body, j = elab_univ extended_ctx body in
       Ok
         ( Ast.Prod { id; dom = elab_dom; body = elab_body },
           Ast.Universe (Ast.product_universe_level i j) )
   | Lambda { id; dom; body } ->
       let* elab_dom, _ = elab_univ ctx dom in
-      let extended_ctx = Context.add ~key:id ~value:elab_dom ctx in
+      let extended_ctx = NameMap.add id elab_dom ctx in
       let* elab_body, elab_body_ty = elaborate extended_ctx body in
       Ok
         ( Ast.Lambda { id; dom = elab_dom; body = elab_body },
@@ -111,7 +113,7 @@ and elab_univ ctx term : (Ast.term * int, [> elaboration_error]) result =
    Otherwise, we need to repeat the pattern-matching/extraction wherever this
    is called *)
 and elab_prod ctx term :
-    (Ast.term * Id.Name.t * Ast.term * Ast.term, [> elaboration_error]) result =
+    (Ast.term * Name.t * Ast.term * Ast.term, [> elaboration_error]) result =
   let* t, ty = elaborate ctx term in
   let* v =  Reduction.reduce ty in
   match v with

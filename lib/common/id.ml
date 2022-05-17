@@ -7,6 +7,7 @@ module type ID = sig
   val of_string : string -> t
   val to_string : t -> string
   val ( = ) : t -> t -> bool
+  val compare : t -> t -> int
   val default : t
 end
 
@@ -17,6 +18,7 @@ module String_id = struct
   let of_string x = x
   let to_string x = x
   let ( = ) = String.equal
+  let compare = String.compare
   let default = "_"
 end
 
