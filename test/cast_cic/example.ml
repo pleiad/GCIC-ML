@@ -40,7 +40,7 @@ let delta' i =
 let omega i =
   let open Ast in
   let d' = delta' i in
-  let dom = 
+  let dom =
     Cast
       {
         source = Unknown (Universe (i + 1));

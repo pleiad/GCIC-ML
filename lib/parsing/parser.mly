@@ -1,4 +1,7 @@
-/* This is the specification for the parser */
+/* This is the specification for the parser 
+
+   http://cambium.inria.fr/~fpottier/menhir/manual.html
+*/
 
 %{
   [@@@coverage exclude_file]
@@ -19,7 +22,9 @@
 %token VERNAC_CHECK VERNAC_EVAL VERNAC_ELABORATE VERNAC_SEPARATOR
 %token EOF
 
-/* This reduces the number of error states */
+/* This reduces the number of error states.
+   It is useful for defining better error messages.
+ */
 %on_error_reduce term 
 
 /* Specify starting production */
@@ -29,7 +34,6 @@
 %type <Ast.command> program_parser
 %type <Ast.term> term_parser
 
-// %left APP
 %% /* Start grammar productions */
 program_parser :
   cmd=command; EOF   { cmd }
