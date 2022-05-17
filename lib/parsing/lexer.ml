@@ -28,10 +28,10 @@ let rec token lexbuf =
   | unknown        -> KWD_UNKNOWN 
   | "let"          -> KWD_LET 
   | "in"           -> KWD_IN 
-  | "check"        -> KWD_CHECK
-  | "eval"         -> KWD_EVAL
-  | "elab"         -> KWD_ELABORATE
-  | "as"           -> KWD_AS
+  | "check"        -> VERNAC_CHECK
+  | "eval"         -> VERNAC_EVAL
+  | "elab"         -> VERNAC_ELABORATE
+  | ";;"           -> VERNAC_SEPARATOR
   | id             -> ID (lexeme lexbuf) 
   | number         -> INT (int_of_string (lexeme lexbuf)) 
   | arrow          -> ARROW 
