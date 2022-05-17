@@ -1,4 +1,6 @@
 open Common
+open Common.Std
+
 (** This module specifies the AST for commands *)
 
 (** The AST for the commands *)
@@ -24,62 +26,40 @@ let string_of_cmd_result : cmd_result -> string = function
   | Check -> "OK"
   | Elaboration t -> Cast_cic.Ast.to_string t
 
-type execute_error = { error_code : string; message : string; cmd : command }
+type execute_error = [
+  | Cast_cic.Elaboration.elaboration_error
+  | Cast_cic.Typing.type_error
+  | Cast_cic.Reduction.reduction_error
+  ]
 
-let string_of_execute_error { error_code; message; _ } =
-  "[" ^ error_code ^ "] " ^ message
-
-let reduction_error cmd reason =
-  {
-    error_code = "reduction_cmd_error";
-    message = "reduction failed due to: " ^ reason;
-    cmd;
-  }
-
-let checking_error cmd reason =
-  {
-    error_code = "checking_cmd_error";
-    message = "checking failed due to: " ^ reason;
-    cmd;
-  }
-
-let elaboration_error cmd reason =
-  {
-    error_code = "elaboration_cmd_error";
-    message = "elaboration failed due to: " ^ reason;
-    cmd;
-  }
-
-let mk_elaboration_error (fn : command -> string -> execute_error) cmd
-    (e : Cast_cic.Elaboration.elaboration_error) : execute_error =
-  let reason = Cast_cic.Elaboration.string_of_error e in
-  fn cmd reason
+let string_of_error = function
+| #Cast_cic.Elaboration.elaboration_error as e ->
+  "[elaboration_error] " ^ Cast_cic.Elaboration.string_of_error e
+| #Cast_cic.Typing.type_error as e ->
+  "[type_error] " ^ Cast_cic.Typing.string_of_error e
+| #Cast_cic.Reduction.reduction_error as e ->
+  "[reduction_error] " ^ Cast_cic.Reduction.string_of_error e
 
 let execute_eval term : (cmd_result, execute_error) result =
-  let open Cast_cic in
-  match Elaboration.elaborate Context.empty term with
-  | Ok (elab_term, _) -> Ok (Reduction (Reduction.reduce elab_term))
-  | Error e -> Error (mk_elaboration_error reduction_error (Eval term) e)
+  let open Cast_cic.Elaboration in
+  let open Cast_cic.Reduction in
+  let* (elab_term, _) = elaborate Context.empty term in
+  let* v = reduce elab_term in
+  Ok (Reduction v)
 
 let execute_check term ty : (cmd_result, execute_error) result =
   let open Cast_cic.Elaboration in
   let open Cast_cic.Typing in
   let empty_ctx = Context.empty in
-  let cmd : command = Check (term, ty) in
-  match elaborate empty_ctx term with
-  | Ok (elab_term, _) -> (
-      match elaborate empty_ctx ty with
-      | Ok (expected_ty, _) -> (
-          match check_type empty_ctx elab_term expected_ty with
-          | Ok _ -> Ok Check
-          | Error e -> Error (string_of_error e |> checking_error cmd))
-      | Error e -> Error (mk_elaboration_error checking_error cmd e))
-  | Error e -> Error (mk_elaboration_error checking_error cmd e)
+  let* (elab_term, _) = elaborate empty_ctx term in
+  let* (expected_ty, _) = elaborate empty_ctx ty in
+  let* () = check_type empty_ctx elab_term expected_ty in
+  Ok Check
 
 let execute_elab term : (cmd_result, execute_error) result =
-  match Cast_cic.Elaboration.elaborate Context.empty term with
-  | Ok (elab_term, _) -> Ok (Elaboration elab_term)
-  | Error e -> Error (mk_elaboration_error elaboration_error (Elaborate term) e)
+  let open Cast_cic.Elaboration in
+  let* (elab_term, _) = elaborate Context.empty term in
+  Ok (Elaboration elab_term)
 
 let execute cmd : (cmd_result, execute_error) result =
   match cmd with

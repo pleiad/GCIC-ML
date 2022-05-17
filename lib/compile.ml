@@ -31,7 +31,7 @@ let compile (line : string) =
   | Ok cmd -> 
     of_parsed_command cmd |>
     execute |>
-    Result.fold ~ok:string_of_cmd_result ~error:string_of_execute_error
+    Result.fold ~ok:string_of_cmd_result ~error:string_of_error
   | Error e -> e
 
 

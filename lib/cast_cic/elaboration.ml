@@ -1,7 +1,7 @@
 open Common
-(** This module specifies the elaboration from GCIC to CastCIC *)
-
 open Common.Std
+
+(** This module specifies the elaboration from GCIC to CastCIC *)
 
 (**********************)
 (*       ERRORS       *)
@@ -39,7 +39,6 @@ let string_of_error err =
     | `Err_impossible term -> Kernel.Ast.to_string term in
   Format.asprintf "[%s] elaboration of term (%s) failed: %s" error_code term message
 
-
 (**********************)
 (*    ELABORATION     *)
 (**********************)
@@ -48,13 +47,15 @@ type elaboration = Ast.term * Ast.term
 (** Type alias for the elaboration result  *)
 
 let are_consistent t1 t2 : bool =
-  let t1_red = Reduction.reduce t1 in
-  let t2_red = Reduction.reduce t2 in
-  Ast.alpha_consistent t1_red t2_red
+  let res =
+    let* t1_red = Reduction.reduce t1 in
+    let* t2_red = Reduction.reduce t2 in
+    Ok (Ast.alpha_consistent t1_red t2_red) in
+  Result.fold ~ok:(fun x -> x) ~error:(fun _ -> false) res
 
 (** The elaboration procedure, as per the paper *)
 let rec elaborate ctx (term : Kernel.Ast.term) :
-    (elaboration, elaboration_error) result =
+    (elaboration, [> elaboration_error]) result =
   let open Kernel.Ast in
   match term with
   | Var x -> (
@@ -84,7 +85,7 @@ let rec elaborate ctx (term : Kernel.Ast.term) :
       let* u' = check_elab ctx u dom in
       Ok (Ast.App (t', u'), Ast.subst1 id u' body)
 
-and check_elab ctx term (s_ty : Ast.term) : (Ast.term, elaboration_error) result
+and check_elab ctx term (s_ty : Ast.term) : (Ast.term, [> elaboration_error]) result
     =
   let* t', ty = elaborate ctx term in
   if are_consistent ty s_ty then
@@ -94,9 +95,10 @@ and check_elab ctx term (s_ty : Ast.term) : (Ast.term, elaboration_error) result
 (* Instead of returning the complete Universe type, we only return the level.
    Otherwise, we need to repeat the pattern-matching/extraction wherever this
    is called *)
-and elab_univ ctx term : (Ast.term * int, elaboration_error) result =
+and elab_univ ctx term : (Ast.term * int, [> elaboration_error]) result =
   let* t, ty = elaborate ctx term in
-  match Reduction.reduce ty with
+  let* v = Reduction.reduce ty in
+  match v with
   (* Inf-Univ *)
   | Universe i -> Ok (t, i)
   (* Inf-Univ? *)
@@ -109,9 +111,10 @@ and elab_univ ctx term : (Ast.term * int, elaboration_error) result =
    Otherwise, we need to repeat the pattern-matching/extraction wherever this
    is called *)
 and elab_prod ctx term :
-    (Ast.term * Id.Name.t * Ast.term * Ast.term, elaboration_error) result =
+    (Ast.term * Id.Name.t * Ast.term * Ast.term, [> elaboration_error]) result =
   let* t, ty = elaborate ctx term in
-  match Reduction.reduce ty with
+  let* v =  Reduction.reduce ty in
+  match v with
   (* Inf-Prod *)
   | Prod { id; dom; body } -> Ok (t, id, dom, body)
   (* Inf-Prod? *)
