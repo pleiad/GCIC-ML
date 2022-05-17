@@ -9,8 +9,10 @@ let rec string_of_seq_context context : string =
   match context with
   | [] -> "[]"
   | (k, v) :: tl ->
-      Format.asprintf "(%s, %s) ; %s" (Name.to_string k) (Ast.to_string v)
-        (string_of_seq_context tl)
+    Format.asprintf
+      "(%s, %s) ; %s"
+      (Name.to_string k)
+      (Ast.to_string v)
+      (string_of_seq_context tl)
 
-let string_of_context ctx : string =
-  NameMap.bindings ctx |> string_of_seq_context
+let string_of_context ctx : string = NameMap.bindings ctx |> string_of_seq_context

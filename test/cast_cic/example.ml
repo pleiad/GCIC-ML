@@ -16,25 +16,16 @@ let delta' i =
   let open Ast in
   let dom =
     Cast
-      {
-        source = unknown (i + 1);
-        target = Universe i;
-        term = Unknown (unknown (i + 1));
-      }
+      { source = unknown (i + 1); target = Universe i; term = Unknown (unknown (i + 1)) }
   in
   Lambda
-    {
-      id;
-      dom;
-      body =
+    { id
+    ; dom
+    ; body =
         App
-          ( Cast { source = dom; target = germ i HProd; term = Var id },
-            Cast
-              {
-                source = dom;
-                target = unknown (cast_universe_level i);
-                term = Var id;
-              } );
+          ( Cast { source = dom; target = germ i HProd; term = Var id }
+          , Cast { source = dom; target = unknown (cast_universe_level i); term = Var id }
+          )
     }
 
 let omega i =
@@ -42,17 +33,15 @@ let omega i =
   let d' = delta' i in
   let dom =
     Cast
-      {
-        source = Unknown (Universe (i + 1));
-        target = Universe i;
-        term = Unknown (Unknown (Universe (i + 1)));
+      { source = Unknown (Universe (i + 1))
+      ; target = Universe i
+      ; term = Unknown (Unknown (Universe (i + 1)))
       }
   in
   App
-    ( d',
-      Cast
-        {
-          source = Prod { id; dom; body = unknown (cast_universe_level i) };
-          target = dom;
-          term = d';
+    ( d'
+    , Cast
+        { source = Prod { id; dom; body = unknown (cast_universe_level i) }
+        ; target = dom
+        ; term = d'
         } )

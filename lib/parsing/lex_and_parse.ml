@@ -9,7 +9,9 @@ module I = Parser.MenhirInterpreter
    which must be of the form [HandlingError env]. *)
 
 let env checkpoint =
-  match checkpoint with I.HandlingError env -> env | _ -> assert false
+  match checkpoint with
+  | I.HandlingError env -> env
+  | _ -> assert false
 
 (* [state checkpoint] extracts the number of the current state out of a
    checkpoint. *)
@@ -23,8 +25,7 @@ let state checkpoint : int =
    delimited by the positions [pos1] and [pos2]. *)
 
 let show text positions =
-  E.extract text positions |> E.sanitize |> E.compress
-  |> E.shorten 20 (* max width 43 *)
+  E.extract text positions |> E.sanitize |> E.compress |> E.shorten 20 (* max width 43 *)
 
 (* [get text checkpoint i] extracts and shows the range of the input text that
    corresponds to the [i]-th stack cell. The top stack cell is numbered zero. *)
@@ -62,9 +63,9 @@ let parse_term text =
     let buffer, supplier = E.wrap_supplier supplier in
     let start_position = fst (Sedlexing.lexing_positions lexbuf) in
     let checkpoint = Parser.Incremental.term_parser start_position in
-
     I.loop_handle succeed (fail text buffer) supplier checkpoint
-  with (* catch exception and turn into Error *)
+  with
+  (* catch exception and turn into Error *)
   | Lexer.SyntaxError msg ->
     let error_msg = asprintf "%s" msg in
     Error error_msg
@@ -76,10 +77,9 @@ let parse_command text =
     let buffer, supplier = E.wrap_supplier supplier in
     let start_position = fst (Sedlexing.lexing_positions lexbuf) in
     let checkpoint = Parser.Incremental.program_parser start_position in
-    
-
     I.loop_handle succeed (fail text buffer) supplier checkpoint
-  with (* catch exception and turn into Error *)
+  with
+  (* catch exception and turn into Error *)
   | Lexer.SyntaxError msg ->
     let error_msg = asprintf "%s" msg in
     Error error_msg

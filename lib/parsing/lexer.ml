@@ -43,8 +43,8 @@ let rec token lexbuf =
   | ',' -> COMMA
   | whitespace -> token lexbuf
   | newline ->
-      Sedlexing.new_line lexbuf;
-      token lexbuf
+    Sedlexing.new_line lexbuf;
+    token lexbuf
   | eof -> EOF
   | any -> raise (SyntaxError ("Unexpected char: " ^ lexeme lexbuf))
   | _ -> assert false
