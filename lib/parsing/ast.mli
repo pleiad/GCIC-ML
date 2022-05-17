@@ -15,3 +15,8 @@ type term =
 val to_string : term -> string 
 
 val eq_term : term -> term -> bool
+
+type command =
+| Eval of term
+| Check of term * term
+| Elaborate of term

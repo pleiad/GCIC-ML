@@ -16,23 +16,33 @@
 %token LPAREN RPAREN
 %token KWD_UNIVERSE KWD_LAMBDA KWD_UNKNOWN KWD_FORALL
 %token KWD_LET KWD_IN
+%token KWD_CHECK KWD_EVAL KWD_ELABORATE KWD_AS
 %token EOF
 
 /* This reduces the number of error states */
-%on_error_reduce term
+%on_error_reduce term 
 
 /* Specify starting production */
-%start program
+%start program_parser term_parser
 /* Types for the result of productions */
 // %nonassoc ID KWD_UNIVERSE KWD_LAMBDA KWD_PROD KWD_UNKNOWN LPAREN /* list ALL other tokens that start an expr */
 // %nonassoc APP
 
-%type <Ast.term> program
+%type <Ast.command> program_parser
+%type <Ast.term> term_parser
 
 // %left APP
 %% /* Start grammar productions */
-program:
+program_parser :
+  cmd=command; EOF   { cmd }
+
+term_parser :
   t=term; EOF   { t }
+
+command :
+| KWD_EVAL;t=term; DOT                       { Eval t }
+| KWD_CHECK; t=term; KWD_AS; ty=term; DOT    { Check (t, ty) }
+| KWD_ELABORATE; t=term; DOT                 { Elaborate t }
 
 id :
 | x=ID { Name.of_string x }
@@ -45,7 +55,7 @@ arg :
 | args=nonempty_list(arg) { List.flatten(args) }
 
 term :
-| KWD_LAMBDA; args=args; DOT;   body=term                         { Lambda (args, body) }
+| KWD_LAMBDA; args=args; COMMA; body=term                         { Lambda (args, body) }
 | KWD_FORALL; args=args; COMMA; body=term                         { Prod (args, body) }
 | dom=fact; ARROW; body=term                                      { Prod ([(None, dom)], body) }
 | KWD_LET; id=id; COLON; ty=term; EQUAL; t1=term; KWD_IN; t2=term { LetIn (id, ty, t1, t2) }

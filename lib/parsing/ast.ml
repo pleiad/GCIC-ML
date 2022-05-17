@@ -2,7 +2,6 @@
 open Format
 open Common.Id
 
-
 (** Terms in GCIC *)
 type term =
   | Var of Name.t
@@ -49,3 +48,8 @@ let rec eq_term t1 t2 =
   | _ -> false
 and eq_arg (id1, dom1) (id2, dom2) = id1 = id2 && eq_term dom1 dom2 
 and eq_args args1 args2 = List.for_all2 eq_arg args1 args2
+
+type command =
+| Eval of term
+| Check of term * term
+| Elaborate of term

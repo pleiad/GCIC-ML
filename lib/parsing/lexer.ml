@@ -28,6 +28,10 @@ let rec token lexbuf =
   | unknown        -> KWD_UNKNOWN 
   | "let"          -> KWD_LET 
   | "in"           -> KWD_IN 
+  | "Check"        -> KWD_CHECK
+  | "Eval"         -> KWD_EVAL
+  | "Elaborate"    -> KWD_ELABORATE
+  | "As"           -> KWD_AS
   | id             -> ID (lexeme lexbuf) 
   | number         -> INT (int_of_string (lexeme lexbuf)) 
   | arrow          -> ARROW 

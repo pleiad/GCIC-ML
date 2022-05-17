@@ -65,7 +65,7 @@ let parse_term text =
     let supplier = Sedlexing.with_tokenizer Lexer.token lexbuf in
     let buffer, supplier = E.wrap_supplier supplier in
     let start_position = fst (Sedlexing.lexing_positions lexbuf) in
-    let checkpoint = Parser.Incremental.program start_position in
+    let checkpoint = Parser.Incremental.term_parser start_position in
     
     I.loop_handle succeed (fail text buffer) supplier checkpoint
   with

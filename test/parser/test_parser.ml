@@ -68,7 +68,7 @@ let tests_unicode () =
   Alcotest.check pterm
     "lambda"
     (Ok (Lambda ([(arg "x", var "a")], var "x")))
-    (parse_term "λ(x:a).x");
+    (parse_term "λ(x:a),x");
   Alcotest.check pterm
     "forall"
     (Ok (Prod ([(arg "x", var "a")], var "x")))
