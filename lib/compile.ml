@@ -1,7 +1,7 @@
 open Parsing
-open Common
+open Common.Id
 
-let from_opt_name id = Option.value id ~default:Id.Name.default
+let from_opt_name id = Option.value id ~default:Name.default
 
 let rec of_parsed_term (t : Parsing.Ast.term) : Kernel.Ast.term =
   match t with

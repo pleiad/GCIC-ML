@@ -42,9 +42,6 @@ let rec to_string (t : term) =
       asprintf "<%s <- %s> %s" (to_string target) (to_string source)
         (to_string term)
 
-type context = (Id.Name.t, term) Context.t
-(** Context *)
-
 (** GCIC variants: Gradual, Normalizing and Shift *)
 type gcic_variant = G | N | S
 

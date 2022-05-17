@@ -1,4 +1,4 @@
-open Common
+(* open Common *)
 (** This module specifies the AST for commands *)
 
 (** The AST for the commands *)
@@ -57,14 +57,15 @@ let mk_elaboration_error (fn : command -> string -> execute_error) cmd
 
 let execute_eval term : (cmd_result, execute_error) result =
   let open Cast_cic in
-  match Elaboration.elaborate Context.empty term with
+  match Elaboration.elaborate Context.NameMap.empty term with
   | Ok (elab_term, _) -> Ok (Reduction (Reduction.reduce elab_term))
   | Error e -> Error (mk_elaboration_error reduction_error (Eval term) e)
 
 let execute_check term ty : (cmd_result, execute_error) result =
   let open Cast_cic.Elaboration in
   let open Cast_cic.Typing in
-  let empty_ctx = Context.empty in
+  let open Cast_cic.Context in
+  let empty_ctx = NameMap.empty in
   let cmd : command = Check (term, ty) in
   match elaborate empty_ctx term with
   | Ok (elab_term, _) -> (
@@ -77,7 +78,8 @@ let execute_check term ty : (cmd_result, execute_error) result =
   | Error e -> Error (mk_elaboration_error checking_error cmd e)
 
 let execute_elab term : (cmd_result, execute_error) result =
-  match Cast_cic.Elaboration.elaborate Context.empty term with
+  let open Cast_cic.Context in
+  match Cast_cic.Elaboration.elaborate NameMap.empty term with
   | Ok (elab_term, _) -> Ok (Elaboration elab_term)
   | Error e -> Error (mk_elaboration_error elaboration_error (Elab term) e)
 

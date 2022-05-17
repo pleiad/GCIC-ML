@@ -1,7 +1,8 @@
-open Common
+open Context
 (** This module specifies the elaboration from GCIC to CastCIC *)
 
 open Common.Std
+open Common.Id
 
 (**********************)
 (*       ERRORS       *)
@@ -46,7 +47,6 @@ let string_of_error ({ error_code; message; term } : elaboration_error) : string
     (Kernel.Ast.to_string term)
     message
 
-
 (**********************)
 (*    ELABORATION     *)
 (**********************)
@@ -65,20 +65,19 @@ let rec elaborate ctx (term : Kernel.Ast.term) :
   let open Kernel.Ast in
   match term with
   | Var x -> (
-      match Context.lookup ~key:x ~ctx with
-      | Some ty -> Ok (Var x, ty)
-      | None -> Error (free_id_err term))
+      try Ok (Var x, NameMap.find x ctx)
+      with Not_found -> Error (free_id_err term))
   | Universe i -> Ok (Universe i, Universe (i + 1))
   | Prod { id; dom; body } ->
       let* elab_dom, i = elab_univ ctx dom in
-      let extended_ctx = Context.add ~key:id ~value:elab_dom ctx in
+      let extended_ctx = NameMap.add id elab_dom ctx in
       let* elab_body, j = elab_univ extended_ctx body in
       Ok
         ( Ast.Prod { id; dom = elab_dom; body = elab_body },
           Ast.Universe (Ast.product_universe_level i j) )
   | Lambda { id; dom; body } ->
       let* elab_dom, _ = elab_univ ctx dom in
-      let extended_ctx = Context.add ~key:id ~value:elab_dom ctx in
+      let extended_ctx = NameMap.add id elab_dom ctx in
       let* elab_body, elab_body_ty = elaborate extended_ctx body in
       Ok
         ( Ast.Lambda { id; dom = elab_dom; body = elab_body },
@@ -116,7 +115,7 @@ and elab_univ ctx term : (Ast.term * int, elaboration_error) result =
    Otherwise, we need to repeat the pattern-matching/extraction wherever this
    is called *)
 and elab_prod ctx term :
-    (Ast.term * Id.Name.t * Ast.term * Ast.term, elaboration_error) result =
+    (Ast.term * Name.t * Ast.term * Ast.term, elaboration_error) result =
   let* t, ty = elaborate ctx term in
   match Reduction.reduce ty with
   (* Inf-Prod *)
