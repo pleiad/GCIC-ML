@@ -72,7 +72,7 @@ let execute_check term ty : (cmd_result, execute_error) result =
       | Ok (expected_ty, _) -> (
           match check_type empty_ctx elab_term expected_ty with
           | Ok _ -> Ok Check
-          | Error e -> Error (error_msg e |> checking_error cmd))
+          | Error e -> Error (string_of_error e |> checking_error cmd))
       | Error e -> Error (mk_elaboration_error checking_error cmd e))
   | Error e -> Error (mk_elaboration_error checking_error cmd e)
 

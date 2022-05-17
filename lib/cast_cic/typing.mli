@@ -6,7 +6,7 @@ open Common.Id
 type type_error
 (** A typing error *)
 
-val error_msg : type_error -> string
+val string_of_error : type_error -> string
 (** Extracts the error message or description *)
 
 val infer_type : context -> term -> (term, type_error) result
