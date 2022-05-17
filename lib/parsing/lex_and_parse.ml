@@ -73,3 +73,18 @@ let parse_term text =
   | Lexer.SyntaxError msg ->
       let error_msg = asprintf "%s" msg in
       Error error_msg
+
+let parse_command text =
+  try 
+    let lexbuf = Sedlexing.Utf8.from_string text in
+    let supplier = Sedlexing.with_tokenizer Lexer.token lexbuf in
+    let buffer, supplier = E.wrap_supplier supplier in
+    let start_position = fst (Sedlexing.lexing_positions lexbuf) in
+    let checkpoint = Parser.Incremental.program_parser start_position in
+    
+    I.loop_handle succeed (fail text buffer) supplier checkpoint
+  with
+  (* catch exception and turn into Error *)
+  | Lexer.SyntaxError msg ->
+      let error_msg = asprintf "%s" msg in
+      Error error_msg

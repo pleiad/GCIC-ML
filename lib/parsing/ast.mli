@@ -20,3 +20,7 @@ type command =
 | Eval of term
 | Check of term * term
 | Elaborate of term
+
+val string_of_command : command -> string
+
+val eq_command : command -> command -> bool
