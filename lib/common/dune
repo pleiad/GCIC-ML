@@ -2,5 +2,4 @@
  (name common)
  (modules id std)
  (preprocess
-   (pps bisect_ppx))
- )
+  (pps bisect_ppx)))

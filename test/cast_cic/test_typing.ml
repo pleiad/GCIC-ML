@@ -14,11 +14,11 @@ let test_omega_typecheck =
 
 let test_omega_typecheck_0 () =
   Alcotest.(check bool)
-    "omega 0 doesn't typechecks" true
+    "omega 0 doesn't typechecks"
+    true
     (Typing.infer_type empty_ctx (omega 0) |> Result.is_error)
 
 let tests =
-  [
-    ("omega 0 doesn't typecheck", `Quick, test_omega_typecheck_0);
-    QCheck_alcotest.to_alcotest test_omega_typecheck;
+  [ "omega 0 doesn't typecheck", `Quick, test_omega_typecheck_0
+  ; QCheck_alcotest.to_alcotest test_omega_typecheck
   ]

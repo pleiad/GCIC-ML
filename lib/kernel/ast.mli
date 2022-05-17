@@ -10,7 +10,11 @@ type term =
   | Prod of fun_info
   | Unknown of int
 
-and fun_info = { id : Name.t; dom : term; body : term }
+and fun_info =
+  { id : Name.t
+  ; dom : term
+  ; body : term
+  }
 
-val to_string : term -> string
 (** Returns the stringified version of a term *)
+val to_string : term -> string

@@ -1,2 +1,3 @@
-profile = default
+profile = janestreet
 version = 0.21.0
+let-binding-spacing = compact

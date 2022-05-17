@@ -4,7 +4,8 @@
     "test": "dune runtest",
     "coverage": "dune runtest --instrument-with=bisect_ppx --force",
     "report": "bisect-ppx-report html",
-    "run": "dune exec gcic"
+    "run": "dune exec gcic",
+    "format": "dune build @fmt --auto-promote"
   },
   "dependencies": {
     "ocaml": "4.13.x",

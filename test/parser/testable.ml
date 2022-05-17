@@ -5,7 +5,5 @@ let term =
   Alcotest.testable pprint_term eq_term
 
 let command =
-  let pprint_command ppf cmd =
-    Format.pp_print_string ppf (string_of_command cmd)
-  in
+  let pprint_command ppf cmd = Format.pp_print_string ppf (string_of_command cmd) in
   Alcotest.testable pprint_command eq_command
