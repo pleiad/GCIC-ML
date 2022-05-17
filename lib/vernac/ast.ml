@@ -7,12 +7,14 @@ type command =
   | Eval of Kernel.Ast.term
   | Check of Kernel.Ast.term * Kernel.Ast.term
   | Elab of Kernel.Ast.term
+  | SetVariant of Kernel.Variant.t
 
 let string_of_command : command -> string = function
   | Eval t -> "eval " ^ Kernel.Ast.to_string t
   | Check (t, ty) ->
     Format.asprintf "check %s : %s" (Kernel.Ast.to_string t) (Kernel.Ast.to_string ty)
   | Elab t -> "elab " ^ Kernel.Ast.to_string t
+  | SetVariant v -> "set variant " ^ Kernel.Variant.to_string v
 
 type cmd_result =
   | Reduction of Cast_cic.Ast.term
@@ -62,8 +64,13 @@ let execute_elab term : (cmd_result, execute_error) result =
   let* elab_term, _ = elaborate NameMap.empty term in
   Ok (Elaboration elab_term)
 
+let execute_set_variant var : (cmd_result, execute_error) result =
+  Kernel.Variant.set_variant var;
+  Ok (Check)
+
 let execute cmd : (cmd_result, execute_error) result =
   match cmd with
   | Eval t -> execute_eval t
   | Check (t, ty) -> execute_check t ty
   | Elab t -> execute_elab t
+  | SetVariant v -> execute_set_variant v

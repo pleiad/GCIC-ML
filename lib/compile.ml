@@ -26,7 +26,7 @@ let of_parsed_command (cmd : Parsing.Ast.command) : Vernac.Ast.command =
   | Eval t -> Eval (of_parsed_term t)
   | Check (t, ty) -> Check (of_parsed_term t, of_parsed_term ty)
   | Elab t -> Elab (of_parsed_term t)
-  | SetVariant _v -> assert false
+  | SetVariant v -> SetVariant v
 
 (** Compiles a string and returns the stringified version of the AST *)
 let compile (line : string) =
