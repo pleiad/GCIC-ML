@@ -7,44 +7,37 @@ open Common.Std
 (*       ERRORS       *)
 (**********************)
 
-type elaboration_error = {
-  error_code : string;
-  message : string;
-  term : Kernel.Ast.term;
-}
+type elaboration_error = [
+  | `Err_free_identifier of Id.Name.t
+  | `Err_inconsistent of Kernel.Ast.term * Ast.term * Ast.term
+  | `Err_constrained_universe of Kernel.Ast.term
+  | `Err_constrained_product of Kernel.Ast.term
+  | `Err_impossible of Kernel.Ast.term
+]
 
-let inconsistent_err term =
-  {
-    error_code = "inconsistent_terms";
-    message = "terms are not consistent";
-    term;
-  }
-
-let constrained_prod_err term =
-  {
-    error_code = "constrained_prod_elab";
-    message = "term does not elaborate to product";
-    term;
-  }
-
-let constrained_univ_err term =
-  {
-    error_code = "constrained_univ_elab";
-    message = "term does not elaborate to universe";
-    term;
-  }
-
-let free_id_err term =
-  { error_code = "free_id"; message = "free identifier"; term }
-
-let impossible_err term =
-  { error_code = "impossible"; message = "impossible state"; term }
-
-let string_of_error ({ error_code; message; term } : elaboration_error) : string
-    =
-  Format.asprintf "[%s] elaboration of term (%s) failed: %s" error_code
-    (Kernel.Ast.to_string term)
-    message
+let string_of_error err =
+  let error_code = 
+    match err with
+    | `Err_free_identifier _ -> "free_id"
+    | `Err_inconsistent _ -> "inconsistent_terms"
+    | `Err_constrained_universe _ -> "constrained_univ_elab"
+    | `Err_constrained_product _ -> "constrained_prod_elab"
+    | `Err_impossible _ -> "impossible" in
+  let message =
+    match err with
+    | `Err_free_identifier _x -> "free_id"
+    | `Err_inconsistent (_term, _ty, _s_ty) -> "terms are not consistent"
+    | `Err_constrained_universe _term -> "term does not elaborate to universe"
+    | `Err_constrained_product _term -> "term does not elaborate to product"
+    | `Err_impossible _ -> "impossible state" in
+  let term =
+    match err with
+    | `Err_free_identifier x -> Ast.(Var x |> to_string)
+    | `Err_inconsistent (term, _, _) -> Kernel.Ast.to_string term
+    | `Err_constrained_universe term -> Kernel.Ast.to_string term
+    | `Err_constrained_product term -> Kernel.Ast.to_string term
+    | `Err_impossible term -> Kernel.Ast.to_string term in
+  Format.asprintf "[%s] elaboration of term (%s) failed: %s" error_code term message
 
 
 (**********************)
@@ -67,7 +60,7 @@ let rec elaborate ctx (term : Kernel.Ast.term) :
   | Var x -> (
       match Context.lookup ~key:x ~ctx with
       | Some ty -> Ok (Var x, ty)
-      | None -> Error (free_id_err term))
+      | None -> Error (`Err_free_identifier x))
   | Universe i -> Ok (Universe i, Universe (i + 1))
   | Prod { id; dom; body } ->
       let* elab_dom, i = elab_univ ctx dom in
@@ -96,7 +89,7 @@ and check_elab ctx term (s_ty : Ast.term) : (Ast.term, elaboration_error) result
   let* t', ty = elaborate ctx term in
   if are_consistent ty s_ty then
     Ok (Ast.Cast { source = ty; target = s_ty; term = t' })
-  else Error (inconsistent_err term)
+  else Error (`Err_inconsistent (term, ty, s_ty))
 
 (* Instead of returning the complete Universe type, we only return the level.
    Otherwise, we need to repeat the pattern-matching/extraction wherever this
@@ -109,7 +102,7 @@ and elab_univ ctx term : (Ast.term * int, elaboration_error) result =
   (* Inf-Univ? *)
   | Unknown (Universe i) ->
       Ok (Ast.Cast { source = ty; target = Universe (i - 1); term = t }, i - 1)
-  | _ -> Error (constrained_univ_err term)
+  | _ -> Error (`Err_constrained_universe term)
 
 (* Similarly to elab_univ, instead of returning the complete product type,
    we only return the constituents of it, ie. its identifier, domain and body.
@@ -132,5 +125,5 @@ and elab_prod ctx term :
               fi.dom,
               fi.body )
       (* if cast level is gt 0, then germ should never reach this*)
-      | _ -> Error (impossible_err term))
-  | _ -> Error (constrained_prod_err term)
+      | _ -> Error (`Err_impossible term))
+  | _ -> Error (`Err_constrained_product term)

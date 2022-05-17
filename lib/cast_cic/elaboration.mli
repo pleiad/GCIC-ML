@@ -2,11 +2,7 @@
 
 (* TODO: This module should go somewhere else, but idk where *)
 
-type elaboration_error = {
-    error_code: string;
-    message: string;
-    term: Kernel.Ast.term;
-}
+type elaboration_error
 (** An error originating from elaboration  *)
 
 val string_of_error : elaboration_error -> string 
