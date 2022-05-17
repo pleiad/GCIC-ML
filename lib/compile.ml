@@ -18,13 +18,20 @@ let rec of_parsed_term (t : Parsing.Ast.term) : Kernel.Ast.term =
 and expand_lambda (id, dom) body = Lambda {id=from_opt_name id; dom=of_parsed_term dom; body}
 and expand_prod (id, dom) body = Prod {id=from_opt_name id; dom=of_parsed_term dom; body}
 
+let of_parsed_command (cmd : Parsing.Ast.command) : Vernac.Ast.command =
+match cmd with
+| Eval t -> Eval (of_parsed_term t)
+| Check( t, ty) -> Check (of_parsed_term t, of_parsed_term ty)
+| Elaborate t -> Elaborate (of_parsed_term t)
+
 (** Compiles a string and returns the stringified version of the AST *)
 let compile (line : string) =
-  match Lex_and_parse.parse_term line with
-  | Ok term -> 
-    let open Cast_cic in
-    (match of_parsed_term term |> Elaboration.elaborate Context.empty with 
-    | Ok (elab, _) -> Reduction.reduce elab |> Ast.to_string 
-    | Error e -> Elaboration.string_of_error e)    
+  let open Vernac.Ast in
+  match Lex_and_parse.parse_command line with
+  | Ok cmd -> 
+    of_parsed_command cmd |>
+    execute |>
+    Result.fold ~ok:string_of_cmd_result ~error:string_of_execute_error
   | Error e -> e
+
 

@@ -26,6 +26,9 @@ let string_of_cmd_result : cmd_result -> string = function
 
 type execute_error = { error_code : string; message : string; cmd : command }
 
+let string_of_execute_error { error_code; message; _ } =
+  "[" ^ error_code ^ "] " ^ message
+
 let reduction_error cmd reason =
   {
     error_code = "reduction_cmd_error";

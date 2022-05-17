@@ -1,4 +1,4 @@
 (library
  (name gcic)
- (libraries parsing kernel cast_cic)
+ (libraries parsing kernel cast_cic vernac)
  (modules compile))

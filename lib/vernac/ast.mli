@@ -18,4 +18,6 @@ type execute_error = {
     cmd: command
 }
 
+val string_of_execute_error : execute_error -> string
+
 val execute : command -> (cmd_result, execute_error) result
