@@ -1,0 +1,600 @@
+term_parser: ID ARROW RPAREN
+##
+## Ends in an error in state: 21.
+##
+## term -> fact ARROW . term [ VERNAC_SEPARATOR RPAREN KWD_IN EQUAL EOF COLON ]
+##
+## The known suffix of the stack is as follows:
+## fact ARROW
+##
+
+After an `$0` (arrow), a term is expected.
+For example:
+> $1 $0 Type0
+
+term_parser: ID RPAREN
+##
+## Ends in an error in state: 56.
+##
+## term_parser -> term . EOF [ # ]
+##
+## The known suffix of the stack is as follows:
+## term
+##
+## WARNING: This example involves spurious reductions.
+## This implies that, although the LR(1) items shown above provide an
+## accurate view of the past (what has been recognized so far), they
+## may provide an INCOMPLETE view of the future (what was expected next).
+## In state 20, spurious reduction of production term -> fact
+##
+
+I'm currently parsing a term.
+After `$0`, the end of file is expected.
+
+term_parser: KWD_FORALL LPAREN ID COLON ID RPAREN COMMA RPAREN
+##
+## Ends in an error in state: 17.
+##
+## term -> KWD_FORALL nonempty_list(arg) COMMA . term [ VERNAC_SEPARATOR RPAREN KWD_IN EQUAL EOF COLON ]
+##
+## The known suffix of the stack is as follows:
+## KWD_FORALL nonempty_list(arg) COMMA
+##
+
+I'm currently parsing a pi type.
+After the `,` (comma), the body of the pi type is expected.
+For example:
+> $2 $1 $0 Type0
+
+term_parser: KWD_FORALL RPAREN
+##
+## Ends in an error in state: 15.
+##
+## term -> KWD_FORALL . nonempty_list(arg) COMMA term [ VERNAC_SEPARATOR RPAREN KWD_IN EQUAL EOF COLON ]
+##
+## The known suffix of the stack is as follows:
+## KWD_FORALL
+##
+
+I'm currently parsing the arguments of a pi type.
+After the `$0`, an argument of the form `(id ... id : term)` is expected.
+For example:
+> $0 (a b : Type0), ...
+> $0, ...
+
+term_parser: KWD_LAMBDA LPAREN ID COLON ID KWD_LET
+##
+## Ends in an error in state: 27.
+##
+## arg -> LPAREN nonempty_list(id) COLON term . RPAREN [ LPAREN DOT COMMA ]
+##
+## The known suffix of the stack is as follows:
+## LPAREN nonempty_list(id) COLON term
+##
+## WARNING: This example involves spurious reductions.
+## This implies that, although the LR(1) items shown above provide an
+## accurate view of the past (what has been recognized so far), they
+## may provide an INCOMPLETE view of the future (what was expected next).
+## In state 20, spurious reduction of production term -> fact
+##
+
+I'm currently parsing arguments to a pi type or lambda expression.
+After the `$0`, a closing parenthesis is expected `)`.
+
+
+term_parser: KWD_LAMBDA LPAREN ID COLON ID RPAREN RPAREN
+##
+## Ends in an error in state: 25.
+##
+## nonempty_list(arg) -> arg . [ DOT COMMA ]
+## nonempty_list(arg) -> arg . nonempty_list(arg) [ DOT COMMA ]
+##
+## The known suffix of the stack is as follows:
+## arg
+##
+
+I'm currently parsing the arguments of a lambda expression.
+I expect more arguments of the form `(id ... id : type)` or a `.` (dot) followed
+by the body of the lambda.
+For example:
+> $0, ...
+> $0 (id1 id2 : Type0), ...
+
+term_parser: KWD_LAMBDA LPAREN ID COLON RPAREN
+##
+## Ends in an error in state: 14.
+##
+## arg -> LPAREN nonempty_list(id) COLON . term RPAREN [ LPAREN DOT COMMA ]
+##
+## The known suffix of the stack is as follows:
+## LPAREN nonempty_list(id) COLON
+##
+
+I'm currently parsing the type of the arguments of a lambda expression.
+After the `:` (colon), a term is expected.
+For example:
+> $2 $1 $0 Type0), ...
+
+term_parser: KWD_LAMBDA LPAREN ID RPAREN
+##
+## Ends in an error in state: 29.
+##
+## nonempty_list(id) -> id . [ COLON ]
+## nonempty_list(id) -> id . nonempty_list(id) [ COLON ]
+##
+## The known suffix of the stack is as follows:
+## id
+##
+
+I'm currently parsing the arguments of a lambda expression.
+I expect more identifiers or a colon followed by a type.
+For example:
+> $0 foo bar : ?0)
+> $0 : ?0)
+
+term_parser: KWD_LAMBDA LPAREN RPAREN
+##
+## Ends in an error in state: 12.
+##
+## arg -> LPAREN . nonempty_list(id) COLON term RPAREN [ LPAREN DOT COMMA ]
+##
+## The known suffix of the stack is as follows:
+## LPAREN
+##
+
+I'm currently parsing the arguments of a lambda expression.
+I expect a nonempty list of identifiers.
+For example:
+> (x : ?0), ...
+> (x y z : ?0), ...
+> (x : ?0) (y z : Type1), ...
+
+term_parser: KWD_LAMBDA RPAREN
+##
+## Ends in an error in state: 11.
+##
+## term -> KWD_LAMBDA . nonempty_list(arg) DOT term [ VERNAC_SEPARATOR RPAREN KWD_IN EQUAL EOF COLON ]
+##
+## The known suffix of the stack is as follows:
+## KWD_LAMBDA
+##
+
+I'm currently parsing the arguments of a lambda expression.
+I expect a nonempty list of arguments of the form `(id ... id : type)`.
+For example:
+> $0 (x : a)
+> $0 (x y z : a)
+
+term_parser: KWD_LET ID COLON ID EQUAL ID KWD_IN RPAREN
+##
+## Ends in an error in state: 37.
+##
+## term -> KWD_LET id COLON term EQUAL term KWD_IN . term [ VERNAC_SEPARATOR RPAREN KWD_IN EQUAL EOF COLON ]
+##
+## The known suffix of the stack is as follows:
+## KWD_LET id COLON term EQUAL term KWD_IN
+##
+
+I'm currently parsing the in-term of a let expression.
+After the `in`, an expression is expected.
+
+term_parser: KWD_LET ID COLON ID EQUAL ID RPAREN
+##
+## Ends in an error in state: 36.
+##
+## term -> KWD_LET id COLON term EQUAL term . KWD_IN term [ VERNAC_SEPARATOR RPAREN KWD_IN EQUAL EOF COLON ]
+##
+## The known suffix of the stack is as follows:
+## KWD_LET id COLON term EQUAL term
+##
+## WARNING: This example involves spurious reductions.
+## This implies that, although the LR(1) items shown above provide an
+## accurate view of the past (what has been recognized so far), they
+## may provide an INCOMPLETE view of the future (what was expected next).
+## In state 20, spurious reduction of production term -> fact
+##
+
+I'm currently parsing the bounded term of a let expression.
+After the `=`, an expression is expected followed by `in`.
+For example:
+> $5 $4 $3 ... $1 $0 in ...
+
+term_parser: KWD_LET ID COLON ID EQUAL RPAREN
+##
+## Ends in an error in state: 35.
+##
+## term -> KWD_LET id COLON term EQUAL . term KWD_IN term [ VERNAC_SEPARATOR RPAREN KWD_IN EQUAL EOF COLON ]
+##
+## The known suffix of the stack is as follows:
+## KWD_LET id COLON term EQUAL
+##
+
+I'm currently parsing the bounded term of a let expression.
+After the `=`, an expression is expected followed by `in`.
+For example:
+> $4 $3 $2 ... $0 in ...
+
+term_parser: KWD_LET ID COLON ID RPAREN
+##
+## Ends in an error in state: 34.
+##
+## term -> KWD_LET id COLON term . EQUAL term KWD_IN term [ VERNAC_SEPARATOR RPAREN KWD_IN EQUAL EOF COLON ]
+##
+## The known suffix of the stack is as follows:
+## KWD_LET id COLON term
+##
+## WARNING: This example involves spurious reductions.
+## This implies that, although the LR(1) items shown above provide an
+## accurate view of the past (what has been recognized so far), they
+## may provide an INCOMPLETE view of the future (what was expected next).
+## In state 20, spurious reduction of production term -> fact
+##
+
+I'm currently parsing the bounded term's type of a let expression.
+After the `:`, an expression is expected followed by `=`.
+For example:
+> $3 $2 $1 $0 = ...
+> $3 $2 $1 $0 x = ...
+
+term_parser: KWD_LET ID COLON RPAREN
+##
+## Ends in an error in state: 10.
+##
+## term -> KWD_LET id COLON . term EQUAL term KWD_IN term [ VERNAC_SEPARATOR RPAREN KWD_IN EQUAL EOF COLON ]
+##
+## The known suffix of the stack is as follows:
+## KWD_LET id COLON
+##
+
+I'm currently parsing the binder's type of a let expression.
+After the `:`, an expression is expected followed by `=`.
+For example:
+> $2 $1 $0 ?0 = ...
+> $2 $1 $0 foo Type0 ?1 = ...
+
+term_parser: KWD_LET ID RPAREN
+##
+## Ends in an error in state: 9.
+##
+## term -> KWD_LET id . COLON term EQUAL term KWD_IN term [ VERNAC_SEPARATOR RPAREN KWD_IN EQUAL EOF COLON ]
+##
+## The known suffix of the stack is as follows:
+## KWD_LET id
+##
+
+I'm currently parsing a let expression.
+After the identifier, a `:` (colon) is expected followed by a type.
+For example:
+> $1 $0 : ?0 = ...
+> $1 $0 : foo Type0 ?1 = ...
+
+term_parser: KWD_LET RPAREN
+##
+## Ends in an error in state: 7.
+##
+## term -> KWD_LET . id COLON term EQUAL term KWD_IN term [ VERNAC_SEPARATOR RPAREN KWD_IN EQUAL EOF COLON ]
+##
+## The known suffix of the stack is as follows:
+## KWD_LET
+##
+
+I'm currently parsing the binder of a let expression.
+After the `let`, an identifier is expected followed by `:`.
+For example:
+> $0 x : ?0 = ...
+> $0 f : foo Type0 ?1 = ...
+
+term_parser: KWD_UNIVERSE RPAREN
+##
+## Ends in an error in state: 5.
+##
+## atom -> KWD_UNIVERSE . INT [ VERNAC_SEPARATOR RPAREN LPAREN KWD_UNKNOWN KWD_UNIVERSE KWD_IN ID EQUAL EOF COLON ARROW ]
+##
+## The known suffix of the stack is as follows:
+## KWD_UNIVERSE
+##
+
+I'm currently parsing the level of a universe.
+After the `$0`, a non-negative integer is expected.
+For example:
+> $0 0
+> Type1
+> □1
+
+term_parser: KWD_UNKNOWN RPAREN
+##
+## Ends in an error in state: 3.
+##
+## atom -> KWD_UNKNOWN . INT [ VERNAC_SEPARATOR RPAREN LPAREN KWD_UNKNOWN KWD_UNIVERSE KWD_IN ID EQUAL EOF COLON ARROW ]
+##
+## The known suffix of the stack is as follows:
+## KWD_UNKNOWN
+##
+
+I'm currently parsing the universe level of an unknown term.
+After the `$0`, a non-negative integer is expected.
+For example:
+> $0 0
+> ?1
+
+term_parser: LPAREN ID KWD_LET
+##
+## Ends in an error in state: 39.
+##
+## atom -> LPAREN term . RPAREN [ VERNAC_SEPARATOR RPAREN LPAREN KWD_UNKNOWN KWD_UNIVERSE KWD_IN ID EQUAL EOF COLON ARROW ]
+##
+## The known suffix of the stack is as follows:
+## LPAREN term
+##
+## WARNING: This example involves spurious reductions.
+## This implies that, although the LR(1) items shown above provide an
+## accurate view of the past (what has been recognized so far), they
+## may provide an INCOMPLETE view of the future (what was expected next).
+## In state 20, spurious reduction of production term -> fact
+##
+
+I'm currently parsing a parenthesised term.
+After the `(` a term is expected followed by a closing parenthesis `)`.
+For example:
+> (f x y)
+> (foo ?0 y)
+> (fun (x : Type0). x)
+
+term_parser: LPAREN RPAREN
+##
+## Ends in an error in state: 2.
+##
+## atom -> LPAREN . term RPAREN [ VERNAC_SEPARATOR RPAREN LPAREN KWD_UNKNOWN KWD_UNIVERSE KWD_IN ID EQUAL EOF COLON ARROW ]
+##
+## The known suffix of the stack is as follows:
+## LPAREN
+##
+
+I'm currently parsing a parenthesised term.
+After the `(` a term is expected followed by a closing parenthesis `)`.
+For example:
+> (f x y)
+> (foo ?0 y)
+> (fun (x : Type0). x)
+
+term_parser: RPAREN
+##
+## Ends in an error in state: 54.
+##
+## term_parser' -> . term_parser [ # ]
+##
+## The known suffix of the stack is as follows:
+##
+##
+
+I'm currently parsing a term.
+At the top level, a term is expected.
+For example:
+> let f : ?0 = Type0 in f
+> fun (x : Type0). x
+
+program_parser: RPAREN
+##
+## Ends in an error in state: 0.
+##
+## program_parser' -> . program_parser [ # ]
+##
+## The known suffix of the stack is as follows:
+##
+##
+
+I'm currently parsing a program.
+At the top level, a command is expected.
+For example:
+> eval let f : ?0 = Type0 in f;;
+> check (fun (x : Type0). x) As ?0 -> ?0;;
+
+
+program_parser: VERNAC_EVAL VERNAC_SEPARATOR
+##
+## Ends in an error in state: 1.
+##
+## command -> VERNAC_EVAL . term VERNAC_SEPARATOR [ EOF ]
+##
+## The known suffix of the stack is as follows:
+## VERNAC_EVAL
+##
+
+A term is expected after the `$0` command.
+For example:
+> $0 let f : ?0 = Type0 in f;;
+
+term_parser: KWD_FORALL LPAREN ID COLON ID RPAREN DOT
+##
+## Ends in an error in state: 16.
+##
+## term -> KWD_FORALL nonempty_list(arg) . COMMA term [ VERNAC_SEPARATOR RPAREN KWD_IN EQUAL EOF COLON ]
+##
+## The known suffix of the stack is as follows:
+## KWD_FORALL nonempty_list(arg)
+##
+## WARNING: This example involves spurious reductions.
+## This implies that, although the LR(1) items shown above provide an
+## accurate view of the past (what has been recognized so far), they
+## may provide an INCOMPLETE view of the future (what was expected next).
+## In state 25, spurious reduction of production nonempty_list(arg) -> arg
+##
+
+I'm currently parsing the arguments of a pi type.
+I expect more arguments of the form (x y z : t) or a `,` (comma) followed
+by the body of the pi type.
+For example:
+> $1 $0 (a b : Type0), ...
+> $1 $0, ...
+
+term_parser: KWD_LAMBDA LPAREN ID COLON ID RPAREN COMMA
+##
+## Ends in an error in state: 31.
+##
+## term -> KWD_LAMBDA nonempty_list(arg) . DOT term [ VERNAC_SEPARATOR RPAREN KWD_IN EQUAL EOF COLON ]
+##
+## The known suffix of the stack is as follows:
+## KWD_LAMBDA nonempty_list(arg)
+##
+## WARNING: This example involves spurious reductions.
+## This implies that, although the LR(1) items shown above provide an
+## accurate view of the past (what has been recognized so far), they
+## may provide an INCOMPLETE view of the future (what was expected next).
+## In state 25, spurious reduction of production nonempty_list(arg) -> arg
+##
+
+I'm currently parsing the arguments of a lambda expression.
+I expect more arguments of the form (x y z : t) or a `.` (dot) followed
+by the body of the lambda.
+For example:
+> $1 $0. ...
+> $1 $0 (id1 id2 : Type0). ...
+
+term_parser: KWD_LAMBDA LPAREN ID COLON ID RPAREN DOT VERNAC_SEPARATOR
+##
+## Ends in an error in state: 32.
+##
+## term -> KWD_LAMBDA nonempty_list(arg) DOT . term [ VERNAC_SEPARATOR RPAREN KWD_IN EQUAL EOF COLON ]
+##
+## The known suffix of the stack is as follows:
+## KWD_LAMBDA nonempty_list(arg) DOT
+##
+
+I'm currently parsing a lambda expression.
+After the `.` (dot), the body of the lambda is expected.
+For example:
+> $2 $1 $0 Type0
+
+program_parser: VERNAC_EVAL ID VERNAC_EVAL
+##
+## Ends in an error in state: 41.
+##
+## command -> VERNAC_EVAL term . VERNAC_SEPARATOR [ EOF ]
+##
+## The known suffix of the stack is as follows:
+## VERNAC_EVAL term
+##
+## WARNING: This example involves spurious reductions.
+## This implies that, although the LR(1) items shown above provide an
+## accurate view of the past (what has been recognized so far), they
+## may provide an INCOMPLETE view of the future (what was expected next).
+## In state 20, spurious reduction of production term -> fact
+##
+
+Missing a `;;` after the term being evaluated. 
+For example:
+> $1 $0;;
+
+program_parser: VERNAC_ELABORATE VERNAC_SEPARATOR
+##
+## Ends in an error in state: 43.
+##
+## command -> VERNAC_ELABORATE . term VERNAC_SEPARATOR [ EOF ]
+##
+## The known suffix of the stack is as follows:
+## VERNAC_ELABORATE
+##
+
+A term is expected after the `$0` command.
+For example:
+> $0 let f : ?0 = Type0 in f;;
+
+program_parser: VERNAC_ELABORATE ID VERNAC_EVAL
+##
+## Ends in an error in state: 44.
+##
+## command -> VERNAC_ELABORATE term . VERNAC_SEPARATOR [ EOF ]
+##
+## The known suffix of the stack is as follows:
+## VERNAC_ELABORATE term
+##
+## WARNING: This example involves spurious reductions.
+## This implies that, although the LR(1) items shown above provide an
+## accurate view of the past (what has been recognized so far), they
+## may provide an INCOMPLETE view of the future (what was expected next).
+## In state 20, spurious reduction of production term -> fact
+##
+
+Missing a `;;` after the term being elaborated. 
+For example:
+> $1 $0;;
+
+program_parser: VERNAC_CHECK VERNAC_SEPARATOR
+##
+## Ends in an error in state: 46.
+##
+## command -> VERNAC_CHECK . term COLON term VERNAC_SEPARATOR [ EOF ]
+##
+## The known suffix of the stack is as follows:
+## VERNAC_CHECK
+##
+
+A term is expected after the `$0` command.
+For example:
+> $0 Type0 : Type1;;
+
+program_parser: VERNAC_CHECK ID VERNAC_SEPARATOR
+##
+## Ends in an error in state: 47.
+##
+## command -> VERNAC_CHECK term . COLON term VERNAC_SEPARATOR [ EOF ]
+##
+## The known suffix of the stack is as follows:
+## VERNAC_CHECK term
+##
+## WARNING: This example involves spurious reductions.
+## This implies that, although the LR(1) items shown above provide an
+## accurate view of the past (what has been recognized so far), they
+## may provide an INCOMPLETE view of the future (what was expected next).
+## In state 20, spurious reduction of production term -> fact
+##
+
+The term being type-checked must be followed by a `:` (colon) and a second term. 
+For example:
+> $1 Type0 : <SOME_TYPE>;;
+
+program_parser: VERNAC_CHECK ID COLON VERNAC_SEPARATOR
+##
+## Ends in an error in state: 48.
+##
+## command -> VERNAC_CHECK term COLON . term VERNAC_SEPARATOR [ EOF ]
+##
+## The known suffix of the stack is as follows:
+## VERNAC_CHECK term COLON
+##
+
+A term must follow the `:` (colon).
+For example:
+> $2 $1 $0 <SOME_TYPE>;;
+
+program_parser: VERNAC_CHECK ID COLON ID VERNAC_EVAL
+##
+## Ends in an error in state: 49.
+##
+## command -> VERNAC_CHECK term COLON term . VERNAC_SEPARATOR [ EOF ]
+##
+## The known suffix of the stack is as follows:
+## VERNAC_CHECK term COLON term
+##
+## WARNING: This example involves spurious reductions.
+## This implies that, although the LR(1) items shown above provide an
+## accurate view of the past (what has been recognized so far), they
+## may provide an INCOMPLETE view of the future (what was expected next).
+## In state 20, spurious reduction of production term -> fact
+##
+
+Missing a `;;` after $0, to close the command. 
+For example:
+> $3 $2 $1 $0;;
+
+program_parser: VERNAC_ELABORATE ID VERNAC_SEPARATOR VERNAC_SEPARATOR
+##
+## Ends in an error in state: 52.
+##
+## program_parser -> command . EOF [ # ]
+##
+## The known suffix of the stack is as follows:
+## command
+##
+
+After `$0`, the end of file is expected.

@@ -37,10 +37,10 @@ let term =
   QCheck.make term_gen ~print:to_string
 
 (* TODO: Check weights and distribution in subterms *)
-(* This one should go somewhere else, but since there are no other tests it's staying 
-here for now *)
+(* This one should go somewhere else, but since there are no other tests it's staying
+   here for now *)
 let gcic_term =
-  let open Kernel.Ast in 
+  let open Kernel.Ast in
   let name_of_int n = string_of_int n |> Id.Name.of_string in
   let var n = Var (name_of_int n) in
   let universe n = Universe n in

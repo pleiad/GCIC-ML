@@ -10,7 +10,8 @@
     "ocaml": "4.13.x",
     "@opam/dune": "*",
     "@opam/stdio": "*",
-    "@opam/menhir": "*"
+    "@opam/menhir": "*",
+    "@opam/sedlex": "*"
   },
   "devDependencies": {
     "@opam/easy-format": "1.3.2",

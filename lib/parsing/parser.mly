@@ -1,5 +1,7 @@
-/* This is the specification for the parser */
-// TODO: Manage applications better, probably with a stratified grammar approach or directives?
+/* This is the specification for the parser 
+
+   http://cambium.inria.fr/~fpottier/menhir/manual.html
+*/
 
 %{
   [@@@coverage exclude_file]
@@ -11,44 +13,65 @@
 
     These are the output of the lexer rules
 */
-%token  <int> INT
-%token  <string> ID
-%token  COLON
-%token  DOT
-%token  LBRACK RBRACK
-%token  LPAREN RPAREN
-%token  AT
-%token  KWD_UNIVERSE
-%token  KWD_LAMBDA
-%token  KWD_PROD
-%token  KWD_UNKNOWN
+%token <int> INT
+%token <string> ID
+%token COLON DOT COMMA ARROW EQUAL
+%token LPAREN RPAREN
+%token KWD_UNIVERSE KWD_LAMBDA KWD_UNKNOWN KWD_FORALL
+%token KWD_LET KWD_IN
+%token VERNAC_CHECK VERNAC_EVAL VERNAC_ELABORATE VERNAC_SEPARATOR
 %token EOF
 
+/* This reduces the number of error states.
+   It is useful for defining better error messages.
+ */
+%on_error_reduce term 
+
 /* Specify starting production */
-%start program
+%start program_parser term_parser
+
 /* Types for the result of productions */
-// %nonassoc ID KWD_UNIVERSE KWD_LAMBDA KWD_PROD KWD_UNKNOWN LPAREN /* list ALL other tokens that start an expr */
-// %nonassoc APP
+%type <Ast.command> program_parser
+%type <Ast.term> term_parser
 
-%type <Ast.term> program
-
-// %left APP
 %% /* Start grammar productions */
-program:
+program_parser :
+  cmd=command; EOF   { cmd }
+
+term_parser :
   t=term; EOF   { t }
 
+command :
+| VERNAC_EVAL;t=term; VERNAC_SEPARATOR                       { Eval t }
+| VERNAC_CHECK; t=term; COLON; ty=term; VERNAC_SEPARATOR     { Check (t, ty) }
+| VERNAC_ELABORATE; t=term; VERNAC_SEPARATOR                 { Elab t }
+
+id :
+| x=ID { Name.of_string x }
+
+arg :
+(* (x y z : A) *)
+| LPAREN; ids=nonempty_list(id); COLON; dom=term; RPAREN  { List.map (fun id -> (Some id, dom)) ids }
+
+%inline args :
+| args=nonempty_list(arg) { List.flatten(args) }
+
 term :
-| t=base_term                                          { t }
-| KWD_LAMBDA; id=ID; COLON; ty=term; DOT; body=term    { Lambda(Name.of_string id, ty, body) }
-| KWD_PROD; id=ID; COLON; ty=term; DOT; body=term      { Prod(Name.of_string id, ty, body) }
-| t=base_term; t2=base_term                            { App(t, t2) }
+| KWD_LAMBDA; args=args; DOT; body=term                           { Lambda (args, body) }
+| KWD_FORALL; args=args; COMMA; body=term                         { Prod (args, body) }
+| dom=fact; ARROW; body=term                                      { Prod ([(None, dom)], body) }
+| KWD_LET; id=id; COLON; ty=term; EQUAL; t1=term; KWD_IN; t2=term { LetIn (id, ty, t1, t2) }
+| t=fact                                                          { t } 
 
+fact :
+| t=fact; u=atom                                       { App (t, u) }
+| t=atom                                               { t }
 
-base_term: 
-| LPAREN; t=term ; RPAREN                           { t }
-| id=ID                                             { Var(Name.of_string id) }
-| KWD_UNIVERSE; i=INT                               { Universe i }
-| KWD_UNKNOWN; AT ; LBRACK; i=INT; RBRACK           { Unknown i }
+atom : 
+| LPAREN; t=term; RPAREN                               { t }
+| id=id                                                { Var id }
+| KWD_UNIVERSE; i=INT                                  { Universe i }
+| KWD_UNKNOWN; i=INT                                   { Unknown i }
 
 
 
