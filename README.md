@@ -56,5 +56,10 @@ We have some additional commands to make it easier to develop in Ocaml.
     # This generates a _coverage folder, where you can then open the index.html file
     esy coverage && esy report
     ```
+1. Run the formatter and update files
+    ```bash
+    esy format
+    ```
+
 ## Resources
 - [Gradualizing the Calculus of Inductive Constructions (paper)](https://dl.acm.org/doi/10.1145/3495528)
