@@ -66,7 +66,7 @@ term_parser: KWD_LAMBDA LPAREN ID COLON ID KWD_LET
 ##
 ## Ends in an error in state: 27.
 ##
-## arg -> LPAREN nonempty_list(id) COLON term . RPAREN [ LPAREN DOT COMMA ]
+## arg -> LPAREN nonempty_list(id) COLON term . RPAREN [ LPAREN COMMA ]
 ##
 ## The known suffix of the stack is as follows:
 ## LPAREN nonempty_list(id) COLON term
@@ -81,13 +81,12 @@ term_parser: KWD_LAMBDA LPAREN ID COLON ID KWD_LET
 I'm currently parsing arguments to a pi type or lambda expression.
 After the `$0`, a closing parenthesis is expected `)`.
 
-
 term_parser: KWD_LAMBDA LPAREN ID COLON ID RPAREN RPAREN
 ##
 ## Ends in an error in state: 25.
 ##
-## nonempty_list(arg) -> arg . [ DOT COMMA ]
-## nonempty_list(arg) -> arg . nonempty_list(arg) [ DOT COMMA ]
+## nonempty_list(arg) -> arg . [ COMMA ]
+## nonempty_list(arg) -> arg . nonempty_list(arg) [ COMMA ]
 ##
 ## The known suffix of the stack is as follows:
 ## arg
@@ -104,7 +103,7 @@ term_parser: KWD_LAMBDA LPAREN ID COLON RPAREN
 ##
 ## Ends in an error in state: 14.
 ##
-## arg -> LPAREN nonempty_list(id) COLON . term RPAREN [ LPAREN DOT COMMA ]
+## arg -> LPAREN nonempty_list(id) COLON . term RPAREN [ LPAREN COMMA ]
 ##
 ## The known suffix of the stack is as follows:
 ## LPAREN nonempty_list(id) COLON
@@ -136,7 +135,7 @@ term_parser: KWD_LAMBDA LPAREN RPAREN
 ##
 ## Ends in an error in state: 12.
 ##
-## arg -> LPAREN . nonempty_list(id) COLON term RPAREN [ LPAREN DOT COMMA ]
+## arg -> LPAREN . nonempty_list(id) COLON term RPAREN [ LPAREN COMMA ]
 ##
 ## The known suffix of the stack is as follows:
 ## LPAREN

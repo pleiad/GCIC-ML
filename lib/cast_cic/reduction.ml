@@ -3,6 +3,12 @@
 
 open Ast
 
+type reduction_error = [ `Err_not_enough_fuel | `Err_stuck_term of term ]
+
+let string_of_error = function
+  | `Err_not_enough_fuel -> "not enough fuel"
+  | `Err_stuck_term _term -> "stuck term"
+
 (** Checks if a term corresponds to a type *)
 let is_type : term -> bool = function Prod _ | Universe _ -> true | _ -> false
 
@@ -30,7 +36,7 @@ type continuation =
 (* Type alias *)
 type state = term * continuation list
 
-exception Stuck_term
+exception Stuck_term of term
 
 (** One step reduction of terms *)
 let reduce1 (term, cont) : state =
@@ -157,18 +163,22 @@ let reduce1 (term, cont) : state =
   | Err t, _ -> (t, KErr :: cont)
   | Cast { source; target; term }, _ ->
       (target, KCast_target (source, term) :: cont)
-  | _, _ -> raise Stuck_term
+  | _, _ -> raise (Stuck_term term)
+
+exception Not_enough_fuel
 
 (** Transitive clousure of reduce1 with fuel *)
 let rec reduce_fueled (fuel : int) ((term, cont) as s) : term =
-  if fuel < 0 then failwith "not enough fuel"
+  if fuel < 0 then raise Not_enough_fuel
   else if is_canonical term && cont = [] then term
   else reduce_fueled (fuel - 1) (reduce1 s)
 
 (** Reduces a term *)
-let reduce term : term =
+let reduce term : (term, [> reduction_error ]) result = 
   let initial_state = (term, []) in
-  reduce_fueled 10000 initial_state
+  try Ok (reduce_fueled 10000 initial_state) with
+  | Not_enough_fuel -> Error `Err_not_enough_fuel
+  | Stuck_term term -> Error (`Err_stuck_term term)
 
 let fill_hole1 term = function
   | KApp_l u -> App (term, u)
@@ -184,5 +194,5 @@ let fill_hole term = List.fold_left fill_hole1 term
 (** One step reduction *)
 let step term =
   let initial_state = (term, []) in
-  (try Ok (reduce1 initial_state) with Stuck_term -> Error "stuck_term")
+  (try Ok (reduce1 initial_state) with Stuck_term t -> Error (`Err_stuck_term t))
   |> Result.map (fun (t, cont) -> fill_hole t cont)

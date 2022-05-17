@@ -26,16 +26,19 @@ and expand_prod (id, dom) body =
   Prod { id = from_opt_name id; dom = of_parsed_term dom; body }
 
 let of_parsed_command (cmd : Parsing.Ast.command) : Vernac.Ast.command =
-  match cmd with
-  | Eval t -> Eval (of_parsed_term t)
-  | Check (t, ty) -> Check (of_parsed_term t, of_parsed_term ty)
-  | Elab t -> Elab (of_parsed_term t)
+match cmd with
+| Eval t -> Eval (of_parsed_term t)
+| Check( t, ty) -> Check (of_parsed_term t, of_parsed_term ty)
+| Elab t -> Elab (of_parsed_term t)
 
 (** Compiles a string and returns the stringified version of the AST *)
 let compile (line : string) =
   let open Vernac.Ast in
   match Lex_and_parse.parse_command line with
-  | Ok cmd ->
-      of_parsed_command cmd |> execute
-      |> Result.fold ~ok:string_of_cmd_result ~error:string_of_execute_error
+  | Ok cmd -> 
+    of_parsed_command cmd |>
+    execute |>
+    Result.fold ~ok:string_of_cmd_result ~error:string_of_error
   | Error e -> e
+
+

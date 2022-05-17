@@ -76,6 +76,7 @@ let parse_command text =
     let buffer, supplier = E.wrap_supplier supplier in
     let start_position = fst (Sedlexing.lexing_positions lexbuf) in
     let checkpoint = Parser.Incremental.program_parser start_position in
+    
 
     I.loop_handle succeed (fail text buffer) supplier checkpoint
   with (* catch exception and turn into Error *)

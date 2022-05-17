@@ -23,4 +23,5 @@ type command = Eval of term | Check of term * term | Elab of term
 val string_of_command : command -> string
 (** Returns the stringified version of a command *)
 
-val eq_command : command -> command -> bool(** Equality predicate for commands *)
+val eq_command : command -> command -> bool
+(** Equality predicate for commands *)

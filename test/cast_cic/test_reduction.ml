@@ -2,11 +2,13 @@ open Cast_cic
 open Cast_cic.Context
 open Example
 
+let reduce t = Reduction.reduce t |> Result.get_ok
+
 let strong_normalization =
   QCheck.(
     Test.make ~count:1000 ~name:"strong normalization" Arbitrary.term (fun t ->
         assume (Typing.infer_type NameMap.empty t |> Result.is_ok);
-        Reduction.reduce t |> Ast.is_canonical))
+        reduce t |> Ast.is_canonical))
 
 let subject_reduction_empty_ctx =
   let ctx = NameMap.empty in
@@ -17,7 +19,7 @@ let subject_reduction_empty_ctx =
         assume (Result.is_ok ty);
         let t' = Reduction.step t in
         assume (Result.is_ok t');
-        Typing.check_type ctx (Result.get_ok t') (Result.get_ok ty)
+        Typing.check_type ctx (Result.get_ok t') (Result.get_ok ty) 
         |> Result.is_ok))
 
 let progress_empty_ctx =
@@ -30,7 +32,7 @@ let progress_empty_ctx =
 let test_app_reduce () =
   let open Ast in
   Alcotest.check Testable.term "beta identity" (Universe 0)
-    (Reduction.reduce
+    (reduce
        (App (Lambda { id; dom = Universe 1; body = Var id }, Universe 0)))
 
 let test_unknown_reduce () =
@@ -38,24 +40,19 @@ let test_unknown_reduce () =
   let unk0 = unknown 0 in
   Alcotest.check Testable.term "Prod-Unk universe"
     (Lambda { id; dom = Universe 5; body = unk0 })
-    (Reduction.reduce
+    (reduce
        (Unknown (Prod { id; dom = Universe 5; body = Universe 0 })));
   Alcotest.check Testable.term "Down-Unk universe" unk0
-    (Reduction.reduce
-       (Cast
-          {
-            source = unknown 1;
-            target = Universe 0;
-            term = Unknown (unknown 1);
-          }))
+    (reduce
+       (Cast { source = unknown 1; target = Universe 0; term = Unknown (unknown 1) }))
 
 let test_error_reduce () =
   let open Ast in
   Alcotest.check Testable.term "Prod-Err universe"
     (Lambda { id; dom = Universe 5; body = Err (Universe 0) })
-    (Reduction.reduce (Err (Prod { id; dom = Universe 5; body = Universe 0 })));
+    (reduce (Err (Prod { id; dom = Universe 5; body = Universe 0 })));
   Alcotest.check Testable.term "Down-Err universe" (Err (Universe 0))
-    (Reduction.reduce
+    (reduce
        (Cast { source = unknown 0; target = Universe 0; term = Err (unknown 1) }))
 
 let test_casts_reduce () =
@@ -69,8 +66,8 @@ let test_casts_reduce () =
        }
    in
    Alcotest.check Testable.term "Canonical cast" canonical_cast
-     (Reduction.reduce canonical_cast));
-  (let prod_germ = germ 1 HProd in
+     (reduce canonical_cast));
+  (let prod_germ = germ 1 HProd in 
    Alcotest.check Testable.term "Prod-Germ"
      (Cast
         {
@@ -84,7 +81,7 @@ let test_casts_reduce () =
                 term = idf;
               };
         })
-     (Reduction.reduce
+     (reduce
         (Cast
            {
              source = Prod { id; dom = Universe 0; body = Universe 0 };
@@ -93,7 +90,7 @@ let test_casts_reduce () =
            })));
   Alcotest.check Testable.term "Dom-Err"
     (Err (unknown 1))
-    (Reduction.reduce
+    (reduce
        (Cast
           {
             source = Err (Universe 1);
@@ -107,16 +104,16 @@ let test_casts_reduce () =
             term = idf;
           }));
   Alcotest.check Testable.term "Codom-Err" (Err (Err (Universe 1)))
-    (Reduction.reduce
+    (reduce
        (Cast { source = Universe 1; target = Err (Universe 1); term = idf }));
   (* This one might be better with a qcheck? *)
   Alcotest.check Testable.term "Univ-Univ" idf
-    (Reduction.reduce
+    (reduce
        (Cast { source = Universe 1; target = Universe 1; term = idf }));
   (* This one might be better with a qcheck? *)
   Alcotest.check Testable.term "Size-Err Univ"
     (Err (unknown 0))
-    (Reduction.reduce
+    (reduce
        (Cast { source = Universe 0; target = unknown 0; term = idf }))
 
 (* This is only valid for GCIC variants N and lift *)
@@ -125,12 +122,12 @@ let test_omega_reduce =
   QCheck.(
     Test.make ~count:100 ~name:"Qcheck Omega fails" small_nat (fun i ->
         assume (i > 0);
-        Ast.alpha_equal (Reduction.reduce (omega i)) (Err (unknown (i - 1)))))
+        Ast.alpha_equal (reduce (omega i)) (Err (unknown (i - 1)))))
 
 let test_inf_prod_elab_reduces () =
   let open Ast in
   Alcotest.check Testable.term "Inf-Prod? reduces" (unknown 0)
-    (Reduction.reduce
+    (reduce
        (Cast
           {
             source = unknown 1;

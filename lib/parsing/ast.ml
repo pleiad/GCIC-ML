@@ -46,11 +46,13 @@ let rec eq_term t1 t2 =
   | LetIn (id1, ty1, t11, t12), LetIn (id2, ty2, t21, t22) ->
       id1 = id2 && eq_term ty1 ty2 && eq_term t11 t21 && eq_term t12 t22
   | _ -> false
-
-and eq_arg (id1, dom1) (id2, dom2) = id1 = id2 && eq_term dom1 dom2
+and eq_arg (id1, dom1) (id2, dom2) = id1 = id2 && eq_term dom1 dom2 
 and eq_args args1 args2 = List.for_all2 eq_arg args1 args2
 
-type command = Eval of term | Check of term * term | Elab of term
+type command =
+| Eval of term
+| Check of term * term
+| Elab of term
 
 let string_of_command : command -> string = function
   | Eval t -> "Eval " ^ to_string t
