@@ -65,6 +65,7 @@ let rec elaborate ctx (term : Kernel.Ast.term)
     : (elaboration, [> elaboration_error ]) result
   =
   let open Kernel.Ast in
+  let open Kernel.Variants in
   match term with
   | Var x ->
     (try Ok (Var x, NameMap.find x ctx) with
@@ -76,7 +77,7 @@ let rec elaborate ctx (term : Kernel.Ast.term)
     let* elab_body, j = elab_univ extended_ctx body in
     Ok
       ( Ast.Prod { id; dom = elab_dom; body = elab_body }
-      , Ast.Universe (Ast.product_universe_level i j) )
+      , Ast.Universe (product_universe_level i j) )
   | Lambda { id; dom; body } ->
     let* elab_dom, _ = elab_univ ctx dom in
     let extended_ctx = NameMap.add id elab_dom ctx in
@@ -125,7 +126,7 @@ and elab_prod ctx term
   (* Inf-Prod *)
   | Prod { id; dom; body } -> Ok (t, id, dom, body)
   (* Inf-Prod? *)
-  | Unknown (Universe i) when Ast.cast_universe_level i >= 0 ->
+  | Unknown (Universe i) when Kernel.Variants.cast_universe_level i >= 0 ->
     let prod_germ = Ast.(germ i HProd) in
     (match prod_germ with
     | Prod fi as prod_germ ->

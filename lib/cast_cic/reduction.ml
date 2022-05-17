@@ -119,7 +119,7 @@ let reduce1 (term, cont) : state =
         ; term = _
         }
     , _ )
-    when j == k && j > cast_universe_level i -> Err tgt, cont
+    when j == k && j > Kernel.Variants.cast_universe_level i -> Err tgt, cont
   (* Congruence rules *)
   | term, KUnknown :: cont when is_canonical term -> Unknown term, cont
   | term, KErr :: cont when is_canonical term -> Err term, cont

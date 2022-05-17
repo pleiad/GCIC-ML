@@ -26,22 +26,6 @@ and fun_info =
 
 val to_string : term -> string
 
-(** GCIC variants: Gradual, Normalizing and Shift *)
-type gcic_variant =
-  | G
-  | N
-  | S
-
-(** Parameter specifying the GCIC variant *)
-val gcic_variant : gcic_variant
-
-(** Computes the level of the universe of a dependent product, 
-    given the levels of its domain and codomain  *)
-val product_universe_level : int -> int -> int
-
-(** Computes the level of the universe for a cast between (? -> ?) and ? *)
-val cast_universe_level : int -> int
-
 (** Head constructors *)
 type head =
   | HProd
