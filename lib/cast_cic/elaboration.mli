@@ -5,7 +5,9 @@
 open Reduction
 
 (** An error originating from elaboration  *)
-type elaboration_error = [ `Err_free_identifier of Common.Id.Name.t | `Err_inconsistent of Kernel.Ast.term * Ast.term * Ast.term
+type elaboration_error =
+  [ `Err_free_identifier of Common.Id.Name.t
+  | `Err_inconsistent of Kernel.Ast.term * Ast.term * Ast.term
   | `Err_constrained_universe of Kernel.Ast.term
   | `Err_constrained_product of Kernel.Ast.term
   | `Err_impossible of Kernel.Ast.term

@@ -28,3 +28,5 @@ jobs:
       - run: esy dune build
       - run: esy dune runtest
       - run: esy bisect-ppx-report send-to Codecov
+      - name: Format code
+        run: esy dune build @fmt
