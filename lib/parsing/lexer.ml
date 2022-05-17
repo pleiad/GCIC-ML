@@ -31,7 +31,12 @@ let rec token lexbuf =
   | "check" -> VERNAC_CHECK
   | "eval" -> VERNAC_EVAL
   | "elab" -> VERNAC_ELABORATE
+  | "set" -> VERNAC_SET
+  | "variant" -> VERNAC_VARIANT
   | ";;" -> VERNAC_SEPARATOR
+  | "G" -> VERNAC_VARIANT_G
+  | "N" -> VERNAC_VARIANT_N
+  | "S" -> VERNAC_VARIANT_S
   | id -> ID (lexeme lexbuf)
   | number -> INT (int_of_string (lexeme lexbuf))
   | arrow -> ARROW

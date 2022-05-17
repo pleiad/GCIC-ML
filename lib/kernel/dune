@@ -1,4 +1,4 @@
 (library
  (name kernel)
- (modules ast variants)
+ (modules ast variant)
  (libraries common))

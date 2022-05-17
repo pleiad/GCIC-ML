@@ -26,7 +26,7 @@ let delta' i =
           ( Cast { source = dom; target = germ i HProd; term = Var id }
           , Cast
               { source = dom
-              ; target = unknown (Kernel.Variants.cast_universe_level i)
+              ; target = unknown (Kernel.Variant.cast_universe_level i)
               ; term = Var id
               } )
     }
@@ -44,8 +44,7 @@ let omega i =
   App
     ( d'
     , Cast
-        { source =
-            Prod { id; dom; body = unknown (Kernel.Variants.cast_universe_level i) }
+        { source = Prod { id; dom; body = unknown (Kernel.Variant.cast_universe_level i) }
         ; target = dom
         ; term = d'
         } )

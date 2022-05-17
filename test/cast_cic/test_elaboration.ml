@@ -69,14 +69,14 @@ let test_delta_elaborates () =
         { id
         ; dom =
             Cast { source = unknown 2; target = Universe 1; term = Unknown (unknown 2) }
-        ; body = unknown (Kernel.Variants.cast_universe_level 1)
+        ; body = unknown (Kernel.Variant.cast_universe_level 1)
         } )
     (Elaboration.elaborate empty_ctx (delta 1) |> Result.get_ok)
 
 let test_omega_elaborates () =
   Alcotest.(check (pair Testable.term Testable.term))
     "omega elaborates ok"
-    (Example.omega 1, unknown (Kernel.Variants.cast_universe_level 1))
+    (Example.omega 1, unknown (Kernel.Variant.cast_universe_level 1))
     (Elaboration.elaborate empty_ctx (omega 1) |> Result.get_ok)
 
 (* The type for the elaborated term matches the inferred type *)

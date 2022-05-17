@@ -1,6 +1,6 @@
 term_parser: ID ARROW RPAREN
 ##
-## Ends in an error in state: 21.
+## Ends in an error in state: 28.
 ##
 ## term -> fact ARROW . term [ VERNAC_SEPARATOR RPAREN KWD_IN EQUAL EOF COLON ]
 ##
@@ -14,7 +14,7 @@ For example:
 
 term_parser: ID RPAREN
 ##
-## Ends in an error in state: 56.
+## Ends in an error in state: 63.
 ##
 ## term_parser -> term . EOF [ # ]
 ##
@@ -25,7 +25,7 @@ term_parser: ID RPAREN
 ## This implies that, although the LR(1) items shown above provide an
 ## accurate view of the past (what has been recognized so far), they
 ## may provide an INCOMPLETE view of the future (what was expected next).
-## In state 20, spurious reduction of production term -> fact
+## In state 27, spurious reduction of production term -> fact
 ##
 
 I'm currently parsing a term.
@@ -33,7 +33,7 @@ After `$0`, the end of file is expected.
 
 term_parser: KWD_FORALL LPAREN ID COLON ID RPAREN COMMA RPAREN
 ##
-## Ends in an error in state: 17.
+## Ends in an error in state: 24.
 ##
 ## term -> KWD_FORALL nonempty_list(arg) COMMA . term [ VERNAC_SEPARATOR RPAREN KWD_IN EQUAL EOF COLON ]
 ##
@@ -48,7 +48,7 @@ For example:
 
 term_parser: KWD_FORALL RPAREN
 ##
-## Ends in an error in state: 15.
+## Ends in an error in state: 22.
 ##
 ## term -> KWD_FORALL . nonempty_list(arg) COMMA term [ VERNAC_SEPARATOR RPAREN KWD_IN EQUAL EOF COLON ]
 ##
@@ -64,9 +64,9 @@ For example:
 
 term_parser: KWD_LAMBDA LPAREN ID COLON ID KWD_LET
 ##
-## Ends in an error in state: 27.
+## Ends in an error in state: 34.
 ##
-## arg -> LPAREN nonempty_list(id) COLON term . RPAREN [ LPAREN COMMA ]
+## arg -> LPAREN nonempty_list(id) COLON term . RPAREN [ LPAREN DOT COMMA ]
 ##
 ## The known suffix of the stack is as follows:
 ## LPAREN nonempty_list(id) COLON term
@@ -75,7 +75,7 @@ term_parser: KWD_LAMBDA LPAREN ID COLON ID KWD_LET
 ## This implies that, although the LR(1) items shown above provide an
 ## accurate view of the past (what has been recognized so far), they
 ## may provide an INCOMPLETE view of the future (what was expected next).
-## In state 20, spurious reduction of production term -> fact
+## In state 27, spurious reduction of production term -> fact
 ##
 
 I'm currently parsing arguments to a pi type or lambda expression.
@@ -83,10 +83,10 @@ After the `$0`, a closing parenthesis is expected `)`.
 
 term_parser: KWD_LAMBDA LPAREN ID COLON ID RPAREN RPAREN
 ##
-## Ends in an error in state: 25.
+## Ends in an error in state: 32.
 ##
-## nonempty_list(arg) -> arg . [ COMMA ]
-## nonempty_list(arg) -> arg . nonempty_list(arg) [ COMMA ]
+## nonempty_list(arg) -> arg . [ DOT COMMA ]
+## nonempty_list(arg) -> arg . nonempty_list(arg) [ DOT COMMA ]
 ##
 ## The known suffix of the stack is as follows:
 ## arg
@@ -101,9 +101,9 @@ For example:
 
 term_parser: KWD_LAMBDA LPAREN ID COLON RPAREN
 ##
-## Ends in an error in state: 14.
+## Ends in an error in state: 21.
 ##
-## arg -> LPAREN nonempty_list(id) COLON . term RPAREN [ LPAREN COMMA ]
+## arg -> LPAREN nonempty_list(id) COLON . term RPAREN [ LPAREN DOT COMMA ]
 ##
 ## The known suffix of the stack is as follows:
 ## LPAREN nonempty_list(id) COLON
@@ -116,7 +116,7 @@ For example:
 
 term_parser: KWD_LAMBDA LPAREN ID RPAREN
 ##
-## Ends in an error in state: 29.
+## Ends in an error in state: 36.
 ##
 ## nonempty_list(id) -> id . [ COLON ]
 ## nonempty_list(id) -> id . nonempty_list(id) [ COLON ]
@@ -133,9 +133,9 @@ For example:
 
 term_parser: KWD_LAMBDA LPAREN RPAREN
 ##
-## Ends in an error in state: 12.
+## Ends in an error in state: 19.
 ##
-## arg -> LPAREN . nonempty_list(id) COLON term RPAREN [ LPAREN COMMA ]
+## arg -> LPAREN . nonempty_list(id) COLON term RPAREN [ LPAREN DOT COMMA ]
 ##
 ## The known suffix of the stack is as follows:
 ## LPAREN
@@ -150,7 +150,7 @@ For example:
 
 term_parser: KWD_LAMBDA RPAREN
 ##
-## Ends in an error in state: 11.
+## Ends in an error in state: 18.
 ##
 ## term -> KWD_LAMBDA . nonempty_list(arg) DOT term [ VERNAC_SEPARATOR RPAREN KWD_IN EQUAL EOF COLON ]
 ##
@@ -166,7 +166,7 @@ For example:
 
 term_parser: KWD_LET ID COLON ID EQUAL ID KWD_IN RPAREN
 ##
-## Ends in an error in state: 37.
+## Ends in an error in state: 44.
 ##
 ## term -> KWD_LET id COLON term EQUAL term KWD_IN . term [ VERNAC_SEPARATOR RPAREN KWD_IN EQUAL EOF COLON ]
 ##
@@ -179,7 +179,7 @@ After the `in`, an expression is expected.
 
 term_parser: KWD_LET ID COLON ID EQUAL ID RPAREN
 ##
-## Ends in an error in state: 36.
+## Ends in an error in state: 43.
 ##
 ## term -> KWD_LET id COLON term EQUAL term . KWD_IN term [ VERNAC_SEPARATOR RPAREN KWD_IN EQUAL EOF COLON ]
 ##
@@ -190,7 +190,7 @@ term_parser: KWD_LET ID COLON ID EQUAL ID RPAREN
 ## This implies that, although the LR(1) items shown above provide an
 ## accurate view of the past (what has been recognized so far), they
 ## may provide an INCOMPLETE view of the future (what was expected next).
-## In state 20, spurious reduction of production term -> fact
+## In state 27, spurious reduction of production term -> fact
 ##
 
 I'm currently parsing the bounded term of a let expression.
@@ -200,7 +200,7 @@ For example:
 
 term_parser: KWD_LET ID COLON ID EQUAL RPAREN
 ##
-## Ends in an error in state: 35.
+## Ends in an error in state: 42.
 ##
 ## term -> KWD_LET id COLON term EQUAL . term KWD_IN term [ VERNAC_SEPARATOR RPAREN KWD_IN EQUAL EOF COLON ]
 ##
@@ -215,7 +215,7 @@ For example:
 
 term_parser: KWD_LET ID COLON ID RPAREN
 ##
-## Ends in an error in state: 34.
+## Ends in an error in state: 41.
 ##
 ## term -> KWD_LET id COLON term . EQUAL term KWD_IN term [ VERNAC_SEPARATOR RPAREN KWD_IN EQUAL EOF COLON ]
 ##
@@ -226,7 +226,7 @@ term_parser: KWD_LET ID COLON ID RPAREN
 ## This implies that, although the LR(1) items shown above provide an
 ## accurate view of the past (what has been recognized so far), they
 ## may provide an INCOMPLETE view of the future (what was expected next).
-## In state 20, spurious reduction of production term -> fact
+## In state 27, spurious reduction of production term -> fact
 ##
 
 I'm currently parsing the bounded term's type of a let expression.
@@ -237,7 +237,7 @@ For example:
 
 term_parser: KWD_LET ID COLON RPAREN
 ##
-## Ends in an error in state: 10.
+## Ends in an error in state: 17.
 ##
 ## term -> KWD_LET id COLON . term EQUAL term KWD_IN term [ VERNAC_SEPARATOR RPAREN KWD_IN EQUAL EOF COLON ]
 ##
@@ -253,7 +253,7 @@ For example:
 
 term_parser: KWD_LET ID RPAREN
 ##
-## Ends in an error in state: 9.
+## Ends in an error in state: 16.
 ##
 ## term -> KWD_LET id . COLON term EQUAL term KWD_IN term [ VERNAC_SEPARATOR RPAREN KWD_IN EQUAL EOF COLON ]
 ##
@@ -269,7 +269,7 @@ For example:
 
 term_parser: KWD_LET RPAREN
 ##
-## Ends in an error in state: 7.
+## Ends in an error in state: 14.
 ##
 ## term -> KWD_LET . id COLON term EQUAL term KWD_IN term [ VERNAC_SEPARATOR RPAREN KWD_IN EQUAL EOF COLON ]
 ##
@@ -285,7 +285,7 @@ For example:
 
 term_parser: KWD_UNIVERSE RPAREN
 ##
-## Ends in an error in state: 5.
+## Ends in an error in state: 12.
 ##
 ## atom -> KWD_UNIVERSE . INT [ VERNAC_SEPARATOR RPAREN LPAREN KWD_UNKNOWN KWD_UNIVERSE KWD_IN ID EQUAL EOF COLON ARROW ]
 ##
@@ -302,7 +302,7 @@ For example:
 
 term_parser: KWD_UNKNOWN RPAREN
 ##
-## Ends in an error in state: 3.
+## Ends in an error in state: 10.
 ##
 ## atom -> KWD_UNKNOWN . INT [ VERNAC_SEPARATOR RPAREN LPAREN KWD_UNKNOWN KWD_UNIVERSE KWD_IN ID EQUAL EOF COLON ARROW ]
 ##
@@ -318,7 +318,7 @@ For example:
 
 term_parser: LPAREN ID KWD_LET
 ##
-## Ends in an error in state: 39.
+## Ends in an error in state: 46.
 ##
 ## atom -> LPAREN term . RPAREN [ VERNAC_SEPARATOR RPAREN LPAREN KWD_UNKNOWN KWD_UNIVERSE KWD_IN ID EQUAL EOF COLON ARROW ]
 ##
@@ -329,7 +329,7 @@ term_parser: LPAREN ID KWD_LET
 ## This implies that, although the LR(1) items shown above provide an
 ## accurate view of the past (what has been recognized so far), they
 ## may provide an INCOMPLETE view of the future (what was expected next).
-## In state 20, spurious reduction of production term -> fact
+## In state 27, spurious reduction of production term -> fact
 ##
 
 I'm currently parsing a parenthesised term.
@@ -341,7 +341,7 @@ For example:
 
 term_parser: LPAREN RPAREN
 ##
-## Ends in an error in state: 2.
+## Ends in an error in state: 9.
 ##
 ## atom -> LPAREN . term RPAREN [ VERNAC_SEPARATOR RPAREN LPAREN KWD_UNKNOWN KWD_UNIVERSE KWD_IN ID EQUAL EOF COLON ARROW ]
 ##
@@ -358,7 +358,7 @@ For example:
 
 term_parser: RPAREN
 ##
-## Ends in an error in state: 54.
+## Ends in an error in state: 61.
 ##
 ## term_parser' -> . term_parser [ # ]
 ##
@@ -391,7 +391,7 @@ For example:
 
 program_parser: VERNAC_EVAL VERNAC_SEPARATOR
 ##
-## Ends in an error in state: 1.
+## Ends in an error in state: 8.
 ##
 ## command -> VERNAC_EVAL . term VERNAC_SEPARATOR [ EOF ]
 ##
@@ -405,7 +405,7 @@ For example:
 
 term_parser: KWD_FORALL LPAREN ID COLON ID RPAREN DOT
 ##
-## Ends in an error in state: 16.
+## Ends in an error in state: 23.
 ##
 ## term -> KWD_FORALL nonempty_list(arg) . COMMA term [ VERNAC_SEPARATOR RPAREN KWD_IN EQUAL EOF COLON ]
 ##
@@ -416,7 +416,7 @@ term_parser: KWD_FORALL LPAREN ID COLON ID RPAREN DOT
 ## This implies that, although the LR(1) items shown above provide an
 ## accurate view of the past (what has been recognized so far), they
 ## may provide an INCOMPLETE view of the future (what was expected next).
-## In state 25, spurious reduction of production nonempty_list(arg) -> arg
+## In state 32, spurious reduction of production nonempty_list(arg) -> arg
 ##
 
 I'm currently parsing the arguments of a pi type.
@@ -428,7 +428,7 @@ For example:
 
 term_parser: KWD_LAMBDA LPAREN ID COLON ID RPAREN COMMA
 ##
-## Ends in an error in state: 31.
+## Ends in an error in state: 38.
 ##
 ## term -> KWD_LAMBDA nonempty_list(arg) . DOT term [ VERNAC_SEPARATOR RPAREN KWD_IN EQUAL EOF COLON ]
 ##
@@ -439,7 +439,7 @@ term_parser: KWD_LAMBDA LPAREN ID COLON ID RPAREN COMMA
 ## This implies that, although the LR(1) items shown above provide an
 ## accurate view of the past (what has been recognized so far), they
 ## may provide an INCOMPLETE view of the future (what was expected next).
-## In state 25, spurious reduction of production nonempty_list(arg) -> arg
+## In state 32, spurious reduction of production nonempty_list(arg) -> arg
 ##
 
 I'm currently parsing the arguments of a lambda expression.
@@ -451,7 +451,7 @@ For example:
 
 term_parser: KWD_LAMBDA LPAREN ID COLON ID RPAREN DOT VERNAC_SEPARATOR
 ##
-## Ends in an error in state: 32.
+## Ends in an error in state: 39.
 ##
 ## term -> KWD_LAMBDA nonempty_list(arg) DOT . term [ VERNAC_SEPARATOR RPAREN KWD_IN EQUAL EOF COLON ]
 ##
@@ -466,7 +466,7 @@ For example:
 
 program_parser: VERNAC_EVAL ID VERNAC_EVAL
 ##
-## Ends in an error in state: 41.
+## Ends in an error in state: 48.
 ##
 ## command -> VERNAC_EVAL term . VERNAC_SEPARATOR [ EOF ]
 ##
@@ -477,7 +477,7 @@ program_parser: VERNAC_EVAL ID VERNAC_EVAL
 ## This implies that, although the LR(1) items shown above provide an
 ## accurate view of the past (what has been recognized so far), they
 ## may provide an INCOMPLETE view of the future (what was expected next).
-## In state 20, spurious reduction of production term -> fact
+## In state 27, spurious reduction of production term -> fact
 ##
 
 Missing a `;;` after the term being evaluated. 
@@ -486,7 +486,7 @@ For example:
 
 program_parser: VERNAC_ELABORATE VERNAC_SEPARATOR
 ##
-## Ends in an error in state: 43.
+## Ends in an error in state: 50.
 ##
 ## command -> VERNAC_ELABORATE . term VERNAC_SEPARATOR [ EOF ]
 ##
@@ -500,7 +500,7 @@ For example:
 
 program_parser: VERNAC_ELABORATE ID VERNAC_EVAL
 ##
-## Ends in an error in state: 44.
+## Ends in an error in state: 51.
 ##
 ## command -> VERNAC_ELABORATE term . VERNAC_SEPARATOR [ EOF ]
 ##
@@ -511,7 +511,7 @@ program_parser: VERNAC_ELABORATE ID VERNAC_EVAL
 ## This implies that, although the LR(1) items shown above provide an
 ## accurate view of the past (what has been recognized so far), they
 ## may provide an INCOMPLETE view of the future (what was expected next).
-## In state 20, spurious reduction of production term -> fact
+## In state 27, spurious reduction of production term -> fact
 ##
 
 Missing a `;;` after the term being elaborated. 
@@ -520,7 +520,7 @@ For example:
 
 program_parser: VERNAC_CHECK VERNAC_SEPARATOR
 ##
-## Ends in an error in state: 46.
+## Ends in an error in state: 53.
 ##
 ## command -> VERNAC_CHECK . term COLON term VERNAC_SEPARATOR [ EOF ]
 ##
@@ -534,7 +534,7 @@ For example:
 
 program_parser: VERNAC_CHECK ID VERNAC_SEPARATOR
 ##
-## Ends in an error in state: 47.
+## Ends in an error in state: 54.
 ##
 ## command -> VERNAC_CHECK term . COLON term VERNAC_SEPARATOR [ EOF ]
 ##
@@ -545,7 +545,7 @@ program_parser: VERNAC_CHECK ID VERNAC_SEPARATOR
 ## This implies that, although the LR(1) items shown above provide an
 ## accurate view of the past (what has been recognized so far), they
 ## may provide an INCOMPLETE view of the future (what was expected next).
-## In state 20, spurious reduction of production term -> fact
+## In state 27, spurious reduction of production term -> fact
 ##
 
 The term being type-checked must be followed by a `:` (colon) and a second term. 
@@ -554,7 +554,7 @@ For example:
 
 program_parser: VERNAC_CHECK ID COLON VERNAC_SEPARATOR
 ##
-## Ends in an error in state: 48.
+## Ends in an error in state: 55.
 ##
 ## command -> VERNAC_CHECK term COLON . term VERNAC_SEPARATOR [ EOF ]
 ##
@@ -568,7 +568,7 @@ For example:
 
 program_parser: VERNAC_CHECK ID COLON ID VERNAC_EVAL
 ##
-## Ends in an error in state: 49.
+## Ends in an error in state: 56.
 ##
 ## command -> VERNAC_CHECK term COLON term . VERNAC_SEPARATOR [ EOF ]
 ##
@@ -579,7 +579,7 @@ program_parser: VERNAC_CHECK ID COLON ID VERNAC_EVAL
 ## This implies that, although the LR(1) items shown above provide an
 ## accurate view of the past (what has been recognized so far), they
 ## may provide an INCOMPLETE view of the future (what was expected next).
-## In state 20, spurious reduction of production term -> fact
+## In state 27, spurious reduction of production term -> fact
 ##
 
 Missing a `;;` after $0, to close the command. 
@@ -588,7 +588,7 @@ For example:
 
 program_parser: VERNAC_ELABORATE ID VERNAC_SEPARATOR VERNAC_SEPARATOR
 ##
-## Ends in an error in state: 52.
+## Ends in an error in state: 59.
 ##
 ## program_parser -> command . EOF [ # ]
 ##
@@ -597,3 +597,48 @@ program_parser: VERNAC_ELABORATE ID VERNAC_SEPARATOR VERNAC_SEPARATOR
 ##
 
 After `$0`, the end of file is expected.
+
+program_parser: VERNAC_SET VERNAC_VARIANT_S
+##
+## Ends in an error in state: 1.
+##
+## command -> VERNAC_SET . VERNAC_VARIANT variant VERNAC_SEPARATOR [ EOF ]
+##
+## The known suffix of the stack is as follows:
+## VERNAC_SET
+##
+
+The command `$0` should be followed by `variant`.
+For example:
+> $0 variant G;;
+
+program_parser: VERNAC_SET VERNAC_VARIANT VERNAC_VARIANT
+##
+## Ends in an error in state: 2.
+##
+## command -> VERNAC_SET VERNAC_VARIANT . variant VERNAC_SEPARATOR [ EOF ]
+##
+## The known suffix of the stack is as follows:
+## VERNAC_SET VERNAC_VARIANT
+##
+
+A variant (G, N or S) must follow the keyword `variant`.
+For example:
+> $1 $0 G;;
+> $1 $0 N;;
+> $1 $0 S;;
+
+program_parser: VERNAC_SET VERNAC_VARIANT VERNAC_VARIANT_G VERNAC_VARIANT_S
+##
+## Ends in an error in state: 6.
+##
+## command -> VERNAC_SET VERNAC_VARIANT variant . VERNAC_SEPARATOR [ EOF ]
+##
+## The known suffix of the stack is as follows:
+## VERNAC_SET VERNAC_VARIANT variant
+##
+
+Missing a `;;` after $0, to close the command. 
+For example:
+> $2 $1 $0;;
+
