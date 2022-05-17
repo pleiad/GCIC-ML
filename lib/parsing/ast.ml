@@ -52,17 +52,17 @@ and eq_args args1 args2 = List.for_all2 eq_arg args1 args2
 type command =
 | Eval of term
 | Check of term * term
-| Elaborate of term
+| Elab of term
 
 let string_of_command : command -> string = function
   | Eval t -> "Eval " ^ to_string t
   | Check (t, ty) ->
       Format.asprintf "Check %s : %s" (to_string t) (to_string ty)
-  | Elaborate t -> "Elaborate " ^ to_string t
+  | Elab t -> "elab " ^ to_string t
 
 let eq_command cmd1 cmd2 =
   match (cmd1, cmd2) with
   | (Eval t1, Eval t2) -> eq_term t1 t2
   | (Check (t1, ty1), Check (t2, ty2)) -> eq_term t1 t2 && eq_term ty1 ty2
-  | (Elaborate t1, Elaborate t2) -> eq_term t1 t2
+  | (Elab t1, Elab t2) -> eq_term t1 t2
   | _ -> false

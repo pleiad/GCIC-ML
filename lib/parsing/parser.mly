@@ -24,10 +24,8 @@
 
 /* Specify starting production */
 %start program_parser term_parser
-/* Types for the result of productions */
-// %nonassoc ID KWD_UNIVERSE KWD_LAMBDA KWD_PROD KWD_UNKNOWN LPAREN /* list ALL other tokens that start an expr */
-// %nonassoc APP
 
+/* Types for the result of productions */
 %type <Ast.command> program_parser
 %type <Ast.term> term_parser
 
@@ -42,7 +40,7 @@ term_parser :
 command :
 | KWD_EVAL;t=term; DOT                       { Eval t }
 | KWD_CHECK; t=term; KWD_AS; ty=term; DOT    { Check (t, ty) }
-| KWD_ELABORATE; t=term; DOT                 { Elaborate t }
+| KWD_ELABORATE; t=term; DOT                 { Elab t }
 
 id :
 | x=ID { Name.of_string x }

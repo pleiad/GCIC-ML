@@ -4,7 +4,7 @@
 type command =
 | Eval of Kernel.Ast.term
 | Check of Kernel.Ast.term * Kernel.Ast.term
-| Elaborate of Kernel.Ast.term 
+| Elab of Kernel.Ast.term 
 
 val string_of_command : command -> string
 

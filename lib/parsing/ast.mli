@@ -19,7 +19,7 @@ val eq_term : term -> term -> bool
 type command =
 | Eval of term
 | Check of term * term
-| Elaborate of term
+| Elab of term
 
 val string_of_command : command -> string
 

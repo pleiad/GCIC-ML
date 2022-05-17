@@ -5,14 +5,14 @@ open Common
 type command =
   | Eval of Kernel.Ast.term
   | Check of Kernel.Ast.term * Kernel.Ast.term
-  | Elaborate of Kernel.Ast.term
+  | Elab of Kernel.Ast.term
 
 let string_of_command : command -> string = function
-  | Eval t -> "Eval " ^ Kernel.Ast.to_string t
+  | Eval t -> "eval " ^ Kernel.Ast.to_string t
   | Check (t, ty) ->
-      Format.asprintf "Check %s : %s" (Kernel.Ast.to_string t)
+      Format.asprintf "check %s : %s" (Kernel.Ast.to_string t)
         (Kernel.Ast.to_string ty)
-  | Elaborate t -> "Elaborate " ^ Kernel.Ast.to_string t
+  | Elab t -> "elab " ^ Kernel.Ast.to_string t
 
 type cmd_result =
   | Reduction of Cast_cic.Ast.term
@@ -79,10 +79,10 @@ let execute_check term ty : (cmd_result, execute_error) result =
 let execute_elab term : (cmd_result, execute_error) result =
   match Cast_cic.Elaboration.elaborate Context.empty term with
   | Ok (elab_term, _) -> Ok (Elaboration elab_term)
-  | Error e -> Error (mk_elaboration_error elaboration_error (Elaborate term) e)
+  | Error e -> Error (mk_elaboration_error elaboration_error (Elab term) e)
 
 let execute cmd : (cmd_result, execute_error) result =
   match cmd with
   | Eval t -> execute_eval t
   | Check (t, ty) -> execute_check t ty
-  | Elaborate t -> execute_elab t
+  | Elab t -> execute_elab t
