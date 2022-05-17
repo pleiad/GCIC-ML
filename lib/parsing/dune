@@ -22,26 +22,23 @@
 ;; performed first. (If desired, this check could be disabled.)
 
 (rule
-  (deps parserMessages.check)
-  (action (with-stdout-to parserMessages.ml
-    (run menhir
-      %{dep:parser.mly}
-      --compile-errors %{dep:parserMessages.messages}
-    )
-  ))
-)
+ (deps parserMessages.check)
+ (action
+  (with-stdout-to
+   parserMessages.ml
+   (run
+    menhir
+    %{dep:parser.mly}
+    --compile-errors
+    %{dep:parserMessages.messages}))))
 
 ;; This rule generates a file "parserMessages.auto.messages" that contains a
 ;; list of all error states. It is used by the completeness check.
 
 (rule
-  (with-stdout-to parserMessages.auto.messages
-    (run menhir
-       %{dep:parser.mly}
-       --list-errors
-    )
-  )
-)
+ (with-stdout-to
+  parserMessages.auto.messages
+  (run menhir %{dep:parser.mly} --list-errors)))
 
 ;; This rule implements the completeness check. It checks that every error
 ;; state listed in the auto-generated file "parserMessages.auto.messages"
@@ -49,10 +46,12 @@
 ;; by the programmer.
 
 (rule
-  (with-stdout-to parserMessages.check
-  (run menhir
-    %{dep:parser.mly}
-    --compare-errors %{dep:parserMessages.auto.messages}
-    --compare-errors %{dep:parserMessages.messages}
-  ))
-)
+ (with-stdout-to
+  parserMessages.check
+  (run
+   menhir
+   %{dep:parser.mly}
+   --compare-errors
+   %{dep:parserMessages.auto.messages}
+   --compare-errors
+   %{dep:parserMessages.messages})))

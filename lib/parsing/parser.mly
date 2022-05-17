@@ -1,4 +1,7 @@
-/* This is the specification for the parser */
+/* This is the specification for the parser 
+
+   http://cambium.inria.fr/~fpottier/menhir/manual.html
+*/
 
 %{
   [@@@coverage exclude_file]
@@ -16,23 +19,32 @@
 %token LPAREN RPAREN
 %token KWD_UNIVERSE KWD_LAMBDA KWD_UNKNOWN KWD_FORALL
 %token KWD_LET KWD_IN
+%token VERNAC_CHECK VERNAC_EVAL VERNAC_ELABORATE VERNAC_SEPARATOR
 %token EOF
 
-/* This reduces the number of error states */
-%on_error_reduce term
+/* This reduces the number of error states.
+   It is useful for defining better error messages.
+ */
+%on_error_reduce term 
 
 /* Specify starting production */
-%start program
+%start program_parser term_parser
+
 /* Types for the result of productions */
-// %nonassoc ID KWD_UNIVERSE KWD_LAMBDA KWD_PROD KWD_UNKNOWN LPAREN /* list ALL other tokens that start an expr */
-// %nonassoc APP
+%type <Ast.command> program_parser
+%type <Ast.term> term_parser
 
-%type <Ast.term> program
-
-// %left APP
 %% /* Start grammar productions */
-program:
+program_parser :
+  cmd=command; EOF   { cmd }
+
+term_parser :
   t=term; EOF   { t }
+
+command :
+| VERNAC_EVAL;t=term; VERNAC_SEPARATOR                       { Eval t }
+| VERNAC_CHECK; t=term; COLON; ty=term; VERNAC_SEPARATOR     { Check (t, ty) }
+| VERNAC_ELABORATE; t=term; VERNAC_SEPARATOR                 { Elab t }
 
 id :
 | x=ID { Name.of_string x }
@@ -45,7 +57,7 @@ arg :
 | args=nonempty_list(arg) { List.flatten(args) }
 
 term :
-| KWD_LAMBDA; args=args; DOT;   body=term                         { Lambda (args, body) }
+| KWD_LAMBDA; args=args; DOT; body=term                           { Lambda (args, body) }
 | KWD_FORALL; args=args; COMMA; body=term                         { Prod (args, body) }
 | dom=fact; ARROW; body=term                                      { Prod ([(None, dom)], body) }
 | KWD_LET; id=id; COLON; ty=term; EQUAL; t1=term; KWD_IN; t2=term { LetIn (id, ty, t1, t2) }
