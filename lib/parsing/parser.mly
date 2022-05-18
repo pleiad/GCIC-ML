@@ -38,16 +38,16 @@
 
 %% /* Start grammar productions */
 program_parser :
-  cmd=command; EOF   { cmd }
+  cmd=command; VERNAC_SEPARATOR; EOF   { cmd }
 
 term_parser :
   t=term; EOF   { t }
 
 command :
-| VERNAC_EVAL;t=term; VERNAC_SEPARATOR                         { Eval t }
-| VERNAC_CHECK; t=term; COLON; ty=term; VERNAC_SEPARATOR       { Check (t, ty) }
-| VERNAC_ELABORATE; t=term; VERNAC_SEPARATOR                   { Elab t }
-| VERNAC_SET; VERNAC_VARIANT ; var=variant; VERNAC_SEPARATOR   { SetVariant var }
+| VERNAC_EVAL;t=term                       { Eval t }
+| VERNAC_CHECK; t=term                     { Check t }
+| VERNAC_ELABORATE; t=term                 { Elab t }
+| VERNAC_SET; VERNAC_VARIANT ; var=variant { SetVariant var }
 
 variant : 
 | VERNAC_VARIANT_G        { G }

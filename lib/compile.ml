@@ -24,7 +24,7 @@ and expand_prod (id, dom) body =
 let of_parsed_command (cmd : Parsing.Ast.command) : Vernac.Ast.command =
   match cmd with
   | Eval t -> Eval (of_parsed_term t)
-  | Check (t, ty) -> Check (of_parsed_term t, of_parsed_term ty)
+  | Check t -> Check (of_parsed_term t)
   | Elab t -> Elab (of_parsed_term t)
   | SetVariant v -> SetVariant v
 

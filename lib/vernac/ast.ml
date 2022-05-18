@@ -5,14 +5,13 @@ open Common.Std
 (** The AST for the commands *)
 type command =
   | Eval of Kernel.Ast.term
-  | Check of Kernel.Ast.term * Kernel.Ast.term
+  | Check of Kernel.Ast.term
   | Elab of Kernel.Ast.term
   | SetVariant of Kernel.Variant.t
 
 let string_of_command : command -> string = function
   | Eval t -> "eval " ^ Kernel.Ast.to_string t
-  | Check (t, ty) ->
-    Format.asprintf "check %s : %s" (Kernel.Ast.to_string t) (Kernel.Ast.to_string ty)
+  | Check t -> "check" ^ Kernel.Ast.to_string t
   | Elab t -> "elab " ^ Kernel.Ast.to_string t
   | SetVariant v -> "set variant " ^ Kernel.Variant.to_string v
 
@@ -20,11 +19,13 @@ type cmd_result =
   | Reduction of Cast_cic.Ast.term
   | Unit
   | Elaboration of Cast_cic.Ast.term
+  | Inference of Cast_cic.Ast.term
 
 let string_of_cmd_result : cmd_result -> string = function
   | Reduction t -> Cast_cic.Ast.to_string t
   | Unit -> "OK"
   | Elaboration t -> Cast_cic.Ast.to_string t
+  | Inference t -> Cast_cic.Ast.to_string t
 
 type execute_error =
   [ Cast_cic.Elaboration.elaboration_error
@@ -48,15 +49,14 @@ let execute_eval term : (cmd_result, execute_error) result =
   let* v = reduce elab_term in
   Ok (Reduction v)
 
-let execute_check term ty : (cmd_result, execute_error) result =
+let execute_check term : (cmd_result, execute_error) result =
   let open Cast_cic.Elaboration in
   let open Cast_cic.Typing in
   let open Cast_cic.Context in
   let empty_ctx = NameMap.empty in
   let* elab_term, _ = elaborate empty_ctx term in
-  let* expected_ty, _ = elaborate empty_ctx ty in
-  let* () = check_type empty_ctx elab_term expected_ty in
-  Ok Unit
+  let* ty = infer_type empty_ctx elab_term in
+  Ok (Inference ty)
 
 let execute_elab term : (cmd_result, execute_error) result =
   let open Cast_cic.Elaboration in
@@ -71,6 +71,6 @@ let execute_set_variant var : (cmd_result, execute_error) result =
 let execute cmd : (cmd_result, execute_error) result =
   match cmd with
   | Eval t -> execute_eval t
-  | Check (t, ty) -> execute_check t ty
+  | Check t -> execute_check t
   | Elab t -> execute_elab t
   | SetVariant v -> execute_set_variant v

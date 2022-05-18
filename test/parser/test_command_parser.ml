@@ -26,12 +26,8 @@ let tests_check () =
   Alcotest.check
     pcommand
     "check command"
-    (Ok (Check (Universe 0, Unknown 0)))
-    (parse_command "check Type0 : ?0;;");
-  Alcotest.(check bool)
-    "Fails without :"
-    true
-    (parse_command "check Type 0 ?0;;" |> Result.is_error);
+    (Ok (Check (Universe 0)))
+    (parse_command "check Type0;;");
   Alcotest.(check bool)
     "Fails if no expression"
     true
@@ -39,7 +35,7 @@ let tests_check () =
   Alcotest.(check bool)
     "Fails if no semi-colons"
     true
-    (parse_command "check ?0 : foo" |> Result.is_error)
+    (parse_command "check ?0" |> Result.is_error)
 
 let tests_elaborate () =
   Alcotest.check
