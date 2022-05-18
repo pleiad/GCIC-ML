@@ -11,7 +11,7 @@ type command =
 
 let string_of_command : command -> string = function
   | Eval t -> "eval " ^ Kernel.Ast.to_string t
-  | Check t -> "check %s" ^ Kernel.Ast.to_string t
+  | Check t -> "check" ^ Kernel.Ast.to_string t
   | Elab t -> "elab " ^ Kernel.Ast.to_string t
   | SetVariant v -> "set variant " ^ Kernel.Variant.to_string v
 
