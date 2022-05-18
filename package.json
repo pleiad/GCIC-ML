@@ -1,11 +1,11 @@
 {
   "scripts": {
-    "make": "esy b dune build",
-    "watch": "esy b dune build -w",
-    "test": "esy b dune runtest",
-    "coverage": "esy b dune runtest --instrument-with=bisect_ppx --force",
-    "report": "esy b bisect-ppx-report html",
-    "run": "esy b dune exec gcic",
+    "make": "dune build",
+    "watch": "dune build -w",
+    "test": "dune runtest",
+    "coverage": "dune runtest --instrument-with=bisect_ppx --force",
+    "report": "bisect-ppx-report html",
+    "run": "dune exec gcic",
     "format": "dune build @fmt --auto-promote"
   },
   "dependencies": {
