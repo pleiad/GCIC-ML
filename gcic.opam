@@ -2,10 +2,10 @@
 opam-version: "2.0"
 synopsis: "Prototype implementation of GCIC"
 description: "Prototype implementation of GCIC"
-maintainer: ["Tomás Díaz"]
-authors: ["Tomás Díaz"]
-homepage: "https://github.com/TDiazT/GCIC"
-bug-reports: "https://github.com/TDiazT/GCIC/issues"
+maintainer: ["Tomás Díaz" "Stefan Malewski" "Éric Tanter"]
+authors: ["Tomás Díaz" "Stefan Malewski" "Éric Tanter"]
+homepage: "https://github.com/pleiad/GCIC"
+bug-reports: "https://github.com/pleiad/GCIC/issues"
 depends: [
   "dune" {>= "2.9"}
   "odoc" {with-doc}
@@ -26,4 +26,4 @@ build: [
   ]
   ["dune" "install" "-p" name "--create-install-files" name]
 ]
-dev-repo: "git+https://github.com/TDiazT/GCIC.git"
+dev-repo: "git+https://github.com/pleiad/GCIC.git"
