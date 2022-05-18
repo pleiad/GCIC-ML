@@ -137,9 +137,12 @@ let reduce1 (term, cont) : state =
 
 exception Not_enough_fuel
 
+let max_fuel : int ref = ref 10000
+let set_fuel (fuel : int) : unit = max_fuel := fuel
+
 (** Transitive clousure of reduce1 with fuel *)
 let rec reduce_fueled (fuel : int) ((term, cont) as s) : term =
-  if fuel < 0
+  if fuel < 0 && !max_fuel > 0
   then raise Not_enough_fuel
   else if is_canonical term && cont = []
   then term
@@ -148,7 +151,7 @@ let rec reduce_fueled (fuel : int) ((term, cont) as s) : term =
 (** Reduces a term *)
 let reduce term : (term, [> reduction_error ]) result =
   let initial_state = term, [] in
-  try Ok (reduce_fueled 10000 initial_state) with
+  try Ok (reduce_fueled !max_fuel initial_state) with
   | Not_enough_fuel -> Error `Err_not_enough_fuel
   | Stuck_term term -> Error (`Err_stuck_term term)
 

@@ -8,6 +8,7 @@
   open Ast
   open Common.Id
   open Kernel.Variant
+  open Vernac.Config
 %}
 
 /* Token definitions 
@@ -21,7 +22,7 @@
 %token KWD_UNIVERSE KWD_LAMBDA KWD_UNKNOWN KWD_FORALL
 %token KWD_LET KWD_IN
 %token VERNAC_CHECK VERNAC_EVAL VERNAC_ELABORATE VERNAC_SEPARATOR VERNAC_SET 
-%token VERNAC_VARIANT VERNAC_VARIANT_G VERNAC_VARIANT_S VERNAC_VARIANT_N
+%token VERNAC_VARIANT VERNAC_VARIANT_G VERNAC_VARIANT_S VERNAC_VARIANT_N VERNAC_FUEL
 %token EOF
 
 /* This reduces the number of error states.
@@ -47,7 +48,11 @@ command :
 | VERNAC_EVAL;t=term; VERNAC_SEPARATOR                         { Eval t }
 | VERNAC_CHECK; t=term; COLON; ty=term; VERNAC_SEPARATOR       { Check (t, ty) }
 | VERNAC_ELABORATE; t=term; VERNAC_SEPARATOR                   { Elab t }
-| VERNAC_SET; VERNAC_VARIANT ; var=variant; VERNAC_SEPARATOR   { SetVariant var }
+| VERNAC_SET; cfg=config; VERNAC_SEPARATOR                     { Set cfg }
+
+config :
+| VERNAC_VARIANT; var=variant { Variant var }
+| VERNAC_FUEL; i=INT          { Fuel i }
 
 variant : 
 | VERNAC_VARIANT_G        { G }

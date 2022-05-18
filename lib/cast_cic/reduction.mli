@@ -8,6 +8,7 @@ type reduction_error =
   ]
 
 val string_of_error : reduction_error -> string
+val set_fuel : int -> unit
 
 (** Reduces a term *)
 val reduce : term -> (term, [> reduction_error ]) result

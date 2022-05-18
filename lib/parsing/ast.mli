@@ -22,7 +22,7 @@ type command =
   | Eval of term
   | Check of term * term
   | Elab of term
-  | SetVariant of Kernel.Variant.t
+  | Set of Vernac.Config.t
 
 (** Returns the stringified version of a command *)
 val string_of_command : command -> string

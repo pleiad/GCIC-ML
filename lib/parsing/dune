@@ -9,7 +9,7 @@
 (library
  (name parsing)
  (modules parser lexer ast lex_and_parse parserMessages)
- (libraries common sedlex menhirLib kernel)
+ (libraries common sedlex menhirLib kernel vernac)
  (preprocess
   (pps sedlex.ppx)))
 

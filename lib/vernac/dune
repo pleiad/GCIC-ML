@@ -1,4 +1,4 @@
 (library
  (name vernac)
  (libraries kernel cast_cic common)
- (modules ast))
+ (modules ast config))

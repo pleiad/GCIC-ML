@@ -58,18 +58,18 @@ type command =
   | Eval of term
   | Check of term * term
   | Elab of term
-  | SetVariant of Kernel.Variant.t
+  | Set of Vernac.Config.t
 
 let string_of_command : command -> string = function
   | Eval t -> "Eval " ^ to_string t
   | Check (t, ty) -> Format.asprintf "Check %s : %s" (to_string t) (to_string ty)
   | Elab t -> "elab " ^ to_string t
-  | SetVariant v -> "set variant " ^ Kernel.Variant.to_string v
+  | Set cfg -> "set " ^ Vernac.Config.to_string cfg
 
 let eq_command cmd1 cmd2 =
   match cmd1, cmd2 with
   | Eval t1, Eval t2 -> eq_term t1 t2
   | Check (t1, ty1), Check (t2, ty2) -> eq_term t1 t2 && eq_term ty1 ty2
   | Elab t1, Elab t2 -> eq_term t1 t2
-  | SetVariant v1, SetVariant v2 -> v1 = v2
+  | Set cfg1, Set cfg2 -> cfg1 = cfg2
   | _ -> false
