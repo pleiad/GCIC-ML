@@ -30,8 +30,7 @@ other option, consider checking [esy's documentation](https://esy.sh/docs/en/get
     ```
 3. Build the project.
     ```bash
-    # This builds it in a sandboxed environment
-    esy b dune build
+    esy make
     ```
 4. Run it and test it out.
    ```bash
