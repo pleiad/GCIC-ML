@@ -39,7 +39,7 @@ let rec to_string (t : term) =
   | Universe i -> asprintf "▢%i" i
   | App (t, t') -> asprintf "(%s %s)" (to_string t) (to_string t')
   | Lambda { id; dom; body } ->
-    asprintf "lambda %s : %s. %s" (Id.Name.to_string id) (to_string dom) (to_string body)
+    asprintf "fun %s : %s. %s" (Id.Name.to_string id) (to_string dom) (to_string body)
   | Prod { id; dom; body } ->
     asprintf "Prod %s : %s. %s" (Id.Name.to_string id) (to_string dom) (to_string body)
   | Unknown ty -> asprintf "?_%s" (to_string ty)

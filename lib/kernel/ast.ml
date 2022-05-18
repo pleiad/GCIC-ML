@@ -24,7 +24,7 @@ let rec to_string =
   | Universe i -> asprintf "Universe_%i" i
   | App (t, t') -> asprintf "(%s %s)" (to_string t) (to_string t')
   | Lambda { id; dom; body } ->
-    asprintf "lambda %s : %s. %s" (Name.to_string id) (to_string dom) (to_string body)
+    asprintf "fun %s : %s. %s" (Name.to_string id) (to_string dom) (to_string body)
   | Prod { id; dom; body } ->
     asprintf "Prod %s : %s. %s" (Name.to_string id) (to_string dom) (to_string body)
   | Unknown i -> asprintf "?_%i" i

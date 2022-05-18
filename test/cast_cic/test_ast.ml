@@ -117,7 +117,7 @@ let tests_to_string () =
   Alcotest.(check string) "App" "(x y)" (to_string (App (idx, idy)));
   Alcotest.(check string)
     "lambda"
-    "lambda x : ?_y. x"
+    "fun x : ?_y. x"
     (to_string (Lambda { id = Name.of_string "x"; dom = Unknown idy; body = idx }));
   Alcotest.(check string)
     "Prod"

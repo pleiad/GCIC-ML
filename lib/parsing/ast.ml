@@ -18,7 +18,7 @@ let rec to_string = function
   | Var x -> Name.to_string x
   | Universe i -> asprintf "Type%i" i
   | App (t, t') -> asprintf "(%s %s)" (to_string t) (to_string t')
-  | Lambda (args, b) -> asprintf "lambda %s. %s" (string_of_args args) (to_string b)
+  | Lambda (args, b) -> asprintf "fun %s. %s" (string_of_args args) (to_string b)
   | Prod (args, b) -> asprintf "forall %s, %s" (string_of_args args) (to_string b)
   | Unknown i -> asprintf "?_%i" i
   | LetIn (id, ty, t1, t2) ->
