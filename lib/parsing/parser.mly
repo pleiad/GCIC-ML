@@ -27,7 +27,7 @@
 /* This reduces the number of error states.
    It is useful for defining better error messages.
  */
-%on_error_reduce term 
+%on_error_reduce term
 
 /* Specify starting production */
 %start program_parser term_parser
@@ -65,7 +65,7 @@ arg :
 | args=nonempty_list(arg) { List.flatten(args) }
 
 top :
-| t=term; COLON; ty=term                                          { Ascription (t, ty) }
+| t=top; COLON; ty=term                                           { Ascription (t, ty) }
 | t=term                                                          { t }
 
 term :

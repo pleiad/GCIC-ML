@@ -17,6 +17,7 @@ term_parser: ID RPAREN
 ## Ends in an error in state: 60.
 ##
 ## term_parser -> top . EOF [ # ]
+## top -> top . COLON term [ EOF COLON ]
 ##
 ## The known suffix of the stack is as follows:
 ## top
@@ -26,7 +27,7 @@ term_parser: ID RPAREN
 ## accurate view of the past (what has been recognized so far), they
 ## may provide an INCOMPLETE view of the future (what was expected next).
 ## In state 26, spurious reduction of production term -> fact
-## In state 47, spurious reduction of production top -> term
+## In state 49, spurious reduction of production top -> term
 ##
 
 I'm currently parsing a term.
@@ -317,30 +318,6 @@ For example:
 > $0 0
 > ?1
 
-term_parser: LPAREN ID KWD_LET
-##
-## Ends in an error in state: 47.
-##
-## top -> term . COLON term [ VERNAC_SEPARATOR RPAREN EOF ]
-## top -> term . [ VERNAC_SEPARATOR RPAREN EOF ]
-##
-## The known suffix of the stack is as follows:
-## term
-##
-## WARNING: This example involves spurious reductions.
-## This implies that, although the LR(1) items shown above provide an
-## accurate view of the past (what has been recognized so far), they
-## may provide an INCOMPLETE view of the future (what was expected next).
-## In state 26, spurious reduction of production term -> fact
-##
-
-I'm currently parsing a parenthesised term.
-After the `(` a term is expected followed by a closing parenthesis `)`.
-For example:
-> (f x y)
-> (foo ?0 y)
-> (fun (x : Type0). x)
-
 term_parser: LPAREN RPAREN
 ##
 ## Ends in an error in state: 8.
@@ -541,6 +518,7 @@ term_parser: LPAREN ID VERNAC_SEPARATOR
 ## Ends in an error in state: 45.
 ##
 ## atom -> LPAREN top . RPAREN [ VERNAC_SEPARATOR RPAREN LPAREN KWD_UNKNOWN KWD_UNIVERSE KWD_IN ID EQUAL EOF COLON ARROW ]
+## top -> top . COLON term [ RPAREN COLON ]
 ##
 ## The known suffix of the stack is as follows:
 ## LPAREN top
@@ -550,19 +528,19 @@ term_parser: LPAREN ID VERNAC_SEPARATOR
 ## accurate view of the past (what has been recognized so far), they
 ## may provide an INCOMPLETE view of the future (what was expected next).
 ## In state 26, spurious reduction of production term -> fact
-## In state 47, spurious reduction of production top -> term
+## In state 49, spurious reduction of production top -> term
 ##
 
 Missing `)` after $0, to close the parenthesised term.
 
 term_parser: ID COLON VERNAC_VARIANT_S
 ##
-## Ends in an error in state: 48.
+## Ends in an error in state: 47.
 ##
-## top -> term COLON . term [ VERNAC_SEPARATOR RPAREN EOF ]
+## top -> top COLON . term [ VERNAC_SEPARATOR RPAREN EOF COLON ]
 ##
 ## The known suffix of the stack is as follows:
-## term COLON
+## top COLON
 ##
 
 I'm currently parsing an ascription.
@@ -572,20 +550,78 @@ For example:
 
 program_parser: VERNAC_CHECK ID RPAREN
 ##
-## Ends in an error in state: 56.
+## Ends in an error in state: 54.
 ##
-## program_parser -> command . VERNAC_SEPARATOR EOF [ # ]
+## command -> VERNAC_CHECK top . [ VERNAC_SEPARATOR ]
+## top -> top . COLON term [ VERNAC_SEPARATOR COLON ]
 ##
 ## The known suffix of the stack is as follows:
-## command
+## VERNAC_CHECK top
 ##
 ## WARNING: This example involves spurious reductions.
 ## This implies that, although the LR(1) items shown above provide an
 ## accurate view of the past (what has been recognized so far), they
 ## may provide an INCOMPLETE view of the future (what was expected next).
 ## In state 26, spurious reduction of production term -> fact
-## In state 47, spurious reduction of production top -> term
-## In state 54, spurious reduction of production command -> VERNAC_CHECK top
+## In state 49, spurious reduction of production top -> term
+##
+
+Missing a `;;` after $0, to close the command. 
+For example:
+> $1 $0;;
+
+program_parser: VERNAC_ELABORATE ID VERNAC_VARIANT_S
+##
+## Ends in an error in state: 52.
+##
+## command -> VERNAC_ELABORATE top . [ VERNAC_SEPARATOR ]
+## top -> top . COLON term [ VERNAC_SEPARATOR COLON ]
+##
+## The known suffix of the stack is as follows:
+## VERNAC_ELABORATE top
+##
+## WARNING: This example involves spurious reductions.
+## This implies that, although the LR(1) items shown above provide an
+## accurate view of the past (what has been recognized so far), they
+## may provide an INCOMPLETE view of the future (what was expected next).
+## In state 26, spurious reduction of production term -> fact
+## In state 49, spurious reduction of production top -> term
+##
+
+Missing a `;;` after $0, to close the command. 
+For example:
+> $1 $0;;
+
+program_parser: VERNAC_EVAL ID VERNAC_VARIANT_S
+##
+## Ends in an error in state: 50.
+##
+## command -> VERNAC_EVAL top . [ VERNAC_SEPARATOR ]
+## top -> top . COLON term [ VERNAC_SEPARATOR COLON ]
+##
+## The known suffix of the stack is as follows:
+## VERNAC_EVAL top
+##
+## WARNING: This example involves spurious reductions.
+## This implies that, although the LR(1) items shown above provide an
+## accurate view of the past (what has been recognized so far), they
+## may provide an INCOMPLETE view of the future (what was expected next).
+## In state 26, spurious reduction of production term -> fact
+## In state 49, spurious reduction of production top -> term
+##
+
+Missing a `;;` after $0, to close the command. 
+For example:
+> $1 $0;;
+
+program_parser: VERNAC_SET VERNAC_VARIANT VERNAC_VARIANT_G VERNAC_EVAL
+##
+## Ends in an error in state: 56.
+##
+## program_parser -> command . VERNAC_SEPARATOR EOF [ # ]
+##
+## The known suffix of the stack is as follows:
+## command
 ##
 
 Missing a `;;` after $0, to close the command. 
