@@ -7,6 +7,7 @@
   [@@@coverage exclude_file]
   open Ast
   open Common.Id
+  open Kernel.Variant
 %}
 
 /* Token definitions 
@@ -19,7 +20,8 @@
 %token LPAREN RPAREN
 %token KWD_UNIVERSE KWD_LAMBDA KWD_UNKNOWN KWD_FORALL
 %token KWD_LET KWD_IN
-%token VERNAC_CHECK VERNAC_EVAL VERNAC_ELABORATE VERNAC_SEPARATOR
+%token VERNAC_CHECK VERNAC_EVAL VERNAC_ELABORATE VERNAC_SEPARATOR VERNAC_SET 
+%token VERNAC_VARIANT VERNAC_VARIANT_G VERNAC_VARIANT_S VERNAC_VARIANT_N
 %token EOF
 
 /* This reduces the number of error states.
@@ -42,9 +44,15 @@ term_parser :
   t=term; EOF   { t }
 
 command :
-| VERNAC_EVAL;t=term; VERNAC_SEPARATOR                       { Eval t }
-| VERNAC_CHECK; t=term; COLON; ty=term; VERNAC_SEPARATOR     { Check (t, ty) }
-| VERNAC_ELABORATE; t=term; VERNAC_SEPARATOR                 { Elab t }
+| VERNAC_EVAL;t=term; VERNAC_SEPARATOR                         { Eval t }
+| VERNAC_CHECK; t=term; COLON; ty=term; VERNAC_SEPARATOR       { Check (t, ty) }
+| VERNAC_ELABORATE; t=term; VERNAC_SEPARATOR                   { Elab t }
+| VERNAC_SET; VERNAC_VARIANT ; var=variant; VERNAC_SEPARATOR   { SetVariant var }
+
+variant : 
+| VERNAC_VARIANT_G        { G }
+| VERNAC_VARIANT_N        { N }
+| VERNAC_VARIANT_S        { S }
 
 id :
 | x=ID { Name.of_string x }

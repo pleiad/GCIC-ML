@@ -5,6 +5,7 @@ type command =
   | Eval of Kernel.Ast.term
   | Check of Kernel.Ast.term * Kernel.Ast.term
   | Elab of Kernel.Ast.term
+  | SetVariant of Kernel.Variant.t
 
 val string_of_command : command -> string
 

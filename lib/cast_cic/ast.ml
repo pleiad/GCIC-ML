@@ -63,7 +63,7 @@ let head : term -> (head, string) result = function
     at the provided level *)
 let germ i : head -> term = function
   | HProd ->
-    let cprod = Kernel.Variants.cast_universe_level i in
+    let cprod = Kernel.Variant.cast_universe_level i in
     let univ = Universe cprod in
     if cprod >= 0
     then Prod { id = Id.Name.of_string "__"; dom = Unknown univ; body = Unknown univ }
@@ -73,7 +73,7 @@ let germ i : head -> term = function
 (** Checks if a term corresponds to a germ at the provided universe level *)
 let is_germ i : term -> bool = function
   | Prod { id = _; dom = Unknown (Universe j); body = Unknown (Universe k) } ->
-    Kernel.Variants.cast_universe_level i = j && j = k && j >= 0
+    Kernel.Variant.cast_universe_level i = j && j = k && j >= 0
   | Err (Universe j) -> i = j
   | Universe j -> j < i
   | _ -> false
@@ -85,8 +85,8 @@ let is_germ i : term -> bool = function
   *)
 let is_germ_for_gte_level i : term -> bool = function
   | Prod { id = _; dom = Unknown (Universe j); body = Unknown (Universe k) } ->
-    j >= Kernel.Variants.cast_universe_level i && j = k && j >= 0
-  | Err (Universe j) -> j = i && Kernel.Variants.cast_universe_level i < 0
+    j >= Kernel.Variant.cast_universe_level i && j = k && j >= 0
+  | Err (Universe j) -> j = i && Kernel.Variant.cast_universe_level i < 0
   | _ -> false
 
 (** Checks if a term is in neutral form *)

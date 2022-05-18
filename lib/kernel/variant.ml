@@ -2,17 +2,30 @@
     the interface surrounding them *)
 
 (** GCIC variants: Gradual, Normalizing and Shift *)
-type gcic_variant =
+type t =
   | G
   | N
   | S
 
-(** Sets the current active variant *)
-val set_variant : gcic_variant -> unit
+let to_string = function
+  | G -> "G"
+  | N -> "N"
+  | S -> "S"
+
+(** Parameter specifying the GCIC variant *)
+let variant : t ref = ref N
+
+let set_variant v = variant := v
 
 (** Computes the level of the universe of a dependent product, 
     given the levels of its domain and codomain  *)
-val product_universe_level : int -> int -> int
+let product_universe_level i j =
+  match !variant with
+  | G | N -> max i j
+  | S -> max i j + 1
 
 (** Computes the level of the universe for a cast between (? -> ?) and ? *)
-val cast_universe_level : int -> int
+let cast_universe_level i =
+  match !variant with
+  | G -> i
+  | N | S -> i - 1
