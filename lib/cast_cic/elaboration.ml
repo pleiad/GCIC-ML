@@ -94,7 +94,7 @@ let rec elaborate ctx (term : Kernel.Ast.term)
     Ok (Ast.App (t', u'), Ast.subst1 id u' body)
   (* Extra rules *)
   | Ascription (t, ty) ->
-    let* ty', _ = elaborate ctx ty in
+    let* ty', _ = elab_univ ctx ty in
     let* t' = check_elab ctx t ty' in
     Ok (t', ty')
 
