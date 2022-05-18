@@ -18,12 +18,12 @@ let string_of_command : command -> string = function
 
 type cmd_result =
   | Reduction of Cast_cic.Ast.term
-  | Check
+  | Unit
   | Elaboration of Cast_cic.Ast.term
 
 let string_of_cmd_result : cmd_result -> string = function
   | Reduction t -> Cast_cic.Ast.to_string t
-  | Check -> "OK"
+  | Unit -> "OK"
   | Elaboration t -> Cast_cic.Ast.to_string t
 
 type execute_error =
@@ -56,7 +56,7 @@ let execute_check term ty : (cmd_result, execute_error) result =
   let* elab_term, _ = elaborate empty_ctx term in
   let* expected_ty, _ = elaborate empty_ctx ty in
   let* () = check_type empty_ctx elab_term expected_ty in
-  Ok Check
+  Ok Unit
 
 let execute_elab term : (cmd_result, execute_error) result =
   let open Cast_cic.Elaboration in
@@ -66,7 +66,7 @@ let execute_elab term : (cmd_result, execute_error) result =
 
 let execute_set_variant var : (cmd_result, execute_error) result =
   Kernel.Variant.set_variant var;
-  Ok (Check)
+  Ok Unit
 
 let execute cmd : (cmd_result, execute_error) result =
   match cmd with
