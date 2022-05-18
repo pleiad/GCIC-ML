@@ -12,6 +12,7 @@ type term =
   | Prod of (Name.t option * term) list * term
   | Unknown of int
   | LetIn of (Name.t * term * term * term)
+  | Ascription of term * term
 
 (** Returns the stringified version of a term *)
 let rec to_string = function
@@ -28,6 +29,7 @@ let rec to_string = function
       (to_string ty)
       (to_string t1)
       (to_string t2)
+  | Ascription (t, ty) -> asprintf "%s : %s" (to_string t) (to_string ty)
 
 and string_of_arg (id, dom) =
   let string_of_name = function
@@ -49,6 +51,7 @@ let rec eq_term t1 t2 =
   | Unknown i, Unknown j -> i == j
   | LetIn (id1, ty1, t11, t12), LetIn (id2, ty2, t21, t22) ->
     id1 = id2 && eq_term ty1 ty2 && eq_term t11 t21 && eq_term t12 t22
+  | Ascription (t1, ty1), Ascription (t2, ty2) -> eq_term t1 t2 && eq_term ty1 ty2
   | _ -> false
 
 and eq_arg (id1, dom1) (id2, dom2) = id1 = id2 && eq_term dom1 dom2

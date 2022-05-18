@@ -10,10 +10,6 @@ let tests_eval () =
     (Ok (Eval (Universe 0)))
     (parse_command "eval Type 0;;");
   Alcotest.(check bool)
-    "Fails with :"
-    true
-    (parse_command "eval Type 0 : ?0;;" |> Result.is_error);
-  Alcotest.(check bool)
     "Fails if no expression"
     true
     (parse_command "eval;;" |> Result.is_error);
@@ -43,10 +39,6 @@ let tests_elaborate () =
     "elab command"
     (Ok (Elab (Universe 0)))
     (parse_command "elab Type 0;;");
-  Alcotest.(check bool)
-    "Fails with :"
-    true
-    (parse_command "elab Type 0 : ?0;;" |> Result.is_error);
   Alcotest.(check bool)
     "Fails if no expression"
     true
