@@ -20,7 +20,7 @@ val eq_term : term -> term -> bool
 (** Vernacular commands in GCIC *)
 type command =
   | Eval of term
-  | Check of term * term
+  | Check of term
   | Elab of term
   | SetVariant of Kernel.Variant.t
 

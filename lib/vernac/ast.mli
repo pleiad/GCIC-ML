@@ -3,7 +3,7 @@
 (** The AST for the commands *)
 type command =
   | Eval of Kernel.Ast.term
-  | Check of Kernel.Ast.term * Kernel.Ast.term
+  | Check of Kernel.Ast.term
   | Elab of Kernel.Ast.term
   | SetVariant of Kernel.Variant.t
 
