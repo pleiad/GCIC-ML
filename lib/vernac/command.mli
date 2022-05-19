@@ -6,5 +6,3 @@ type 'a t =
   | Check of 'a
   | Elab of 'a
   | SetVariant of Kernel.Variant.t
-
-
