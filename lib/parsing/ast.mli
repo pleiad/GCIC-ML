@@ -10,6 +10,7 @@ type term =
   | Prod of (Name.t option * term) list * term
   | Unknown of int
   | LetIn of (Name.t * term * term * term)
+  | Ascription of term * term
 
 (** Returns the stringified version of a term *)
 val to_string : term -> string

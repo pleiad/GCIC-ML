@@ -25,7 +25,8 @@ let state checkpoint : int =
    delimited by the positions [pos1] and [pos2]. *)
 
 let show text positions =
-  E.extract text positions |> E.sanitize |> E.compress |> E.shorten 20 (* max width 43 *)
+  E.extract text positions |> E.sanitize |> E.compress |> E.shorten 20
+(* max width 43 *)
 
 (* [get text checkpoint i] extracts and shows the range of the input text that
    corresponds to the [i]-th stack cell. The top stack cell is numbered zero. *)

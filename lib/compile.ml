@@ -14,6 +14,7 @@ let rec of_parsed_term (t : Parsing.Ast.term) : Kernel.Ast.term =
   | LetIn (id, ty, t1, t2) ->
     let f = Kernel.Ast.Lambda { id; dom = of_parsed_term ty; body = of_parsed_term t2 } in
     App (f, of_parsed_term t1)
+  | Ascription (t, ty) -> Ascription (of_parsed_term t, of_parsed_term ty)
 
 and expand_lambda (id, dom) body =
   Lambda { id = from_opt_name id; dom = of_parsed_term dom; body }

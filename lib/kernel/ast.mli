@@ -9,6 +9,8 @@ type term =
   | Lambda of fun_info
   | Prod of fun_info
   | Unknown of int
+  (* Extras *)
+  | Ascription of term * term
 
 and fun_info =
   { id : Name.t

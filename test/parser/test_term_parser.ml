@@ -52,6 +52,35 @@ let tests_let () =
   Alcotest.(check bool) "let is reserved" true (parse_term "let" |> Result.is_error);
   Alcotest.(check bool) "in is reserved" true (parse_term "in" |> Result.is_error)
 
+let tests_ascription () =
+  Alcotest.check
+    pterm
+    "ascription"
+    (Ok (Ascription (var "x", Unknown 0)))
+    (parse_term "x : ?0");
+  Alcotest.check
+    pterm
+    "multiple ascription"
+    (Ok
+       (Ascription (Ascription (Ascription (Universe 0, Unknown 1), Universe 1), Unknown 2)))
+    (parse_term "Type 0 : ?1 : Type1 : ?2");
+  Alcotest.(check bool)
+    "ascription in lambda arg fails"
+    true
+    (parse_term "fun (x : ?0 : ?1). x" |> Result.is_error);
+  Alcotest.(check bool)
+    "ascription in pi arg fails"
+    true
+    (parse_term "forall (x : ?0 : ?1), x" |> Result.is_error);
+  Alcotest.(check bool)
+    "ascription in let binding type fails"
+    true
+    (parse_term "let x : ?0 : ?1 = Type0 in x" |> Result.is_error);
+  Alcotest.(check bool)
+    "ascription in let binding body fails"
+    true
+    (parse_term "let x : ?0 = Type0 : Type1 in x" |> Result.is_error)
+
 let tests_unicode () =
   Alcotest.check pterm "universe" (Ok (Universe 0)) (parse_term "□0");
   Alcotest.check
@@ -74,5 +103,6 @@ let tests =
   [ "products", `Quick, product_notation
   ; "application", `Quick, tests_application
   ; "let binding", `Quick, tests_let
+  ; "ascriptions", `Quick, tests_ascription
   ; "unicode", `Quick, tests_unicode
   ]

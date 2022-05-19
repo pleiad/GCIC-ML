@@ -27,7 +27,7 @@
 /* This reduces the number of error states.
    It is useful for defining better error messages.
  */
-%on_error_reduce term 
+%on_error_reduce term
 
 /* Specify starting production */
 %start program_parser term_parser
@@ -41,12 +41,12 @@ program_parser :
   cmd=command; VERNAC_SEPARATOR; EOF   { cmd }
 
 term_parser :
-  t=term; EOF   { t }
+  t=top; EOF   { t }
 
 command :
-| VERNAC_EVAL;t=term                       { Eval t }
-| VERNAC_CHECK; t=term                     { Check t }
-| VERNAC_ELABORATE; t=term                 { Elab t }
+| VERNAC_EVAL; t=top                       { Eval t }
+| VERNAC_CHECK; t=top                      { Check t }
+| VERNAC_ELABORATE; t=top                  { Elab t }
 | VERNAC_SET; VERNAC_VARIANT ; var=variant { SetVariant var }
 
 variant : 
@@ -64,6 +64,10 @@ arg :
 %inline args :
 | args=nonempty_list(arg) { List.flatten(args) }
 
+top :
+| t=top; COLON; ty=term                                           { Ascription (t, ty) }
+| t=term                                                          { t }
+
 term :
 | KWD_LAMBDA; args=args; DOT; body=term                           { Lambda (args, body) }
 | KWD_FORALL; args=args; COMMA; body=term                         { Prod (args, body) }
@@ -76,7 +80,7 @@ fact :
 | t=atom                                               { t }
 
 atom : 
-| LPAREN; t=term; RPAREN                               { t }
+| LPAREN; t=top; RPAREN                                { t }
 | id=id                                                { Var id }
 | KWD_UNIVERSE; i=INT                                  { Universe i }
 | KWD_UNKNOWN; i=INT                                   { Unknown i }

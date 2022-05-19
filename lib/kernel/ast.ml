@@ -9,6 +9,8 @@ type term =
   | Lambda of fun_info
   | Prod of fun_info
   | Unknown of int
+  (* Extras *)
+  | Ascription of term * term
 
 and fun_info =
   { id : Name.t
@@ -28,3 +30,4 @@ let rec to_string =
   | Prod { id; dom; body } ->
     asprintf "Prod %s : %s. %s" (Name.to_string id) (to_string dom) (to_string body)
   | Unknown i -> asprintf "?_%i" i
+  | Ascription (t, ty) -> asprintf "%s : %s" (to_string t) (to_string ty)
