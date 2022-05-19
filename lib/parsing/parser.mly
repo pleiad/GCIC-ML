@@ -8,6 +8,13 @@
   open Ast
   open Common.Id
   open Kernel.Variant
+
+  let mk_definition name args ty' body =
+    let open Vernac.Command in
+    let term = Lambda (args, Ascription (body, ty')) in
+    let ty  = Prod (args, ty') in
+    let const_def = Constant_def { name; ty; term } in
+    Definition const_def
 %}
 
 /* Token definitions 
@@ -50,8 +57,8 @@ command :
 | VERNAC_ELABORATE; t=top                  { Elab t }
 | VERNAC_SET; VERNAC_VARIANT; var=variant  { SetVariant var }
 // def foo (x : Type1) : Type1 = ...
-| VERNAC_DEFINITION; id=id; args=args; COLON; ty=term; EQUAL ; body=top  
- { Definition (id, args, body) }
+| VERNAC_DEFINITION; id=id; args=list(arg); COLON; ty=term; EQUAL ; body=top  
+ { mk_definition id (List.flatten args) ty body }
 
 variant : 
 | VERNAC_VARIANT_G        { G }

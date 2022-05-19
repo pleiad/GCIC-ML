@@ -1,9 +1,12 @@
-open Parsing
+open Vernac
 open Common.Id
+
+type parsed_term = Parsing.Ast.term
+type term = Kernel.Ast.term
 
 let from_opt_name id = Option.value id ~default:Name.default
 
-let rec of_parsed_term (t : Parsing.Ast.term) : Kernel.Ast.term =
+let rec of_parsed_term (t : parsed_term) : term =
   match t with
   | Var x -> Var x
   | Universe i -> Universe i
@@ -22,23 +25,23 @@ and expand_lambda (id, dom) body =
 and expand_prod (id, dom) body =
   Prod { id = from_opt_name id; dom = of_parsed_term dom; body }
 
-let of_parsed_command (cmd : Parsing.Ast.term Vernac.Command.t)
-    : Kernel.Ast.term Vernac.Command.t
-  =
-  match cmd with
+let of_parsed_gdef
+    : parsed_term Command.global_definition -> term Command.global_definition
+  = function
+  | Constant_def { name; ty; term } ->
+    Constant_def { name; ty = of_parsed_term ty; term = of_parsed_term term }
+
+let of_parsed_command : parsed_term Command.t -> term Command.t = function
   | Eval t -> Eval (of_parsed_term t)
   | Check t -> Check (of_parsed_term t)
   | Elab t -> Elab (of_parsed_term t)
   | SetVariant v -> SetVariant v
-  | Definition (id, args, body) -> Definition (id, of_parsed_args args, of_parsed_term body)
-and of_parsed_arg (id, dom) = 
-   (id, of_parsed_term dom)
-and of_parsed_args args = List.map of_parsed_arg args
+  | Definition gdef -> Definition (of_parsed_gdef gdef)
 
 (** Compiles a string and returns the stringified version of the AST *)
 let compile (line : string) =
   let open Vernac.Exec in
-  match Lex_and_parse.parse_command line with
+  match Parsing.Lex_and_parse.parse_command line with
   | Ok cmd ->
     of_parsed_command cmd
     |> execute
