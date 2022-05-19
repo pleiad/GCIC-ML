@@ -97,6 +97,7 @@ let rec elaborate ctx (term : Kernel.Ast.term)
     let* ty', _ = elab_univ ctx ty in
     let* t' = check_elab ctx t ty' in
     Ok (t', ty')
+  | UnknownT i -> Ok (Ast.Unknown (Ast.Universe i), Ast.Universe i)
 
 and check_elab ctx term (s_ty : Ast.term) : (Ast.term, [> elaboration_error ]) result =
   let* t', ty = elaborate ctx term in

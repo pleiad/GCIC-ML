@@ -18,6 +18,7 @@ let newline = [%sedlex.regexp? '\r' | '\n' | "\r\n"]
 let lambda = [%sedlex.regexp? "fun" | 0x03bb]
 let forall = [%sedlex.regexp? "forall" | 0x2200]
 let unknown = [%sedlex.regexp? '?']
+let unknownT = [%sedlex.regexp? "?T"]
 let arrow = [%sedlex.regexp? "->" | 0x2192]
 
 let rec token lexbuf =
@@ -26,6 +27,7 @@ let rec token lexbuf =
   | lambda -> KWD_LAMBDA
   | forall -> KWD_FORALL
   | unknown -> KWD_UNKNOWN
+  | unknownT -> KWD_UNKNOWN_T
   | "let" -> KWD_LET
   | "in" -> KWD_IN
   | "check" -> VERNAC_CHECK

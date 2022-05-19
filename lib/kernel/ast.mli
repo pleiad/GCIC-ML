@@ -11,6 +11,7 @@ type term =
   | Unknown of int
   (* Extras *)
   | Ascription of term * term
+  | UnknownT of int
 
 and fun_info =
   { id : Name.t
