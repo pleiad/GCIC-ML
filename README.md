@@ -61,13 +61,15 @@ We have some additional commands to make it easier to develop in Ocaml.
     ```
 
 #### Better REPL
-For a better repl experience install [rlwrap](https://github.com/hanslub42/rlwrap).
+For a better repl experience install [rlwrap](https://github.com/hanslub42/rlwrap). This will provide you with multiple features, such as: auto-completion, history, search, etc. (check rlwrap's documentation for more info).
 ```bash
 # OS X 
 brew install rlwrap
 # Linux
 apt install rlwrap
 ```
+Then you can simply run the program as before `esy repl`.
+You should see the changes in effect immediately. 
 
 ## Resources
 - [Gradualizing the Calculus of Inductive Constructions (paper)](https://dl.acm.org/doi/10.1145/3495528)
