@@ -1,4 +1,5 @@
 open Common.Std
+open Common.Id
 
 type cmd_result =
   | Reduction of Cast_cic.Ast.term
@@ -62,3 +63,4 @@ let execute cmd : (cmd_result, execute_error) result =
   | Check t -> execute_check t
   | Elab t -> execute_elab t
   | SetVariant v -> execute_set_variant v
+  | Definition (_id, _args, _body) -> Ok Unit

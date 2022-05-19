@@ -20,8 +20,9 @@
 %token LPAREN RPAREN
 %token KWD_UNIVERSE KWD_LAMBDA KWD_UNKNOWN KWD_FORALL
 %token KWD_LET KWD_IN
-%token VERNAC_CHECK VERNAC_EVAL VERNAC_ELABORATE VERNAC_SEPARATOR VERNAC_SET 
+%token VERNAC_CHECK VERNAC_EVAL VERNAC_ELABORATE VERNAC_DEFINITION VERNAC_SET 
 %token VERNAC_VARIANT VERNAC_VARIANT_G VERNAC_VARIANT_S VERNAC_VARIANT_N
+%token VERNAC_SEPARATOR
 %token EOF
 
 /* This reduces the number of error states.
@@ -47,7 +48,10 @@ command :
 | VERNAC_EVAL; t=top                       { Eval t }
 | VERNAC_CHECK; t=top                      { Check t }
 | VERNAC_ELABORATE; t=top                  { Elab t }
-| VERNAC_SET; VERNAC_VARIANT ; var=variant { SetVariant var }
+| VERNAC_SET; VERNAC_VARIANT; var=variant  { SetVariant var }
+// def foo (x : Type1) : Type1 = ...
+| VERNAC_DEFINITION; id=id; args=args; COLON; ty=term; EQUAL ; body=top  
+ { Definition (id, args, body) }
 
 variant : 
 | VERNAC_VARIANT_G        { G }

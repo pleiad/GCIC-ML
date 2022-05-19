@@ -31,6 +31,7 @@ let rec token lexbuf =
   | "check" -> VERNAC_CHECK
   | "eval" -> VERNAC_EVAL
   | "elab" -> VERNAC_ELABORATE
+  | "def" -> VERNAC_DEFINITION
   | "set" -> VERNAC_SET
   | "variant" -> VERNAC_VARIANT
   | ";;" -> VERNAC_SEPARATOR

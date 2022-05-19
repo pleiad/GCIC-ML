@@ -30,6 +30,10 @@ let of_parsed_command (cmd : Parsing.Ast.term Vernac.Command.t)
   | Check t -> Check (of_parsed_term t)
   | Elab t -> Elab (of_parsed_term t)
   | SetVariant v -> SetVariant v
+  | Definition (id, args, body) -> Definition (id, of_parsed_args args, of_parsed_term body)
+and of_parsed_arg (id, dom) = 
+   (id, of_parsed_term dom)
+and of_parsed_args args = List.map of_parsed_arg args
 
 (** Compiles a string and returns the stringified version of the AST *)
 let compile (line : string) =
