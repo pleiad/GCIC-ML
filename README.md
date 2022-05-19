@@ -34,7 +34,7 @@ other option, consider checking [esy's documentation](https://esy.sh/docs/en/get
     ```
 4. Run it and test it out.
    ```bash
-   esy run
+   esy repl
    ```
 
 Now you should be able to play with GCIC or start developing :tada:!
@@ -59,6 +59,15 @@ We have some additional commands to make it easier to develop in Ocaml.
     ```bash
     esy format
     ```
+
+#### Better REPL
+For a better repl experience install [rlwrap](https://github.com/hanslub42/rlwrap).
+```bash
+# OS X 
+brew install rlwrap
+# Linux
+apt install rlwrap
+```
 
 ## Resources
 - [Gradualizing the Calculus of Inductive Constructions (paper)](https://dl.acm.org/doi/10.1145/3495528)
