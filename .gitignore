@@ -37,3 +37,7 @@ node_modules/
 
 # bisect
 _coverage/
+*.coverage
+
+# logs
+errors.log

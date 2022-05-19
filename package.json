@@ -5,7 +5,7 @@
     "test": "dune runtest",
     "coverage": "dune runtest --instrument-with=bisect_ppx --force",
     "report": "bisect-ppx-report html",
-    "run": "dune exec gcic",
+    "repl": "bash scripts/repl.sh",
     "format": "dune build @fmt --auto-promote",
     "update-parser-errors": "sh lib/parsing/update_error_msgs.sh"
   },
