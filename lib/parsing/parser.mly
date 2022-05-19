@@ -33,7 +33,7 @@
 %start program_parser term_parser
 
 /* Types for the result of productions */
-%type <Ast.command> program_parser
+%type <Ast.term Vernac.Command.t> program_parser
 %type <Ast.term> term_parser
 
 %% /* Start grammar productions */

@@ -1,20 +1,5 @@
 open Common.Std
 
-(** This module specifies the AST for commands *)
-
-(** The AST for the commands *)
-type command =
-  | Eval of Kernel.Ast.term
-  | Check of Kernel.Ast.term
-  | Elab of Kernel.Ast.term
-  | SetVariant of Kernel.Variant.t
-
-let string_of_command : command -> string = function
-  | Eval t -> "eval " ^ Kernel.Ast.to_string t
-  | Check t -> "check" ^ Kernel.Ast.to_string t
-  | Elab t -> "elab " ^ Kernel.Ast.to_string t
-  | SetVariant v -> "set variant " ^ Kernel.Variant.to_string v
-
 type cmd_result =
   | Reduction of Cast_cic.Ast.term
   | Unit
@@ -71,6 +56,7 @@ let execute_set_variant var : (cmd_result, execute_error) result =
   Ok Unit
 
 let execute cmd : (cmd_result, execute_error) result =
+  let open Command in
   match cmd with
   | Eval t -> execute_eval t
   | Check t -> execute_check t

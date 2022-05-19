@@ -22,7 +22,9 @@ and expand_lambda (id, dom) body =
 and expand_prod (id, dom) body =
   Prod { id = from_opt_name id; dom = of_parsed_term dom; body }
 
-let of_parsed_command (cmd : Parsing.Ast.command) : Vernac.Ast.command =
+let of_parsed_command (cmd : Parsing.Ast.term Vernac.Command.t)
+    : Kernel.Ast.term Vernac.Command.t
+  =
   match cmd with
   | Eval t -> Eval (of_parsed_term t)
   | Check t -> Check (of_parsed_term t)
@@ -31,7 +33,7 @@ let of_parsed_command (cmd : Parsing.Ast.command) : Vernac.Ast.command =
 
 (** Compiles a string and returns the stringified version of the AST *)
 let compile (line : string) =
-  let open Vernac.Ast in
+  let open Vernac.Exec in
   match Lex_and_parse.parse_command line with
   | Ok cmd ->
     of_parsed_command cmd

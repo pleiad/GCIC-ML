@@ -17,16 +17,3 @@ val to_string : term -> string
 
 (** Equality predicate for terms *)
 val eq_term : term -> term -> bool
-
-(** Vernacular commands in GCIC *)
-type command =
-  | Eval of term
-  | Check of term
-  | Elab of term
-  | SetVariant of Kernel.Variant.t
-
-(** Returns the stringified version of a command *)
-val string_of_command : command -> string
-
-(** Equality predicate for commands *)
-val eq_command : command -> command -> bool

@@ -56,23 +56,3 @@ let rec eq_term t1 t2 =
 
 and eq_arg (id1, dom1) (id2, dom2) = id1 = id2 && eq_term dom1 dom2
 and eq_args args1 args2 = List.for_all2 eq_arg args1 args2
-
-type command =
-  | Eval of term
-  | Check of term
-  | Elab of term
-  | SetVariant of Kernel.Variant.t
-
-let string_of_command : command -> string = function
-  | Eval t -> "eval " ^ to_string t
-  | Check t -> Format.asprintf "check %s" (to_string t)
-  | Elab t -> "elab " ^ to_string t
-  | SetVariant v -> "set variant " ^ Kernel.Variant.to_string v
-
-let eq_command cmd1 cmd2 =
-  match cmd1, cmd2 with
-  | Eval t1, Eval t2 -> eq_term t1 t2
-  | Check t1, Check t2 -> eq_term t1 t2
-  | Elab t1, Elab t2 -> eq_term t1 t2
-  | SetVariant v1, SetVariant v2 -> v1 = v2
-  | _ -> false
