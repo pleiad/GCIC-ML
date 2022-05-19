@@ -7,4 +7,4 @@ val parse_term : string -> (Ast.term, string) result
 
 (** Given a string to read a command from, parse the
 command and return it if successful *)
-val parse_command : string -> (Ast.command, string) result
+val parse_command : string -> (Ast.term Vernac.Command.t, string) result

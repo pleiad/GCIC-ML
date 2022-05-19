@@ -22,7 +22,9 @@ and expand_lambda (id, dom) body =
 and expand_prod (id, dom) body =
   Prod { id = from_opt_name id; dom = of_parsed_term dom; body }
 
-let of_parsed_command (cmd : Parsing.Ast.command) : Vernac.Command.t =
+let of_parsed_command (cmd : Parsing.Ast.term Vernac.Command.t)
+    : Kernel.Ast.term Vernac.Command.t
+  =
   match cmd with
   | Eval t -> Eval (of_parsed_term t)
   | Check t -> Check (of_parsed_term t)
