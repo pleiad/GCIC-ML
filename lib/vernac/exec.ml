@@ -1,47 +1,49 @@
 open Common
 open Common.Std
+open Cast_cic
 
 type cmd_result =
-  | Reduction of Cast_cic.Ast.term
+  | Reduction of Ast.term
   | Unit
-  | Elaboration of Cast_cic.Ast.term
-  | Inference of Cast_cic.Ast.term
+  | Elaboration of Ast.term
+  | Inference of Ast.term
 
 let string_of_cmd_result : cmd_result -> string = function
-  | Reduction t -> Cast_cic.Ast.to_string t
+  | Reduction t -> Ast.to_string t
   | Unit -> "OK"
-  | Elaboration t -> Cast_cic.Ast.to_string t
-  | Inference t -> Cast_cic.Ast.to_string t
+  | Elaboration t -> Ast.to_string t
+  | Inference t -> Ast.to_string t
 
 type execute_error =
-  [ Cast_cic.Elaboration.elaboration_error
-  | Cast_cic.Typing.type_error
-  | Cast_cic.Reduction.reduction_error
+  [ Elaboration.elaboration_error
+  | Typing.type_error
+  | Reduction.reduction_error
   ]
 
 let string_of_error = function
-  | #Cast_cic.Elaboration.elaboration_error as e ->
-    "[elaboration_error] " ^ Cast_cic.Elaboration.string_of_error e
-  | #Cast_cic.Typing.type_error as e ->
-    "[type_error] " ^ Cast_cic.Typing.string_of_error e
-  | #Cast_cic.Reduction.reduction_error as e ->
-    "[reduction_error] " ^ Cast_cic.Reduction.string_of_error e
+  | #Elaboration.elaboration_error as e ->
+    "[elaboration_error] " ^ Elaboration.string_of_error e
+  | #Typing.type_error as e -> "[type_error] " ^ Typing.string_of_error e
+  | #Reduction.reduction_error as e -> "[reduction_error] " ^ Reduction.string_of_error e
 
 let execute_eval term : (cmd_result, execute_error) result =
-  let open Cast_cic.Elaboration in
-  let open Cast_cic.Reduction in
+  let open Elaboration in
+  let open Reduction in
   let* elab_term, _ = elaborate Context.empty term in
+  let* v = reduce elab_term in
   Ok (Reduction v)
 
 let execute_check term : (cmd_result, execute_error) result =
-  let open Cast_cic.Elaboration in
-  let open Cast_cic.Typing in
-  let open Cast_cic.Reduction in
-  let empty_ctx = Context.empty in
+  let open Elaboration in
+  let open Typing in
+  let open Reduction in
+  let* elab_term, _ = elaborate Context.empty term in
+  let* ty = infer_type Context.empty elab_term in
+  let* v = reduce ty in
   Ok (Inference v)
 
 let execute_elab term : (cmd_result, execute_error) result =
-  let open Cast_cic.Elaboration in
+  let open Elaboration in
   let* elab_term, _ = elaborate Context.empty term in
   Ok (Elaboration elab_term)
 
