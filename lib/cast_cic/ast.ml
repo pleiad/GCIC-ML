@@ -118,27 +118,31 @@ let is_canonical : term -> bool = function
   | t -> is_neutral t
 
 (** Performs substitution inside a term *)
-let rec subst1 x v = function
-  | Var y -> if x = y then v else Var y
+let rec subst ctx = function
+  | Var x ->
+    (match Context.lookup x ctx with
+    | Some (Some v) -> v
+    | _ -> Var x)
   | Universe i -> Universe i
-  | App (t, u) -> App (subst1 x v t, subst1 x v u)
+  | App (t, u) -> App (subst ctx t, subst ctx u)
   | Lambda fi ->
     Lambda
       { fi with
-        dom = subst1 x v fi.dom
-      ; body = (if x = fi.id then fi.body else subst1 x v fi.body)
+        dom = subst ctx fi.dom
+      ; body = subst (Context.add fi.id None ctx) fi.body
       }
   | Prod fi ->
     Prod
       { fi with
-        dom = subst1 x v fi.dom
-      ; body = (if x = fi.id then fi.body else subst1 x v fi.body)
+        dom = subst ctx fi.dom
+      ; body = subst (Context.add fi.id None ctx) fi.body
       }
-  | Unknown t -> Unknown (subst1 x v t)
-  | Err t -> Err (subst1 x v t)
+  | Unknown t -> Unknown (subst ctx t)
+  | Err t -> Err (subst ctx t)
   | Cast { source; target; term } ->
-    Cast
-      { source = subst1 x v source; target = subst1 x v target; term = subst1 x v term }
+    Cast { source = subst ctx source; target = subst ctx target; term = subst ctx term }
+
+let subst1 x v = subst Context.(add x (Some v) empty)
 
 (** Checks if two terms are identifiable up to alpha-renaming *)
 let rec alpha_equal t1 t2 =

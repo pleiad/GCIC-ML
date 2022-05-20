@@ -51,6 +51,9 @@ val is_neutral : term -> bool
 val is_canonical : term -> bool
 
 (** Performs substitution inside a term *)
+val subst : term option Context.t -> term -> term
+
+(** Performs substitution inside a term *)
 val subst1 : Id.Name.t -> term -> term -> term
 
 (** Checks if two terms are identifiable up to alpha-renaming *)
