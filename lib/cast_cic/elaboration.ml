@@ -1,5 +1,5 @@
 (** This module specifies the elaboration from GCIC to CastCIC *)
-open Context
+open Common
 
 open Common.Std
 open Common.Id
@@ -68,19 +68,19 @@ let rec elaborate ctx (term : Kernel.Ast.term)
   let open Kernel.Variant in
   match term with
   | Var x ->
-    (try Ok (Var x, NameMap.find x ctx) with
+    (try Ok (Var x, Context.find x ctx) with
     | Not_found -> Error (`Err_free_identifier x))
   | Universe i -> Ok (Universe i, Universe (i + 1))
   | Prod { id; dom; body } ->
     let* elab_dom, i = elab_univ ctx dom in
-    let extended_ctx = NameMap.add id elab_dom ctx in
+    let extended_ctx = Context.add id elab_dom ctx in
     let* elab_body, j = elab_univ extended_ctx body in
     Ok
       ( Ast.Prod { id; dom = elab_dom; body = elab_body }
       , Ast.Universe (product_universe_level i j) )
   | Lambda { id; dom; body } ->
     let* elab_dom, _ = elab_univ ctx dom in
-    let extended_ctx = NameMap.add id elab_dom ctx in
+    let extended_ctx = Context.add id elab_dom ctx in
     let* elab_body, elab_body_ty = elaborate extended_ctx body in
     Ok
       ( Ast.Lambda { id; dom = elab_dom; body = elab_body }

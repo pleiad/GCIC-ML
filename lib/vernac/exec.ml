@@ -1,3 +1,4 @@
+open Common
 open Common.Std
 
 type cmd_result =
@@ -29,26 +30,19 @@ let string_of_error = function
 let execute_eval term : (cmd_result, execute_error) result =
   let open Cast_cic.Elaboration in
   let open Cast_cic.Reduction in
-  let open Cast_cic.Context in
-  let* elab_term, _ = elaborate NameMap.empty term in
-  let* v = reduce elab_term in
+  let* elab_term, _ = elaborate Context.empty term in
   Ok (Reduction v)
 
 let execute_check term : (cmd_result, execute_error) result =
   let open Cast_cic.Elaboration in
   let open Cast_cic.Typing in
   let open Cast_cic.Reduction in
-  let open Cast_cic.Context in
-  let empty_ctx = NameMap.empty in
-  let* elab_term, _ = elaborate empty_ctx term in
-  let* ty = infer_type empty_ctx elab_term in
-  let* v = reduce ty in
+  let empty_ctx = Context.empty in
   Ok (Inference v)
 
 let execute_elab term : (cmd_result, execute_error) result =
   let open Cast_cic.Elaboration in
-  let open Cast_cic.Context in
-  let* elab_term, _ = elaborate NameMap.empty term in
+  let* elab_term, _ = elaborate Context.empty term in
   Ok (Elaboration elab_term)
 
 let execute_set_variant var : (cmd_result, execute_error) result =
