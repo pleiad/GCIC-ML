@@ -24,6 +24,7 @@ type term =
       ; target : term
       ; term : term
       }
+  | Const of Id.Name.t
 
 and fun_info =
   { id : Id.Name.t
@@ -46,6 +47,7 @@ let rec to_string (t : term) =
   | Err ty -> asprintf "err_%s" (to_string ty)
   | Cast { source; target; term } ->
     asprintf "<%s <- %s> %s" (to_string target) (to_string source) (to_string term)
+  | Const x -> Id.Name.to_string x
 
 (** Head constructors *)
 type head =
@@ -56,7 +58,7 @@ type head =
 let head : term -> (head, string) result = function
   | Prod _ -> Ok HProd
   | Universe i -> Ok (HUniverse i)
-  | Var _ | App (_, _) | Lambda _ | Unknown _ | Err _ | Cast _ ->
+  | Var _ | App (_, _) | Lambda _ | Unknown _ | Err _ | Cast _ | Const _ ->
     Error "invalid term to get head constructor"
 
 (** Returns the least precise type for the given head constructor, 
@@ -141,6 +143,7 @@ let rec subst ctx = function
   | Err t -> Err (subst ctx t)
   | Cast { source; target; term } ->
     Cast { source = subst ctx source; target = subst ctx target; term = subst ctx term }
+  | Const x -> Const x
 
 let subst1 x v = subst Context.(add x (Some v) empty)
 
@@ -168,6 +171,7 @@ let rec alpha_equal t1 t2 =
     alpha_equal ci1.source ci2.source
     && alpha_equal ci1.target ci2.target
     && alpha_equal ci1.term ci2.term
+  | Const x, Const y -> x = y
   | _ -> false
 
 (** Checks if two terms are alpha consistent *)
@@ -192,4 +196,8 @@ let rec alpha_consistent t1 t2 : bool =
   | Cast ci1, _ -> alpha_consistent ci1.term t2
   | _, Unknown _ -> true
   | Unknown _, _ -> true
+  | Const x, Const y -> x = y
   | _ -> false
+
+(** Global declarations. TODO: MOVE!!!! *)
+let global_decls = ref Context.empty

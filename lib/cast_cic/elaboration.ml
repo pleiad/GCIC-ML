@@ -97,6 +97,9 @@ let rec elaborate ctx (term : Kernel.Ast.term)
     let* ty', _ = elab_univ ctx ty in
     let* t' = check_elab ctx t ty' in
     Ok (t', ty')
+  | Const x ->
+    (try Ok (Const x, Context.find x !Ast.global_decls |> snd) with
+    | Not_found -> Error (`Err_free_identifier x))
 
 and check_elab ctx term (s_ty : Ast.term) : (Ast.term, [> elaboration_error ]) result =
   let* t', ty = elaborate ctx term in

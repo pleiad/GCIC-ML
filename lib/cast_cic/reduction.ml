@@ -6,11 +6,13 @@ open Ast
 type reduction_error =
   [ `Err_not_enough_fuel
   | `Err_stuck_term of term
+  | `Err_free_const
   ]
 
 let string_of_error = function
   | `Err_not_enough_fuel -> "not enough fuel"
   | `Err_stuck_term _term -> "stuck term"
+  | `Err_free_const -> "free constant"
 
 (** Checks if a term corresponds to a type *)
 let is_type : term -> bool = function
@@ -47,6 +49,7 @@ exception Stuck_term of term
 let reduce1 (term, cont) : state =
   match term, cont with
   (* Redexes *)
+  | Const x, _ -> Common.Context.find x !Ast.global_decls |> fst, cont
   (* Beta *)
   | Lambda { id; dom = _; body }, KApp_l u :: cont -> subst1 id u body, cont
   (* Prod-Unk *)
@@ -167,5 +170,6 @@ let fill_hole term = List.fold_left fill_hole1 term
 let step term =
   let initial_state = term, [] in
   (try Ok (reduce1 initial_state) with
-  | Stuck_term t -> Error (`Err_stuck_term t))
+  | Stuck_term t -> Error (`Err_stuck_term t)
+  | Not_found -> Error `Err_free_const)
   |> Result.map (fun (t, cont) -> fill_hole t cont)
