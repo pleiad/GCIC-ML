@@ -6,6 +6,8 @@ type term = Kernel.Ast.term
 
 let from_opt_name id = Option.value id ~default:Name.default
 
+(* For simplicity, any free identifier is treated as a Const (an identifier refering to a global declaration).
+   A better approach would be to have a list of global declarations and treat free identifiers as just free.  *)
 let rec of_parsed_term ?(ids : Name.t list = []) (t : parsed_term) : term =
   match t with
   | Var x -> if List.mem x ids then Var x else Const x
