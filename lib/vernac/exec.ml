@@ -55,16 +55,13 @@ let execute_set_variant var : (cmd_result, execute_error) result =
 let execute_definition gdef : (cmd_result, execute_error) result =
   let open Elaboration in
   let open Typing in
-  let open Reduction in
   let open Command in
   match gdef with
   | Constant_def { name; ty; term } ->
     let* elab_ty, _ = elab_univ Name.Map.empty ty in
-    let* norm_ty = reduce elab_ty in
-    let* elab_term = check_elab Name.Map.empty term norm_ty in
-    let* norm_term = reduce elab_term in
-    let* _ = check_type Name.Map.empty norm_term norm_ty in
-    Declarations.add name (norm_term, norm_ty);
+    let* elab_term = check_elab Name.Map.empty term elab_ty in
+    let* _ = check_type Name.Map.empty elab_term elab_ty in
+    Declarations.add name (elab_term, elab_ty);
     Ok Unit
 
 let execute cmd : (cmd_result, execute_error) result =
