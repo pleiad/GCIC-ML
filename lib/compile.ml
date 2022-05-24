@@ -18,6 +18,7 @@ let rec of_parsed_term ?(ids : Name.t list = []) (t : parsed_term) : term =
     let f = Parsing.Ast.Lambda ([ Some id, ty ], t2) in
     of_parsed_term ~ids (App (f, t1))
   | Ascription (t, ty) -> Ascription (of_parsed_term ~ids t, of_parsed_term ~ids ty)
+  | UnknownT i -> UnknownT i
 
 and expand_lambda (hd : Kernel.Ast.fun_info -> term) ids args body =
   match args with

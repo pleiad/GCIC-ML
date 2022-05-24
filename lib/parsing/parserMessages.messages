@@ -289,7 +289,7 @@ term_parser: KWD_UNIVERSE RPAREN
 ##
 ## Ends in an error in state: 11.
 ##
-## atom -> KWD_UNIVERSE . INT [ VERNAC_SEPARATOR RPAREN LPAREN KWD_UNKNOWN KWD_UNIVERSE KWD_IN ID EQUAL EOF COLON ARROW ]
+## atom -> KWD_UNIVERSE . INT [ VERNAC_SEPARATOR RPAREN LPAREN KWD_UNKNOWN KWD_UNKNOWN_T KWD_UNIVERSE KWD_IN ID EQUAL EOF COLON ARROW ]
 ##
 ## The known suffix of the stack is as follows:
 ## KWD_UNIVERSE
@@ -306,7 +306,7 @@ term_parser: KWD_UNKNOWN RPAREN
 ##
 ## Ends in an error in state: 9.
 ##
-## atom -> KWD_UNKNOWN . INT [ VERNAC_SEPARATOR RPAREN LPAREN KWD_UNKNOWN KWD_UNIVERSE KWD_IN ID EQUAL EOF COLON ARROW ]
+## atom -> KWD_UNKNOWN . INT [ VERNAC_SEPARATOR RPAREN LPAREN KWD_UNKNOWN KWD_UNKNOWN_T KWD_UNIVERSE KWD_IN ID EQUAL EOF COLON ARROW ]
 ##
 ## The known suffix of the stack is as follows:
 ## KWD_UNKNOWN
@@ -318,11 +318,27 @@ For example:
 > $0 0
 > ?1
 
+term_parser: KWD_UNKNOWN_T RPAREN
+##
+## Ends in an error in state: 9.
+##
+## atom -> KWD_UNKNOWN_T . INT [ VERNAC_SEPARATOR RPAREN LPAREN KWD_UNKNOWN KWD_UNKNOWN_T KWD_UNIVERSE KWD_IN ID EQUAL EOF COLON ARROW ]
+##
+## The known suffix of the stack is as follows:
+## KWD_UNKNOWN_T
+##
+
+I'm currently parsing the universe level of the unknown type.
+After the `$0`, a non-negative integer is expected.
+For example:
+> $0 0
+> !1
+
 term_parser: LPAREN RPAREN
 ##
 ## Ends in an error in state: 8.
 ##
-## atom -> LPAREN . top RPAREN [ VERNAC_SEPARATOR RPAREN LPAREN KWD_UNKNOWN KWD_UNIVERSE KWD_IN ID EQUAL EOF COLON ARROW ]
+## atom -> LPAREN . top RPAREN [ VERNAC_SEPARATOR RPAREN LPAREN KWD_UNKNOWN KWD_UNKNOWN_T KWD_UNIVERSE KWD_IN ID EQUAL EOF COLON ARROW ]
 ##
 ## The known suffix of the stack is as follows:
 ## LPAREN
@@ -517,7 +533,7 @@ term_parser: LPAREN ID VERNAC_SEPARATOR
 ##
 ## Ends in an error in state: 45.
 ##
-## atom -> LPAREN top . RPAREN [ VERNAC_SEPARATOR RPAREN LPAREN KWD_UNKNOWN KWD_UNIVERSE KWD_IN ID EQUAL EOF COLON ARROW ]
+## atom -> LPAREN top . RPAREN [ VERNAC_SEPARATOR RPAREN LPAREN KWD_UNKNOWN KWD_UNKNOWN_T KWD_UNIVERSE KWD_IN ID EQUAL EOF COLON ARROW ]
 ## top -> top . COLON term [ RPAREN COLON ]
 ##
 ## The known suffix of the stack is as follows:

@@ -97,6 +97,7 @@ let rec elaborate ctx (term : Kernel.Ast.term)
     let* ty', _ = elab_univ ctx ty in
     let* t' = check_elab ctx t ty' in
     Ok (t', ty')
+  | UnknownT i -> Ok (Ast.Unknown (Ast.Universe i), Ast.Universe i)
   | Const x ->
     (try Ok (Const x, Context.find x !Ast.global_decls |> snd) with
     | Not_found -> Error (`Err_free_identifier x))

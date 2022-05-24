@@ -25,7 +25,7 @@
 %token <string> ID
 %token COLON DOT COMMA ARROW EQUAL
 %token LPAREN RPAREN
-%token KWD_UNIVERSE KWD_LAMBDA KWD_UNKNOWN KWD_FORALL
+%token KWD_UNIVERSE KWD_LAMBDA KWD_UNKNOWN KWD_UNKNOWN_T KWD_FORALL
 %token KWD_LET KWD_IN
 %token VERNAC_CHECK VERNAC_EVAL VERNAC_ELABORATE VERNAC_DEFINITION VERNAC_SET 
 %token VERNAC_VARIANT VERNAC_VARIANT_G VERNAC_VARIANT_S VERNAC_VARIANT_N
@@ -95,6 +95,7 @@ atom :
 | id=id                                                { Var id }
 | KWD_UNIVERSE; i=INT                                  { Universe i }
 | KWD_UNKNOWN; i=INT                                   { Unknown i }
+| KWD_UNKNOWN_T; i=INT                                 { UnknownT i }
 
 
 

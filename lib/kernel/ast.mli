@@ -11,6 +11,7 @@ type term =
   | Unknown of int
   (* Extras *)
   | Ascription of term * term
+  | UnknownT of int
   | Const of Name.t
 
 and fun_info =
