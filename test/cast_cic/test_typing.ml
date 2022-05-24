@@ -1,8 +1,8 @@
 open Cast_cic
 open Example
-open Common
+open Common.Id
 
-let varname x = Id.Name.of_string x
+let varname x = Name.of_string x
 
 let test_omega_typecheck =
   QCheck.(

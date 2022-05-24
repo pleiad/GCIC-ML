@@ -1,7 +1,6 @@
 (** This module specifies the elaboration from GCIC to CastCIC *)
-open Common
-
 open Common.Std
+
 open Common.Id
 
 (** This module specifies the elaboration from GCIC to CastCIC *)
@@ -68,19 +67,19 @@ let rec elaborate ctx (term : Kernel.Ast.term)
   let open Kernel.Variant in
   match term with
   | Var x ->
-    (try Ok (Var x, Context.find x ctx) with
+    (try Ok (Var x, Name.Map.find x ctx) with
     | Not_found -> Error (`Err_free_identifier x))
   | Universe i -> Ok (Universe i, Universe (i + 1))
   | Prod { id; dom; body } ->
     let* elab_dom, i = elab_univ ctx dom in
-    let extended_ctx = Context.add id elab_dom ctx in
+    let extended_ctx = Name.Map.add id elab_dom ctx in
     let* elab_body, j = elab_univ extended_ctx body in
     Ok
       ( Ast.Prod { id; dom = elab_dom; body = elab_body }
       , Ast.Universe (product_universe_level i j) )
   | Lambda { id; dom; body } ->
     let* elab_dom, _ = elab_univ ctx dom in
-    let extended_ctx = Context.add id elab_dom ctx in
+    let extended_ctx = Name.Map.add id elab_dom ctx in
     let* elab_body, elab_body_ty = elaborate extended_ctx body in
     Ok
       ( Ast.Lambda { id; dom = elab_dom; body = elab_body }
@@ -99,7 +98,7 @@ let rec elaborate ctx (term : Kernel.Ast.term)
     Ok (t', ty')
   | UnknownT i -> Ok (Ast.Unknown (Ast.Universe i), Ast.Universe i)
   | Const x ->
-    (try Ok (Const x, Context.find x !Ast.global_decls |> snd) with
+    (try Ok (Const x, Name.Map.find x !Ast.global_decls |> snd) with
     | Not_found -> Error (`Err_free_identifier x))
 
 and check_elab ctx term (s_ty : Ast.term) : (Ast.term, [> elaboration_error ]) result =

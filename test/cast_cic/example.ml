@@ -1,8 +1,7 @@
 open Cast_cic
-open Common
 open Common.Id
 
-let empty_ctx = Context.empty
+let empty_ctx = Name.Map.empty
 let name_of_int n = string_of_int n |> Name.of_string
 let id = Name.of_string "__"
 

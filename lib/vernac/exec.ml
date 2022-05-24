@@ -1,5 +1,5 @@
-open Common
 open Common.Std
+open Common.Id
 open Cast_cic
 
 type cmd_result =
@@ -29,7 +29,7 @@ let string_of_error = function
 let execute_eval term : (cmd_result, execute_error) result =
   let open Elaboration in
   let open Reduction in
-  let* elab_term, _ = elaborate Context.empty term in
+  let* elab_term, _ = elaborate Name.Map.empty term in
   let* v = reduce elab_term in
   Ok (Reduction v)
 
@@ -37,15 +37,15 @@ let execute_check term : (cmd_result, execute_error) result =
   let open Elaboration in
   let open Typing in
   let open Reduction in
-  let* elab_term, _ = elaborate Context.empty term in
-  let* ty = infer_type Context.empty elab_term in
+  let* elab_term, _ = elaborate Name.Map.empty term in
+  let* ty = infer_type Name.Map.empty elab_term in
   let* v = reduce ty in
   (* By default it normalizes the output. TODO: Add flag *)
   Ok (Inference v)
 
 let execute_elab term : (cmd_result, execute_error) result =
   let open Elaboration in
-  let* elab_term, _ = elaborate Context.empty term in
+  let* elab_term, _ = elaborate Name.Map.empty term in
   Ok (Elaboration elab_term)
 
 let execute_set_variant var : (cmd_result, execute_error) result =
@@ -59,12 +59,12 @@ let execute_definition gdef : (cmd_result, execute_error) result =
   let open Command in
   match gdef with
   | Constant_def { name; ty; term } ->
-    let* elab_ty, _ = elab_univ Context.empty ty in
+    let* elab_ty, _ = elab_univ Name.Map.empty ty in
     let* norm_ty = reduce elab_ty in
-    let* elab_term = check_elab Context.empty term norm_ty in
+    let* elab_term = check_elab Name.Map.empty term norm_ty in
     let* norm_term = reduce elab_term in
-    let* _ = check_type Context.empty norm_term norm_ty in
-    Ast.global_decls := Context.add name (norm_term, norm_ty) !Ast.global_decls;
+    let* _ = check_type Name.Map.empty norm_term norm_ty in
+    Ast.global_decls := Name.Map.add name (norm_term, norm_ty) !Ast.global_decls;
     Ok Unit
 
 let execute cmd : (cmd_result, execute_error) result =

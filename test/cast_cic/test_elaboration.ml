@@ -1,5 +1,4 @@
 open Cast_cic
-open Common
 open Example
 
 let delta i =
@@ -84,10 +83,10 @@ let test_omega_elaborates () =
 let correct_elaboration =
   QCheck.(
     Test.make ~count:1000 ~name:"correct elaboration" Arbitrary.gcic_term (fun t ->
-        let elab_term = Elaboration.elaborate Context.empty t in
+        let elab_term = Elaboration.elaborate empty_ctx t in
         assume (elab_term |> Result.is_ok);
         let t', ty = Result.get_ok elab_term in
-        match Typing.infer_type Context.empty t' with
+        match Typing.infer_type empty_ctx t' with
         | Ok ty' -> Ast.alpha_equal ty ty'
         | Error _ -> false))
 

@@ -1,18 +1,18 @@
 (** This module specifies the structure of CastCIC *)
-open Common
+open Common.Id
 
 (** Global counter used to create new identifiers *)
 let id_counter : int ref = ref 0
 
 (** Returns a new identifier name *)
-let new_identifier () : Id.Name.t =
-  let id = Id.Name.of_string ("#" ^ string_of_int !id_counter) in
+let new_identifier () : Name.t =
+  let id = Name.of_string ("#" ^ string_of_int !id_counter) in
   id_counter := !id_counter + 1;
   id
 
 (** Terms in CastCIC *)
 type term =
-  | Var of Id.Name.t
+  | Var of Name.t
   | Universe of int
   | App of term * term
   | Lambda of fun_info
@@ -24,10 +24,10 @@ type term =
       ; target : term
       ; term : term
       }
-  | Const of Id.Name.t
+  | Const of Name.t
 
 and fun_info =
-  { id : Id.Name.t
+  { id : Name.t
   ; dom : term
   ; body : term
   }
@@ -36,18 +36,18 @@ and fun_info =
 let rec to_string (t : term) =
   let open Format in
   match t with
-  | Var x -> Id.Name.to_string x
+  | Var x -> Name.to_string x
   | Universe i -> asprintf "▢%i" i
   | App (t, t') -> asprintf "(%s %s)" (to_string t) (to_string t')
   | Lambda { id; dom; body } ->
-    asprintf "fun %s : %s. %s" (Id.Name.to_string id) (to_string dom) (to_string body)
+    asprintf "fun %s : %s. %s" (Name.to_string id) (to_string dom) (to_string body)
   | Prod { id; dom; body } ->
-    asprintf "Prod %s : %s. %s" (Id.Name.to_string id) (to_string dom) (to_string body)
+    asprintf "Prod %s : %s. %s" (Name.to_string id) (to_string dom) (to_string body)
   | Unknown ty -> asprintf "?_%s" (to_string ty)
   | Err ty -> asprintf "err_%s" (to_string ty)
   | Cast { source; target; term } ->
     asprintf "<%s <- %s> %s" (to_string target) (to_string source) (to_string term)
-  | Const x -> Id.Name.to_string x
+  | Const x -> Name.to_string x
 
 (** Head constructors *)
 type head =
@@ -58,8 +58,7 @@ type head =
 let head : term -> (head, string) result = function
   | Prod _ -> Ok HProd
   | Universe i -> Ok (HUniverse i)
-  | Var _ | App (_, _) | Lambda _ | Unknown _ | Err _ | Cast _ | Const _ ->
-    Error "invalid term to get head constructor"
+  | _ -> Error "invalid term to get head constructor"
 
 (** Returns the least precise type for the given head constructor, 
     at the provided level *)
@@ -68,7 +67,7 @@ let germ i : head -> term = function
     let cprod = Kernel.Variant.cast_universe_level i in
     let univ = Universe cprod in
     if cprod >= 0
-    then Prod { id = Id.Name.of_string "__"; dom = Unknown univ; body = Unknown univ }
+    then Prod { id = Name.of_string "__"; dom = Unknown univ; body = Unknown univ }
     else Err univ
   | HUniverse j -> if j < i then Universe j else Err (Universe i)
 
@@ -119,12 +118,14 @@ let is_canonical : term -> bool = function
     true
   | t -> is_neutral t
 
+(* Module alias *)
+module Context = Name.Map
+
 (** Performs substitution inside a term *)
 let rec subst ctx = function
   | Var x ->
-    (match Context.lookup x ctx with
-    | Some (Some v) -> v
-    | _ -> Var x)
+    (try Context.find x ctx |> Option.fold ~none:(Var x) ~some:(fun v -> v) with
+    | Not_found -> Var x)
   | Universe i -> Universe i
   | App (t, u) -> App (subst ctx t, subst ctx u)
   | Lambda fi ->
@@ -145,7 +146,7 @@ let rec subst ctx = function
     Cast { source = subst ctx source; target = subst ctx target; term = subst ctx term }
   | Const x -> Const x
 
-let subst1 x v = subst Context.(add x (Some v) empty)
+let subst1 x v = subst (Context.add x (Some v) Context.empty)
 
 (** Checks if two terms are identifiable up to alpha-renaming *)
 let rec alpha_equal t1 t2 =
@@ -200,4 +201,4 @@ let rec alpha_consistent t1 t2 : bool =
   | _ -> false
 
 (** Global declarations. TODO: MOVE!!!! *)
-let global_decls = ref Context.empty
+let global_decls = ref Name.Map.empty

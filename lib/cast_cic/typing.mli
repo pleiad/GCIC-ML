@@ -1,15 +1,15 @@
 (** This module specifies the typing relation *)
 
 open Ast
-open Common
+open Common.Id
 open Reduction
 
-type typing_context = Ast.term Context.t
+type typing_context = Ast.term Name.Map.t
 
 (** A typing error *)
 type type_error =
   [ `Err_not_convertible of term * term
-  | `Err_free_identifier of Id.Name.t
+  | `Err_free_identifier of Name.t
   | `Err_not_product of term * term
   | `Err_not_universe of term * term
   ]
@@ -34,7 +34,7 @@ val check_type
 val infer_prod
   :  typing_context
   -> term
-  -> (Id.Name.t * term * term, [> type_error | reduction_error ]) result
+  -> (Name.t * term * term, [> type_error | reduction_error ]) result
 
 (** Constrained inference, where the inferred type must be convertible to a universe *)
 val infer_univ : typing_context -> term -> (int, [> type_error | reduction_error ]) result
