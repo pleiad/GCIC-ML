@@ -2,7 +2,6 @@
 (* The implementation is based on a CEK machine (https://en.wikipedia.org/wiki/CEK_Machine) *)
 
 open Ast
-open Common.Id
 
 type reduction_error =
   [ `Err_not_enough_fuel
@@ -50,7 +49,7 @@ exception Stuck_term of term
 let reduce1 (term, cont) : state =
   match term, cont with
   (* Redexes *)
-  | Const x, _ -> Name.Map.find x !Ast.global_decls |> fst, cont
+  | Const x, _ -> Declarations.find x |> fst, cont
   (* Beta *)
   | Lambda { id; dom = _; body }, KApp_l u :: cont -> subst1 id u body, cont
   (* Prod-Unk *)

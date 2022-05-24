@@ -98,7 +98,7 @@ let rec elaborate ctx (term : Kernel.Ast.term)
     Ok (t', ty')
   | UnknownT i -> Ok (Ast.Unknown (Ast.Universe i), Ast.Universe i)
   | Const x ->
-    (try Ok (Const x, Name.Map.find x !Ast.global_decls |> snd) with
+    (try Ok (Const x, Declarations.find x |> snd) with
     | Not_found -> Error (`Err_free_identifier x))
 
 and check_elab ctx term (s_ty : Ast.term) : (Ast.term, [> elaboration_error ]) result =

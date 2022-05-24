@@ -55,7 +55,7 @@ let rec infer_type (ctx : typing_context) (t : term) : (term, [> type_error ]) r
     let* () = check_type ctx term source in
     Ok target
   | Const id ->
-    (try Ok (Name.Map.find id !Ast.global_decls |> snd) with
+    (try Ok (Declarations.find id |> snd) with
     | Not_found -> Error (`Err_free_identifier id))
 
 and check_type (ctx : typing_context) (t : term) (ty : term)

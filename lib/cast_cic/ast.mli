@@ -62,6 +62,3 @@ val alpha_equal : term -> term -> bool
 
 (** Checks if two terms are alpha consistent *)
 val alpha_consistent : term -> term -> bool
-
-(** Global declarations. TODO: MOVE!!!! *)
-val global_decls : (term * term) Name.Map.t ref

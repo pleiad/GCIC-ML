@@ -64,7 +64,7 @@ let execute_definition gdef : (cmd_result, execute_error) result =
     let* elab_term = check_elab Name.Map.empty term norm_ty in
     let* norm_term = reduce elab_term in
     let* _ = check_type Name.Map.empty norm_term norm_ty in
-    Ast.global_decls := Name.Map.add name (norm_term, norm_ty) !Ast.global_decls;
+    Declarations.add name (norm_term, norm_ty);
     Ok Unit
 
 let execute cmd : (cmd_result, execute_error) result =

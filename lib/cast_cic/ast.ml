@@ -199,6 +199,3 @@ let rec alpha_consistent t1 t2 : bool =
   | Unknown _, _ -> true
   | Const x, Const y -> x = y
   | _ -> false
-
-(** Global declarations. TODO: MOVE!!!! *)
-let global_decls = ref Name.Map.empty
