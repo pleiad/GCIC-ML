@@ -1,13 +1,19 @@
-{ pkgs ? import <nixpkgs> {} }:
-  
+{ sources ? import ./nix/sources.nix
+, pkgs ? import sources.nixpkgs {}
+}:
+
 with pkgs;
 mkShell {
-  nativeBuildInputs = (with ocaml-ng.ocamlPackages_4_13; [
+  nativeBuildInputs = (with ocamlPackages; [
     ocaml stdio 
     menhir menhirLib sedlex_2
-    dune_2 merlin ocamlformat findlib ocaml-lsp  utop
+    dune_2 merlin findlib ocaml-lsp utop
     alcotest qcheck qcheck-alcotest bisect_ppx
-  ]) ++ [inotify-tools rlwrap];
+  ]) ++ [
+    inotify-tools
+    rlwrap
+    ocamlformat
+    ];
 
   shellHook = ''
     alias dune-watch="dune build -w"
