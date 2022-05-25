@@ -10,7 +10,7 @@ open Common.Id
 
 (** Find a global declaration.
     Raises [Not_found] if no binding for the name exists. *)
-val find : Name.t -> Ast.term * Ast.term
+val find : Name.t -> Kernel.Ast.term * Kernel.Ast.term
 
 (** Add a global declaration *)
-val add : Name.t -> Ast.term * Ast.term -> unit
+val add : Name.t -> Kernel.Ast.term * Kernel.Ast.term -> unit

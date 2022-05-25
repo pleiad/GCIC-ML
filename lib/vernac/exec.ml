@@ -64,7 +64,7 @@ let execute_definition gdef : (cmd_result, execute_error) result =
     let* elab_ty, _ = elab_univ reduce empty_ctx ty in
     let* elab_term = check_elab reduce empty_ctx term elab_ty in
     let* _ = check_type empty_ctx elab_term elab_ty in
-    Declarations.add name (elab_term, elab_ty);
+    Declarations.add name (term, ty);
     Ok Unit
 
 let execute cmd : (cmd_result, execute_error) result =

@@ -44,12 +44,18 @@ type continuation =
 type state = term * continuation list
 
 exception Stuck_term of term
+exception Not_enough_fuel
 
 (** One step reduction of terms *)
-let reduce1 (term, cont) : state =
+let rec reduce1 (term, cont) : state =
   match term, cont with
   (* Redexes *)
-  | Const x, _ -> Declarations.find x |> fst, cont
+  | Const x, _ ->
+    let term, _ = Declarations.find x in
+    let elab = Elaboration.elaborate reduce Common.Id.Name.Map.empty term in
+    (match Result.map fst elab with
+    | Error _ -> raise (Stuck_term (Const x))
+    | Ok t -> t, cont)
   (* Beta *)
   | Lambda { id; dom = _; body }, KApp_l u :: cont -> subst1 id u body, cont
   (* Prod-Unk *)
@@ -138,10 +144,8 @@ let reduce1 (term, cont) : state =
   | Cast { source; target; term }, _ -> target, KCast_target (source, term) :: cont
   | _, _ -> raise (Stuck_term term)
 
-exception Not_enough_fuel
-
 (** Transitive clousure of reduce1 with fuel *)
-let rec reduce_fueled (fuel : int) ((term, cont) as s) : term =
+and reduce_fueled (fuel : int) ((term, cont) as s) : term =
   if fuel < 0
   then raise Not_enough_fuel
   else if is_canonical term && cont = []
@@ -149,7 +153,7 @@ let rec reduce_fueled (fuel : int) ((term, cont) as s) : term =
   else reduce_fueled (fuel - 1) (reduce1 s)
 
 (** Reduces a term *)
-let reduce term : (term, [> reduction_error ]) result =
+and reduce term : (term, [> reduction_error ]) result =
   let initial_state = term, [] in
   try Ok (reduce_fueled 10000 initial_state) with
   | Not_enough_fuel -> Error `Err_not_enough_fuel

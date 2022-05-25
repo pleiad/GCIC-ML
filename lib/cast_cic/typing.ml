@@ -54,9 +54,11 @@ let rec infer_type (ctx : typing_context) (t : term) : (term, [> type_error ]) r
     let* _ = infer_univ ctx target in
     let* () = check_type ctx term source in
     Ok target
-  | Const id ->
-    (try Ok (Declarations.find id |> snd) with
-    | Not_found -> Error (`Err_free_identifier id))
+  | Const x ->
+    let* ty = (try Ok (Declarations.find x |> snd) with
+              | Not_found -> Error (`Err_free_identifier x)) in
+    let* elab_ty, _ = Elaboration.elab_univ Reduction.reduce Name.Map.empty ty in
+    Ok elab_ty
 
 and check_type (ctx : typing_context) (t : term) (ty : term)
     : (unit, [> type_error ]) result
