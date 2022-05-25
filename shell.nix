@@ -19,7 +19,7 @@ mkShell {
     alias dune-watch="dune build -w"
     alias dune-test="dune runtest"
     alias dune-coverage="dune runtest --instrument-with bisect_ppx --force; bisect-ppx-report html; bisect-ppx-report summary"
-    alias dune-repl="rlwrap -m dune exec gcic"
+    alias gcic-repl="rlwrap -m dune exec gcic"
     alias update-parser-errors="sh lib/parsing/update_error_msgs.sh"
     alias dune-format="dune build @fmt --auto-promote"
   '';
