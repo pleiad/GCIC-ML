@@ -51,16 +51,16 @@ let string_of_error err =
 (** Type alias for the elaboration result  *)
 type elaboration = Ast.term * Ast.term
 
-let are_consistent t1 t2 : bool =
+let are_consistent reduce t1 t2 : bool =
   let res =
-    let* t1_red = Reduction.reduce t1 in
-    let* t2_red = Reduction.reduce t2 in
+    let* t1_red = reduce t1 in
+    let* t2_red = reduce t2 in
     Ok (Ast.alpha_consistent t1_red t2_red)
   in
   Result.fold ~ok:(fun x -> x) ~error:(fun _ -> false) res
 
 (** The elaboration procedure, as per the paper *)
-let rec elaborate ctx (term : Kernel.Ast.term)
+let rec elaborate reduce ctx (term : Kernel.Ast.term)
     : (elaboration, [> elaboration_error ]) result
   =
   let open Kernel.Ast in
@@ -71,16 +71,16 @@ let rec elaborate ctx (term : Kernel.Ast.term)
     | Not_found -> Error (`Err_free_identifier x))
   | Universe i -> Ok (Universe i, Universe (i + 1))
   | Prod { id; dom; body } ->
-    let* elab_dom, i = elab_univ ctx dom in
+    let* elab_dom, i = elab_univ reduce ctx dom in
     let extended_ctx = Name.Map.add id elab_dom ctx in
-    let* elab_body, j = elab_univ extended_ctx body in
+    let* elab_body, j = elab_univ reduce extended_ctx body in
     Ok
       ( Ast.Prod { id; dom = elab_dom; body = elab_body }
       , Ast.Universe (product_universe_level i j) )
   | Lambda { id; dom; body } ->
-    let* elab_dom, _ = elab_univ ctx dom in
+    let* elab_dom, _ = elab_univ reduce ctx dom in
     let extended_ctx = Name.Map.add id elab_dom ctx in
-    let* elab_body, elab_body_ty = elaborate extended_ctx body in
+    let* elab_body, elab_body_ty = elaborate reduce extended_ctx body in
     Ok
       ( Ast.Lambda { id; dom = elab_dom; body = elab_body }
       , Ast.Prod { id; dom = elab_dom; body = elab_body_ty } )
@@ -88,31 +88,31 @@ let rec elaborate ctx (term : Kernel.Ast.term)
     let unk_ty = Ast.Unknown (Ast.Universe i) in
     Ok (Ast.Unknown unk_ty, unk_ty)
   | App (t, u) ->
-    let* t', id, dom, body = elab_prod ctx t in
-    let* u' = check_elab ctx u dom in
+    let* t', id, dom, body = elab_prod reduce ctx t in
+    let* u' = check_elab reduce ctx u dom in
     Ok (Ast.App (t', u'), Ast.subst1 id u' body)
   (* Extra rules *)
   | Ascription (t, ty) ->
-    let* ty', _ = elab_univ ctx ty in
-    let* t' = check_elab ctx t ty' in
+    let* ty', _ = elab_univ reduce ctx ty in
+    let* t' = check_elab reduce ctx t ty' in
     Ok (t', ty')
   | UnknownT i -> Ok (Ast.Unknown (Ast.Universe i), Ast.Universe i)
   | Const x ->
     (try Ok (Const x, Declarations.find x |> snd) with
     | Not_found -> Error (`Err_free_identifier x))
 
-and check_elab ctx term (s_ty : Ast.term) : (Ast.term, [> elaboration_error ]) result =
-  let* t', ty = elaborate ctx term in
-  if are_consistent ty s_ty
+and check_elab reduce ctx term (s_ty : Ast.term) : (Ast.term, [> elaboration_error ]) result =
+  let* t', ty = elaborate reduce ctx term in
+  if are_consistent reduce ty s_ty
   then Ok (Ast.Cast { source = ty; target = s_ty; term = t' })
   else Error (`Err_inconsistent (term, ty, s_ty))
 
 (* Instead of returning the complete Universe type, we only return the level.
    Otherwise, we need to repeat the pattern-matching/extraction wherever this
    is called *)
-and elab_univ ctx term : (Ast.term * int, [> elaboration_error ]) result =
-  let* t, ty = elaborate ctx term in
-  let* v = Reduction.reduce ty in
+and elab_univ reduce ctx term : (Ast.term * int, [> elaboration_error ]) result =
+  let* t, ty = elaborate reduce ctx term in
+  let* v = reduce ty in
   match v with
   (* Inf-Univ *)
   | Universe i -> Ok (t, i)
@@ -125,11 +125,11 @@ and elab_univ ctx term : (Ast.term * int, [> elaboration_error ]) result =
    we only return the constituents of it, ie. its identifier, domain and body.
    Otherwise, we need to repeat the pattern-matching/extraction wherever this
    is called *)
-and elab_prod ctx term
+and elab_prod reduce ctx term
     : (Ast.term * Name.t * Ast.term * Ast.term, [> elaboration_error ]) result
   =
-  let* t, ty = elaborate ctx term in
-  let* v = Reduction.reduce ty in
+  let* t, ty = elaborate reduce ctx term in
+  let* v = reduce ty in
   match v with
   (* Inf-Prod *)
   | Prod { id; dom; body } -> Ok (t, id, dom, body)

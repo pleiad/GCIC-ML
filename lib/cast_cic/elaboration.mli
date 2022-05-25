@@ -3,7 +3,6 @@
 (* TODO: This module should go somewhere else, but idk where *)
 
 open Common.Id
-open Reduction
 
 (** An error originating from elaboration  *)
 type elaboration_error =
@@ -22,17 +21,20 @@ type elaboration = Ast.term * Ast.term
 
 (** The elaboration procedure, as per the paper *)
 val elaborate
-  :  Ast.term Name.Map.t
+  :  (Ast.term -> (Ast.term, [> elaboration_error ] as 'e) result)
+  -> Ast.term Name.Map.t
   -> Kernel.Ast.term
-  -> (elaboration, [> elaboration_error | reduction_error ]) result
+  -> (elaboration, 'e) result
 
 val check_elab
-  :  Ast.term Name.Map.t
+  :  (Ast.term -> (Ast.term, [> elaboration_error ] as 'e) result)
+  -> Ast.term Name.Map.t
   -> Kernel.Ast.term
   -> Ast.term
-  -> (Ast.term, [> elaboration_error | reduction_error ]) result
+  -> (Ast.term, 'e) result
 
 val elab_univ
-  :  Ast.term Name.Map.t
+  :  (Ast.term -> (Ast.term, [> elaboration_error ] as 'e) result)
+  -> Ast.term Name.Map.t
   -> Kernel.Ast.term
-  -> (Ast.term * int, [> elaboration_error | reduction_error ]) result
+  -> (Ast.term * int, 'e) result

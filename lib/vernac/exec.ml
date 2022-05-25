@@ -29,7 +29,7 @@ let string_of_error = function
 let execute_eval term : (cmd_result, execute_error) result =
   let open Elaboration in
   let open Reduction in
-  let* elab_term, _ = elaborate Name.Map.empty term in
+  let* elab_term, _ = elaborate reduce Name.Map.empty term in
   let* v = reduce elab_term in
   Ok (Reduction v)
 
@@ -38,7 +38,7 @@ let execute_check term : (cmd_result, execute_error) result =
   let open Typing in
   let open Reduction in
   let empty_ctx = Name.Map.empty in
-  let* elab_term, _ = elaborate empty_ctx term in
+  let* elab_term, _ = elaborate reduce empty_ctx term in
   let* ty = infer_type empty_ctx elab_term in
   let* v = reduce ty in
   (* By default it normalizes the output. TODO: Add flag *)
@@ -46,7 +46,7 @@ let execute_check term : (cmd_result, execute_error) result =
 
 let execute_elab term : (cmd_result, execute_error) result =
   let open Elaboration in
-  let* elab_term, _ = elaborate Name.Map.empty term in
+  let* elab_term, _ = elaborate Reduction.reduce Name.Map.empty term in
   Ok (Elaboration elab_term)
 
 let execute_set_variant var : (cmd_result, execute_error) result =
@@ -56,12 +56,13 @@ let execute_set_variant var : (cmd_result, execute_error) result =
 let execute_definition gdef : (cmd_result, execute_error) result =
   let open Elaboration in
   let open Typing in
+  let open Reduction in
   let open Command in
   let empty_ctx = Name.Map.empty in
   match gdef with
   | Constant_def { name; ty; term } ->
-    let* elab_ty, _ = elab_univ empty_ctx ty in
-    let* elab_term = check_elab empty_ctx term elab_ty in
+    let* elab_ty, _ = elab_univ reduce empty_ctx ty in
+    let* elab_term = check_elab reduce empty_ctx term elab_ty in
     let* _ = check_type empty_ctx elab_term elab_ty in
     Declarations.add name (elab_term, elab_ty);
     Ok Unit

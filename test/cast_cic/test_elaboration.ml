@@ -10,30 +10,32 @@ let omega i =
   let d = delta i in
   App (d, d)
 
+let elaborate = Elaboration.elaborate Reduction.reduce
+
 let tests_base_elaborations () =
   let open Kernel.Ast in
   let idf : Kernel.Ast.term = Lambda { id; dom = Universe 1; body = Var id } in
   Alcotest.(check (pair Testable.term Testable.term))
     "Universe elaborates ok"
     (Universe 0, Universe 1)
-    (Elaboration.elaborate empty_ctx (Universe 0) |> Result.get_ok);
+    (elaborate empty_ctx (Universe 0) |> Result.get_ok);
   Alcotest.(check (pair Testable.term Testable.term))
     "lambda with universe elaborates"
     ( Lambda { id; dom = Universe 1; body = Var id }
     , Prod { id; dom = Universe 1; body = Universe 1 } )
-    (Elaboration.elaborate empty_ctx idf |> Result.get_ok);
+    (elaborate empty_ctx idf |> Result.get_ok);
   Alcotest.(check (pair Testable.term Testable.term))
     "lambda with unknown elaborates"
     (let dom =
        Ast.Cast { source = unknown 1; target = Universe 0; term = Unknown (unknown 1) }
      in
      Lambda { id; dom; body = Var id }, Prod { id; dom; body = dom })
-    (Elaboration.elaborate empty_ctx (Lambda { id; dom = Unknown 1; body = Var id })
+    (elaborate empty_ctx (Lambda { id; dom = Unknown 1; body = Var id })
     |> Result.get_ok);
   Alcotest.(check (pair Testable.term Testable.term))
     "Prod with universe elaborates"
     (Prod { id; dom = Universe 1; body = Var id }, Universe 2)
-    (Elaboration.elaborate empty_ctx (Prod { id; dom = Universe 1; body = Var id })
+    (elaborate empty_ctx (Prod { id; dom = Universe 1; body = Var id })
     |> Result.get_ok);
   Alcotest.(check (pair Testable.term Testable.term))
     "Prod with unknown elaborates"
@@ -43,7 +45,7 @@ let tests_base_elaborations () =
      ( Prod
          { id; dom; body = Cast { source = dom; target = Universe (-1); term = Var id } }
      , Universe 0 ))
-    (Elaboration.elaborate empty_ctx (Prod { id; dom = Unknown 1; body = Var id })
+    (elaborate empty_ctx (Prod { id; dom = Unknown 1; body = Var id })
     |> Result.get_ok);
   Alcotest.(check (pair Testable.term Testable.term))
     "app without unknown"
@@ -51,7 +53,7 @@ let tests_base_elaborations () =
         ( Lambda { id; dom = Universe 1; body = Var id }
         , Cast { source = Universe 1; target = Universe 1; term = Universe 0 } )
     , Universe 1 )
-    (Elaboration.elaborate empty_ctx (App (idf, Universe 0)) |> Result.get_ok);
+    (elaborate empty_ctx (App (idf, Universe 0)) |> Result.get_ok);
   Alcotest.(check (pair Testable.term Testable.term))
     "app with unknown"
     ( App
@@ -59,7 +61,7 @@ let tests_base_elaborations () =
             { source = unknown 1; target = Ast.germ 1 HProd; term = Unknown (unknown 1) }
         , Cast { source = Universe 1; target = unknown 0; term = Universe 0 } )
     , unknown 0 )
-    (Elaboration.elaborate empty_ctx (App (Unknown 1, Universe 0)) |> Result.get_ok)
+    (elaborate empty_ctx (App (Unknown 1, Universe 0)) |> Result.get_ok)
 
 let test_delta_elaborates () =
   Alcotest.(check (pair Testable.term Testable.term))
@@ -71,19 +73,19 @@ let test_delta_elaborates () =
             Cast { source = unknown 2; target = Universe 1; term = Unknown (unknown 2) }
         ; body = unknown (Kernel.Variant.cast_universe_level 1)
         } )
-    (Elaboration.elaborate empty_ctx (delta 1) |> Result.get_ok)
+    (elaborate empty_ctx (delta 1) |> Result.get_ok)
 
 let test_omega_elaborates () =
   Alcotest.(check (pair Testable.term Testable.term))
     "omega elaborates ok"
     (Example.omega 1, unknown (Kernel.Variant.cast_universe_level 1))
-    (Elaboration.elaborate empty_ctx (omega 1) |> Result.get_ok)
+    (elaborate empty_ctx (omega 1) |> Result.get_ok)
 
 (* The type for the elaborated term matches the inferred type *)
 let correct_elaboration =
   QCheck.(
     Test.make ~count:1000 ~name:"correct elaboration" Arbitrary.gcic_term (fun t ->
-        let elab_term = Elaboration.elaborate empty_ctx t in
+        let elab_term = elaborate empty_ctx t in
         assume (elab_term |> Result.is_ok);
         let t', ty = Result.get_ok elab_term in
         match Typing.infer_type empty_ctx t' with
