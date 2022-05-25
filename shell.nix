@@ -21,5 +21,6 @@ mkShell {
     alias dune-coverage="dune runtest --instrument-with bisect_ppx --force; bisect-ppx-report html; bisect-ppx-report summary"
     alias dune-repl="rlwrap -m dune exec gcic"
     alias update-parser-errors="sh lib/parsing/update_error_msgs.sh"
+    alias dune-format="dune build @fmt --auto-promote"
   '';
 }
