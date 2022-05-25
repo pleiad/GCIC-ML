@@ -55,7 +55,7 @@ We have some additional commands to make it easier to develop in Ocaml.
     # This generates a _coverage folder, where you can then open the index.html file
     esy coverage && esy report
     ```
-1. Run the formatter and update files
+4. Run the formatter and update files
     ```bash
     esy format
     ```
@@ -70,6 +70,52 @@ apt install rlwrap
 ```
 Then you can simply run the program as before `esy repl`.
 You should see the changes in effect immediately. 
+
+### Nix 
+[Nix](https://nixos.org/) is a declarative package manager.
+
+#### Setup
+1. To start, install nix. You can check [nix's documentation] (https://nix.dev/tutorials/install-nix) for more information.
+    ```shell
+    # Linux
+    sh <(curl -L https://nixos.org/nix/install) --daemon
+    # macOS
+    sh <(curl -L https://nixos.org/nix/install) --darwin-use-unencrypted-nix-store-volume --daemon
+    # Windows (WSL2)
+    sh <(curl -L https://nixos.org/nix/install) --no-daemon
+    ```
+
+3. Launch the development environment.
+    ```bash
+    nix-shell
+    ```
+4. Run it and test it out.
+   ```bash
+   gcic-repl
+   ```
+
+Now you should be able to play with GCIC or start developing :tada:!
+
+
+#### Additional commands
+We have some additional commands to make it easier to develop in Ocaml.
+1. Hot rebuild (this keeps on running and building the project automatically).
+   ```bash
+   dune-watch
+   ```
+2. Run the test suite.
+    ```bash
+    dune-test
+    ```
+3. Run the tests with coverage and generate a [Bisect](https://github.com/aantron/bisect_ppx) report.
+    ```bash
+    # This generates a _coverage folder, where you can then open the index.html file
+    dune-coverage
+    ```
+4. Run the formatter and update files
+    ```bash
+    dune-format
+    ```
 
 ## Resources
 - [Gradualizing the Calculus of Inductive Constructions (paper)](https://dl.acm.org/doi/10.1145/3495528)
