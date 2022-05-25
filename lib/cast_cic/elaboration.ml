@@ -98,12 +98,16 @@ let rec elaborate reduce ctx (term : Kernel.Ast.term)
     Ok (t', ty')
   | UnknownT i -> Ok (Ast.Unknown (Ast.Universe i), Ast.Universe i)
   | Const x ->
-    let* ty = (try Ok (Declarations.find x |> snd) with
-              | Not_found -> Error (`Err_free_identifier x)) in
+    let* ty =
+      try Ok (Declarations.find x |> snd) with
+      | Not_found -> Error (`Err_free_identifier x)
+    in
     let* elab_ty, _ = elab_univ reduce Name.Map.empty ty in
     Ok (Ast.Const x, elab_ty)
 
-and check_elab reduce ctx term (s_ty : Ast.term) : (Ast.term, [> elaboration_error ]) result =
+and check_elab reduce ctx term (s_ty : Ast.term)
+    : (Ast.term, [> elaboration_error ]) result
+  =
   let* t', ty = elaborate reduce ctx term in
   if are_consistent reduce ty s_ty
   then Ok (Ast.Cast { source = ty; target = s_ty; term = t' })

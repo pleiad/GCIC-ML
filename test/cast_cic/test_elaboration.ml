@@ -30,13 +30,11 @@ let tests_base_elaborations () =
        Ast.Cast { source = unknown 1; target = Universe 0; term = Unknown (unknown 1) }
      in
      Lambda { id; dom; body = Var id }, Prod { id; dom; body = dom })
-    (elaborate empty_ctx (Lambda { id; dom = Unknown 1; body = Var id })
-    |> Result.get_ok);
+    (elaborate empty_ctx (Lambda { id; dom = Unknown 1; body = Var id }) |> Result.get_ok);
   Alcotest.(check (pair Testable.term Testable.term))
     "Prod with universe elaborates"
     (Prod { id; dom = Universe 1; body = Var id }, Universe 2)
-    (elaborate empty_ctx (Prod { id; dom = Universe 1; body = Var id })
-    |> Result.get_ok);
+    (elaborate empty_ctx (Prod { id; dom = Universe 1; body = Var id }) |> Result.get_ok);
   Alcotest.(check (pair Testable.term Testable.term))
     "Prod with unknown elaborates"
     (let dom =
@@ -45,8 +43,7 @@ let tests_base_elaborations () =
      ( Prod
          { id; dom; body = Cast { source = dom; target = Universe (-1); term = Var id } }
      , Universe 0 ))
-    (elaborate empty_ctx (Prod { id; dom = Unknown 1; body = Var id })
-    |> Result.get_ok);
+    (elaborate empty_ctx (Prod { id; dom = Unknown 1; body = Var id }) |> Result.get_ok);
   Alcotest.(check (pair Testable.term Testable.term))
     "app without unknown"
     ( App

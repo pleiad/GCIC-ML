@@ -38,4 +38,7 @@ val infer_prod
   -> (Name.t * term * term, [> type_error | reduction_error | elaboration_error ]) result
 
 (** Constrained inference, where the inferred type must be convertible to a universe *)
-val infer_univ : typing_context -> term -> (int, [> type_error | reduction_error | elaboration_error ]) result
+val infer_univ
+  :  typing_context
+  -> term
+  -> (int, [> type_error | reduction_error | elaboration_error ]) result
