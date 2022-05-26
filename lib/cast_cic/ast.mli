@@ -1,11 +1,11 @@
 (** This module specifies the structure of CastCIC *)
-open Common
+open Common.Id
 
-val new_identifier : unit -> Id.Name.t
+val new_identifier : unit -> Name.t
 
 (** Terms in CastCIC *)
 type term =
-  | Var of Id.Name.t
+  | Var of Name.t
   | Universe of int
   | App of term * term
   | Lambda of fun_info
@@ -17,9 +17,10 @@ type term =
       ; target : term
       ; term : term
       }
+  | Const of Name.t
 
 and fun_info =
-  { id : Id.Name.t
+  { id : Name.t
   ; dom : term
   ; body : term
   }
@@ -51,7 +52,10 @@ val is_neutral : term -> bool
 val is_canonical : term -> bool
 
 (** Performs substitution inside a term *)
-val subst1 : Id.Name.t -> term -> term -> term
+val subst : term option Name.Map.t -> term -> term
+
+(** Performs substitution inside a term *)
+val subst1 : Name.t -> term -> term -> term
 
 (** Checks if two terms are identifiable up to alpha-renaming *)
 val alpha_equal : term -> term -> bool

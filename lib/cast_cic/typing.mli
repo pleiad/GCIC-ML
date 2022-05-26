@@ -3,7 +3,9 @@
 open Ast
 open Common.Id
 open Reduction
-open Context
+open Elaboration
+
+type typing_context = Ast.term Name.Map.t
 
 (** A typing error *)
 type type_error =
@@ -17,20 +19,26 @@ type type_error =
 val string_of_error : type_error -> string
 
 (** Infers the type of the given term *)
-val infer_type : context -> term -> (term, [> type_error | reduction_error ]) result
+val infer_type
+  :  typing_context
+  -> term
+  -> (term, [> type_error | reduction_error | elaboration_error ]) result
 
 (** Checks that the term has the given type *)
 val check_type
-  :  context
+  :  typing_context
   -> term
   -> term
-  -> (unit, [> type_error | reduction_error ]) result
+  -> (unit, [> type_error | reduction_error | elaboration_error ]) result
 
 (** Constrained inference, where the inferred type must be convertible to a product *)
 val infer_prod
-  :  context
+  :  typing_context
   -> term
-  -> (Name.t * term * term, [> type_error | reduction_error ]) result
+  -> (Name.t * term * term, [> type_error | reduction_error | elaboration_error ]) result
 
 (** Constrained inference, where the inferred type must be convertible to a universe *)
-val infer_univ : context -> term -> (int, [> type_error | reduction_error ]) result
+val infer_univ
+  :  typing_context
+  -> term
+  -> (int, [> type_error | reduction_error | elaboration_error ]) result

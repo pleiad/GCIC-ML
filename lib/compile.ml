@@ -1,42 +1,55 @@
-open Parsing
+open Vernac
 open Common.Id
+
+type parsed_term = Parsing.Ast.term
+type term = Kernel.Ast.term
 
 let from_opt_name id = Option.value id ~default:Name.default
 
-let rec of_parsed_term (t : Parsing.Ast.term) : Kernel.Ast.term =
+(* For simplicity, any free identifier is treated as a Const (an identifier refering to a global declaration).
+   A better approach would be to have a list of global declarations and treat free identifiers as just free.  *)
+let rec of_parsed_term ?(ids : Name.t list = []) (t : parsed_term) : term =
   match t with
-  | Var x -> Var x
+  | Var x -> if List.mem x ids then Var x else Const x
   | Universe i -> Universe i
-  | App (t, u) -> App (of_parsed_term t, of_parsed_term u)
-  | Lambda (args, body) -> List.fold_right expand_lambda args (of_parsed_term body)
-  | Prod (args, body) -> List.fold_right expand_prod args (of_parsed_term body)
+  | App (t, u) -> App (of_parsed_term ~ids t, of_parsed_term ~ids u)
+  | Lambda (args, body) -> expand_lambda (fun fi -> Kernel.Ast.Lambda fi) ids args body
+  | Prod (args, body) -> expand_lambda (fun fi -> Kernel.Ast.Prod fi) ids args body
   | Unknown i -> Unknown i
   | LetIn (id, ty, t1, t2) ->
-    let f = Kernel.Ast.Lambda { id; dom = of_parsed_term ty; body = of_parsed_term t2 } in
-    App (f, of_parsed_term t1)
-  (* Extras *)
-  | Ascription (t, ty) -> Ascription (of_parsed_term t, of_parsed_term ty)
+    let f = Parsing.Ast.Lambda ([ Some id, ty ], t2) in
+    of_parsed_term ~ids (App (f, t1))
+  | Ascription (t, ty) -> Ascription (of_parsed_term ~ids t, of_parsed_term ~ids ty)
   | UnknownT i -> UnknownT i
 
-and expand_lambda (id, dom) body =
-  Lambda { id = from_opt_name id; dom = of_parsed_term dom; body }
+and expand_lambda (hd : Kernel.Ast.fun_info -> term) ids args body =
+  match args with
+  | [] -> of_parsed_term ~ids body
+  | (id, dom) :: args ->
+    let new_scope = Option.fold ~none:ids ~some:(fun x -> x :: ids) id in
+    hd
+      { id = from_opt_name id
+      ; dom = of_parsed_term ~ids dom
+      ; body = expand_lambda hd new_scope args body
+      }
 
-and expand_prod (id, dom) body =
-  Prod { id = from_opt_name id; dom = of_parsed_term dom; body }
+let of_parsed_gdef
+    : parsed_term Command.global_definition -> term Command.global_definition
+  = function
+  | Constant_def { name; ty; term } ->
+    Constant_def { name; ty = of_parsed_term ty; term = of_parsed_term term }
 
-let of_parsed_command (cmd : Parsing.Ast.term Vernac.Command.t)
-    : Kernel.Ast.term Vernac.Command.t
-  =
-  match cmd with
+let of_parsed_command : parsed_term Command.t -> term Command.t = function
   | Eval t -> Eval (of_parsed_term t)
   | Check t -> Check (of_parsed_term t)
   | Elab t -> Elab (of_parsed_term t)
   | SetVariant v -> SetVariant v
+  | Definition gdef -> Definition (of_parsed_gdef gdef)
 
 (** Compiles a string and returns the stringified version of the AST *)
 let compile (line : string) =
   let open Vernac.Exec in
-  match Lex_and_parse.parse_command line with
+  match Parsing.Lex_and_parse.parse_command line with
   | Ok cmd ->
     of_parsed_command cmd
     |> execute
