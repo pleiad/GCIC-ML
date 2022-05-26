@@ -95,6 +95,5 @@ and execute_load file_parser filename =
       cmds;
     Ok Unit
   with
-  | LoadFail e ->
-    Error (`LoadError e)
+  | LoadFail e -> Error (`LoadError e)
   | Sys_error _ -> Error (`FileNotFound filename)

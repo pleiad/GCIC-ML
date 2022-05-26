@@ -14,7 +14,7 @@ For example:
 
 term_parser: ID RPAREN
 ##
-## Ends in an error in state: 78.
+## Ends in an error in state: 82.
 ##
 ## term_parser -> top . EOF [ # ]
 ## top -> top . COLON term [ EOF COLON ]
@@ -353,7 +353,7 @@ For example:
 
 term_parser: RPAREN
 ##
-## Ends in an error in state: 77.
+## Ends in an error in state: 81.
 ##
 ## term_parser' -> . term_parser [ # ]
 ##
@@ -369,7 +369,7 @@ For example:
 
 program_parser: RPAREN
 ##
-## Ends in an error in state: 0.
+## Ends in an error in state: 75.
 ##
 ## program_parser' -> . program_parser [ # ]
 ##
@@ -489,10 +489,9 @@ For example:
 
 program_parser: VERNAC_ELABORATE ID VERNAC_SEPARATOR VERNAC_SEPARATOR
 ##
-## Ends in an error in state: 70.
+## Ends in an error in state: 76.
 ##
-## nonempty_list(sequenced_command) -> sequenced_command . [ EOF ]
-## nonempty_list(sequenced_command) -> sequenced_command . nonempty_list(sequenced_command) [ EOF ]
+## list(sequenced_command) -> sequenced_command . list(sequenced_command) [ EOF ]
 ##
 ## The known suffix of the stack is as follows:
 ## sequenced_command
@@ -633,7 +632,7 @@ For example:
 
 program_parser: VERNAC_SET VERNAC_VARIANT VERNAC_VARIANT_G VERNAC_EVAL
 ##
-## Ends in an error in state: 72.
+## Ends in an error in state: 73.
 ##
 ## sequenced_command -> command . VERNAC_SEPARATOR [ VERNAC_SET VERNAC_LOAD VERNAC_EVAL VERNAC_ELABORATE VERNAC_DEFINITION VERNAC_CHECK EOF ]
 ##
@@ -794,3 +793,32 @@ program_parser: VERNAC_LOAD DOUBLE_QUOTE ID VERNAC_VARIANT_S
 I expect a filename wrapped in double-quotes after `load`.
 For example:
 > load "my_file";;
+
+command_parser: VERNAC_VARIANT_S
+##
+## Ends in an error in state: 0.
+##
+## command_parser' -> . command_parser [ # ]
+##
+## The known suffix of the stack is as follows:
+##
+##
+
+I'm currently parsing a program.
+At the top level, a command is expected.
+For example:
+> eval let f : ?0 = Type0 in f;;
+> check (fun (x : Type0). x) As ?0 -> ?0;;
+
+command_parser: VERNAC_CHECK ID VERNAC_SEPARATOR VERNAC_VARIANT_S
+##
+## Ends in an error in state: 70.
+##
+## command_parser -> sequenced_command . EOF [ # ]
+##
+## The known suffix of the stack is as follows:
+## sequenced_command
+##
+
+I'm currently parsing a single command.
+After `$0`, the end of file is expected.

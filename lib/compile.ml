@@ -48,9 +48,11 @@ let of_parsed_command : parsed_term Command.t -> term Command.t = function
   | Load filename -> Load filename
 
 let parse_file_content str =
-  match Parsing.Lex_and_parse.parse_commands str with
+  match Parsing.Lex_and_parse.parse_program str with
   | Ok cmds -> List.map of_parsed_command cmds
-  | Error e -> print_endline e; []
+  | Error e ->
+    print_endline e;
+    []
 
 (** Compiles a string and returns the stringified version of the AST *)
 let compile (line : string) =

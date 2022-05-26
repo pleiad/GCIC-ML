@@ -42,19 +42,23 @@
 %on_error_reduce term
 
 /* Specify starting production */
-%start program_parser term_parser
+%start program_parser term_parser command_parser
 
 /* Types for the result of productions */
 %type <Ast.term Vernac.Command.t list> program_parser
 %type <Ast.term> term_parser
+%type <Ast.term Vernac.Command.t> command_parser
 
 %% /* Start grammar productions */
 program_parser :
-  cmds=nonempty_list(sequenced_command); EOF   { cmds }
+  cmds=list(sequenced_command); EOF   { cmds }
 
 term_parser :
   t=top; EOF   { t }
 
+command_parser : 
+  cmd=sequenced_command; EOF    { cmd }
+  
 sequenced_command :
 | cmd=command ; VERNAC_SEPARATOR   { cmd }
 

@@ -10,4 +10,4 @@ command and return it if successful *)
 val parse_command : string -> (Ast.term Vernac.Command.t, string) result
 
 (** Given a string, parse the list of commands and return it if successful *)
-val parse_commands : string -> (Ast.term Vernac.Command.t list, string) result
+val parse_program : string -> (Ast.term Vernac.Command.t list, string) result
