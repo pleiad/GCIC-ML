@@ -50,7 +50,7 @@ let of_parsed_command : parsed_term Command.t -> term Command.t = function
 let parse_file_content str =
   match Parsing.Lex_and_parse.parse_commands str with
   | Ok cmds -> List.map of_parsed_command cmds
-  | Error e -> failwith e
+  | Error e -> print_endline e; []
 
 (** Compiles a string and returns the stringified version of the AST *)
 let compile (line : string) =

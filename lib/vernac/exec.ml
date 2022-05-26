@@ -97,4 +97,4 @@ and execute_load file_parser filename =
   with
   | LoadFail e ->
     Error (`LoadError e)
-  | _ -> Error (`FileNotFound filename)
+  | Sys_error _ -> Error (`FileNotFound filename)
