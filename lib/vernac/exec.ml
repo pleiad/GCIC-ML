@@ -18,6 +18,7 @@ type execute_error =
   [ Elaboration.elaboration_error
   | Typing.type_error
   | Reduction.reduction_error
+  | `ImportError 
   ]
 
 let string_of_error = function
@@ -25,6 +26,7 @@ let string_of_error = function
     "[elaboration_error] " ^ Elaboration.string_of_error e
   | #Typing.type_error as e -> "[type_error] " ^ Typing.string_of_error e
   | #Reduction.reduction_error as e -> "[reduction_error] " ^ Reduction.string_of_error e
+  | `ImportError -> "[import_error]" 
 
 let execute_eval term : (cmd_result, execute_error) result =
   let open Elaboration in
@@ -67,7 +69,7 @@ let execute_definition gdef : (cmd_result, execute_error) result =
     Declarations.add name (term, ty);
     Ok Unit
 
-let execute cmd : (cmd_result, execute_error) result =
+let rec execute file_parser cmd : (cmd_result, execute_error) result =
   let open Command in
   match cmd with
   | Eval t -> execute_eval t
@@ -75,4 +77,18 @@ let execute cmd : (cmd_result, execute_error) result =
   | Elab t -> execute_elab t
   | SetVariant v -> execute_set_variant v
   | Definition gdef -> execute_definition gdef
-  | Import _filename -> Ok Unit
+  | Import filename -> execute_import file_parser filename
+and execute_import file_parser filename = 
+  let ch = open_in filename in
+  try
+    let content = really_input_string ch (in_channel_length ch) in 
+    let cmds = file_parser content in 
+    let res = List.fold_left (fun res cmd -> if Result.is_error res then res else execute file_parser cmd) (Ok Unit) cmds in
+    (* close the input channel *)
+    close_in ch;
+    res
+  with _ ->
+    (* some unexpected exception occurs *)
+    close_in_noerr ch;
+    (* emergency closing *)
+    Error (`ImportError)
