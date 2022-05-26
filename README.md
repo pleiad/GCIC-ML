@@ -81,8 +81,6 @@ You should see the changes in effect immediately.
     sh <(curl -L https://nixos.org/nix/install) --daemon
     # macOS
     sh <(curl -L https://nixos.org/nix/install) --darwin-use-unencrypted-nix-store-volume --daemon
-    # Windows (WSL2)
-    sh <(curl -L https://nixos.org/nix/install) --no-daemon
     ```
 
 3. Launch the development environment.
