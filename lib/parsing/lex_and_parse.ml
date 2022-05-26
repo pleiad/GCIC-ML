@@ -79,6 +79,7 @@ let parse_command text =
     let start_position = fst (Sedlexing.lexing_positions lexbuf) in
     let checkpoint = Parser.Incremental.program_parser start_position in
     I.loop_handle succeed (fail text buffer) supplier checkpoint
+    |> Result.map List.hd
   with
   (* catch exception and turn into Error *)
   | Lexer.SyntaxError msg ->

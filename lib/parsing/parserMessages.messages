@@ -14,7 +14,7 @@ For example:
 
 term_parser: ID RPAREN
 ##
-## Ends in an error in state: 75.
+## Ends in an error in state: 78.
 ##
 ## term_parser -> top . EOF [ # ]
 ## top -> top . COLON term [ EOF COLON ]
@@ -353,7 +353,7 @@ For example:
 
 term_parser: RPAREN
 ##
-## Ends in an error in state: 74.
+## Ends in an error in state: 77.
 ##
 ## term_parser' -> . term_parser [ # ]
 ##
@@ -489,15 +489,16 @@ For example:
 
 program_parser: VERNAC_ELABORATE ID VERNAC_SEPARATOR VERNAC_SEPARATOR
 ##
-## Ends in an error in state: 72.
+## Ends in an error in state: 70.
 ##
-## program_parser -> command VERNAC_SEPARATOR . EOF [ # ]
+## nonempty_list(sequenced_command) -> sequenced_command . [ EOF ]
+## nonempty_list(sequenced_command) -> sequenced_command . nonempty_list(sequenced_command) [ EOF ]
 ##
 ## The known suffix of the stack is as follows:
-## command VERNAC_SEPARATOR
+## sequenced_command
 ##
 
-After `$0`, the end of file is expected.
+After `$0`, another command or the EOF are expected.
 
 program_parser: VERNAC_SET VERNAC_VARIANT_S
 ##
@@ -632,9 +633,9 @@ For example:
 
 program_parser: VERNAC_SET VERNAC_VARIANT VERNAC_VARIANT_G VERNAC_EVAL
 ##
-## Ends in an error in state: 71.
+## Ends in an error in state: 72.
 ##
-## program_parser -> command . VERNAC_SEPARATOR EOF [ # ]
+## sequenced_command -> command . VERNAC_SEPARATOR [ VERNAC_SET VERNAC_IMPORT VERNAC_EVAL VERNAC_ELABORATE VERNAC_DEFINITION VERNAC_CHECK EOF ]
 ##
 ## The known suffix of the stack is as follows:
 ## command

@@ -9,6 +9,9 @@
   open Common.Id
   open Kernel.Variant
 
+  (** Stores a global declaration (def) as a lambda. 
+      The body of the lambda is being ascribed to the expected type.
+  *)
   let mk_definition name args ty' body =
     let open Vernac.Command in
     let term = Lambda (args, Ascription (body, ty')) in
@@ -42,20 +45,25 @@
 %start program_parser term_parser
 
 /* Types for the result of productions */
-%type <Ast.term Vernac.Command.t> program_parser
+%type <Ast.term Vernac.Command.t list> program_parser
 %type <Ast.term> term_parser
 
 %% /* Start grammar productions */
 program_parser :
-  cmd=command; VERNAC_SEPARATOR; EOF   { cmd }
+  cmds=nonempty_list(sequenced_command); EOF   { cmds }
 
 term_parser :
   t=top; EOF   { t }
 
+sequenced_command :
+| cmd=command ; VERNAC_SEPARATOR   { cmd }
+
 command :
+// eval <top>
 | VERNAC_EVAL; t=top                       { Eval t }
+// check <top>
 | VERNAC_CHECK; t=top                      { Check t }
-// elab <term>
+// elab <top>
 | VERNAC_ELABORATE; t=top                  { Elab t }
 // set variant variant_name
 | VERNAC_SET; VERNAC_VARIANT; var=variant  { SetVariant var }
