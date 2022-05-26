@@ -12,6 +12,7 @@ type term =
   (* Extras *)
   | Ascription of term * term
   | UnknownT of int
+  | Const of Name.t
 
 and fun_info =
   { id : Name.t
@@ -33,3 +34,4 @@ let rec to_string =
   | Unknown i -> asprintf "?_%i" i
   | Ascription (t, ty) -> asprintf "%s : %s" (to_string t) (to_string ty)
   | UnknownT i -> asprintf "?_▢%i" i
+  | Const x -> Name.to_string x

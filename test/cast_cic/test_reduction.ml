@@ -1,5 +1,4 @@
 open Cast_cic
-open Cast_cic.Context
 open Example
 
 let reduce t = Reduction.reduce t |> Result.get_ok
@@ -7,11 +6,11 @@ let reduce t = Reduction.reduce t |> Result.get_ok
 let strong_normalization =
   QCheck.(
     Test.make ~count:1000 ~name:"strong normalization" Arbitrary.term (fun t ->
-        assume (Typing.infer_type NameMap.empty t |> Result.is_ok);
+        assume (Typing.infer_type empty_ctx t |> Result.is_ok);
         reduce t |> Ast.is_canonical))
 
 let subject_reduction_empty_ctx =
-  let ctx = NameMap.empty in
+  let ctx = empty_ctx in
   QCheck.(
     Test.make ~count:1000 ~name:"subject reduction in empty ctx" Arbitrary.term (fun t ->
         let ty = Typing.infer_type ctx t in
@@ -21,7 +20,7 @@ let subject_reduction_empty_ctx =
         Typing.check_type ctx (Result.get_ok t') (Result.get_ok ty) |> Result.is_ok))
 
 let progress_empty_ctx =
-  let ctx = NameMap.empty in
+  let ctx = empty_ctx in
   QCheck.(
     Test.make ~count:1000 ~name:"progress in empty ctx" Arbitrary.term (fun t ->
         assume (Typing.infer_type ctx t |> Result.is_ok);

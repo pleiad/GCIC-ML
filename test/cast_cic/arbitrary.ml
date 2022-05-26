@@ -1,8 +1,8 @@
 open Cast_cic.Ast
-open Common
+open Common.Id
 
 let term =
-  let name_of_int n = string_of_int n |> Id.Name.of_string in
+  let name_of_int n = string_of_int n |> Name.of_string in
   let var n = Var (name_of_int n) in
   let universe n = Universe n in
   let app t1 t2 = App (t1, t2) in
@@ -38,7 +38,7 @@ let term =
    here for now *)
 let gcic_term =
   let open Kernel.Ast in
-  let name_of_int n = string_of_int n |> Id.Name.of_string in
+  let name_of_int n = string_of_int n |> Name.of_string in
   let var n = Var (name_of_int n) in
   let universe n = Universe n in
   let app t1 t2 = App (t1, t2) in
@@ -66,18 +66,20 @@ let gcic_term =
   QCheck.make term_gen ~print:to_string
 
 let context arbitrary_key arbitrary_value =
-  let open Cast_cic.Context in
   let context_gen =
     QCheck.Gen.(
       sized
       @@ fix (fun self n ->
              match n with
-             | 0 -> return NameMap.empty
+             | 0 -> return Name.Map.empty
              | n ->
                let* key = QCheck.gen arbitrary_key in
                let* value = QCheck.gen arbitrary_value in
-               map (NameMap.add key value) (self (n - 1))))
+               map (Name.Map.add key value) (self (n - 1))))
   in
+  QCheck.make context_gen
+(*
   let print_context = Some string_of_context in
   (* TODO: Add shrinker *)
   QCheck.make context_gen ?print:print_context
+  *)

@@ -6,3 +6,11 @@ type 'a t =
   | Check of 'a
   | Elab of 'a
   | SetVariant of Kernel.Variant.t
+  | Definition of 'a global_definition
+
+and 'a global_definition =
+  | Constant_def of
+      { name : Common.Id.Name.t
+      ; ty : 'a
+      ; term : 'a
+      }
