@@ -7,7 +7,7 @@ type 'a t =
   | Elab of 'a
   | SetVariant of Kernel.Variant.t
   | Definition of 'a global_definition
-  | Import of string 
+  | Load of string 
 
 and 'a global_definition =
   | Constant_def of

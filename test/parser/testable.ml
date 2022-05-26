@@ -23,7 +23,7 @@ let command =
     | Elab t -> "elab " ^ to_string t
     | SetVariant v -> "set variant " ^ Kernel.Variant.to_string v
     | Definition gdef -> "definition " ^ def_to_string gdef
-    | Import filename -> Format.asprintf "import \"%s\"" filename
+    | Load filename -> Format.asprintf "import \"%s\"" filename
   in
   let eq_command (cmd1 : term Command.t) (cmd2 : term Command.t) =
     match cmd1, cmd2 with
@@ -32,7 +32,7 @@ let command =
     | Elab t1, Elab t2 -> eq_term t1 t2
     | SetVariant v1, SetVariant v2 -> v1 = v2
     | Definition def1, Definition def2 -> eq_definition def1 def2
-    | Import fn1, Import fn2 -> fn1 = fn2
+    | Load fn1, Load fn2 -> fn1 = fn2
     | _ -> false
   in
   let pprint_command ppf cmd = Format.pp_print_string ppf (cmd_to_string cmd) in

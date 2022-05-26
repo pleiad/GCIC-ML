@@ -33,7 +33,7 @@
 %token KWD_LET KWD_IN
 %token VERNAC_CHECK VERNAC_EVAL VERNAC_ELABORATE VERNAC_DEFINITION VERNAC_SET 
 %token VERNAC_VARIANT VERNAC_VARIANT_G VERNAC_VARIANT_S VERNAC_VARIANT_N
-%token VERNAC_IMPORT VERNAC_SEPARATOR
+%token VERNAC_LOAD VERNAC_SEPARATOR
 %token EOF
 
 /* This reduces the number of error states.
@@ -70,8 +70,8 @@ command :
 // def foo (x : Type1) : Type1 = ...
 | VERNAC_DEFINITION; id=id; args=list(arg); COLON; ty=term; EQUAL ; body=top  
  { mk_definition id (List.flatten args) ty body }
-// import "filename"
-| VERNAC_IMPORT; DOUBLE_QUOTE; filename=ID; DOUBLE_QUOTE  { Import filename }
+// load "filename"
+| VERNAC_LOAD; DOUBLE_QUOTE; filename=ID; DOUBLE_QUOTE  { Load filename }
 
 variant : 
 | VERNAC_VARIANT_G        { G }

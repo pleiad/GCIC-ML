@@ -18,7 +18,7 @@ type execute_error =
   [ Elaboration.elaboration_error
   | Typing.type_error
   | Reduction.reduction_error
-  | `ImportError 
+  | `LoadError 
   ]
 
 let string_of_error = function
@@ -26,7 +26,7 @@ let string_of_error = function
     "[elaboration_error] " ^ Elaboration.string_of_error e
   | #Typing.type_error as e -> "[type_error] " ^ Typing.string_of_error e
   | #Reduction.reduction_error as e -> "[reduction_error] " ^ Reduction.string_of_error e
-  | `ImportError -> "[import_error]" 
+  | `LoadError -> "[load_error]" 
 
 let execute_eval term : (cmd_result, execute_error) result =
   let open Elaboration in
@@ -77,8 +77,8 @@ let rec execute file_parser cmd : (cmd_result, execute_error) result =
   | Elab t -> execute_elab t
   | SetVariant v -> execute_set_variant v
   | Definition gdef -> execute_definition gdef
-  | Import filename -> execute_import file_parser filename
-and execute_import file_parser filename = 
+  | Load filename -> execute_load file_parser filename
+and execute_load file_parser filename = 
   let ch = open_in filename in
   try
     let content = really_input_string ch (in_channel_length ch) in 
@@ -91,4 +91,4 @@ and execute_import file_parser filename =
     (* some unexpected exception occurs *)
     close_in_noerr ch;
     (* emergency closing *)
-    Error (`ImportError)
+    Error (`LoadError)

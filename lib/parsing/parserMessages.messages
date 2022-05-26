@@ -635,7 +635,7 @@ program_parser: VERNAC_SET VERNAC_VARIANT VERNAC_VARIANT_G VERNAC_EVAL
 ##
 ## Ends in an error in state: 72.
 ##
-## sequenced_command -> command . VERNAC_SEPARATOR [ VERNAC_SET VERNAC_IMPORT VERNAC_EVAL VERNAC_ELABORATE VERNAC_DEFINITION VERNAC_CHECK EOF ]
+## sequenced_command -> command . VERNAC_SEPARATOR [ VERNAC_SET VERNAC_LOAD VERNAC_EVAL VERNAC_ELABORATE VERNAC_DEFINITION VERNAC_CHECK EOF ]
 ##
 ## The known suffix of the stack is as follows:
 ## command
@@ -761,44 +761,36 @@ Missing a `;;` after $0, to close the command.
 For example:
 > $0;;
 
-program_parser: VERNAC_IMPORT VERNAC_VARIANT_S
+
+
+program_parser: VERNAC_LOAD VERNAC_VARIANT_S
 ##
 ## Ends in an error in state: 7.
 ##
-## command -> VERNAC_IMPORT . DOUBLE_QUOTE ID DOUBLE_QUOTE [ VERNAC_SEPARATOR ]
+## command -> VERNAC_LOAD . DOUBLE_QUOTE ID DOUBLE_QUOTE [ VERNAC_SEPARATOR ]
 ##
 ## The known suffix of the stack is as follows:
-## VERNAC_IMPORT
+## VERNAC_LOAD
 ##
-
-I expect a `"` (double-quote) followed by the filename.
-For example:
-> $0 "my-file";;
-
-program_parser: VERNAC_IMPORT DOUBLE_QUOTE VERNAC_VARIANT_S
+program_parser: VERNAC_LOAD DOUBLE_QUOTE VERNAC_VARIANT_S
 ##
 ## Ends in an error in state: 8.
 ##
-## command -> VERNAC_IMPORT DOUBLE_QUOTE . ID DOUBLE_QUOTE [ VERNAC_SEPARATOR ]
+## command -> VERNAC_LOAD DOUBLE_QUOTE . ID DOUBLE_QUOTE [ VERNAC_SEPARATOR ]
 ##
 ## The known suffix of the stack is as follows:
-## VERNAC_IMPORT DOUBLE_QUOTE
+## VERNAC_LOAD DOUBLE_QUOTE
 ##
-
-The filename must follow the `"` (double-quote).
-For example:
-> $1 "my_file";;
-
-program_parser: VERNAC_IMPORT DOUBLE_QUOTE ID VERNAC_VARIANT_S
+program_parser: VERNAC_LOAD DOUBLE_QUOTE ID VERNAC_VARIANT_S
 ##
 ## Ends in an error in state: 9.
 ##
-## command -> VERNAC_IMPORT DOUBLE_QUOTE ID . DOUBLE_QUOTE [ VERNAC_SEPARATOR ]
+## command -> VERNAC_LOAD DOUBLE_QUOTE ID . DOUBLE_QUOTE [ VERNAC_SEPARATOR ]
 ##
 ## The known suffix of the stack is as follows:
-## VERNAC_IMPORT DOUBLE_QUOTE ID
+## VERNAC_LOAD DOUBLE_QUOTE ID
 ##
 
-I expect a `"` (double-quote) after the filename.
+I expect a filename wrapped in double-quotes after `load`.
 For example:
-> $2 "my-file";;
+> load "my_file";;

@@ -82,12 +82,12 @@ let tests_set_variant () =
     true
     (parse_command "variant G;;" |> Result.is_error)
 
-    let tests_import () =
+    let tests_load () =
       Alcotest.check
         pcommand
-        "import command"
-        (Ok (Import "file"))
-        (parse_command "import \"file\";;")
+        "load command"
+        (Ok (Load "file"))
+        (parse_command "load \"file\";;")
       (* Alcotest.check
         pcommand
         "set variant command"
@@ -120,5 +120,5 @@ let tests =
   ; "check command", `Quick, tests_check
   ; "elab command", `Quick, tests_elaborate
   ; "set variant command", `Quick, tests_set_variant
-  ; "import command", `Quick, tests_import
+  ; "load command", `Quick, tests_load
   ]
