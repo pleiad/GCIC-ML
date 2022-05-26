@@ -18,15 +18,17 @@ type execute_error =
   [ Elaboration.elaboration_error
   | Typing.type_error
   | Reduction.reduction_error
-  | `LoadError
+  | `LoadError of execute_error
+  | `FileNotFound of string
   ]
 
-let string_of_error = function
+let rec string_of_error = function
   | #Elaboration.elaboration_error as e ->
     "[elaboration_error] " ^ Elaboration.string_of_error e
   | #Typing.type_error as e -> "[type_error] " ^ Typing.string_of_error e
   | #Reduction.reduction_error as e -> "[reduction_error] " ^ Reduction.string_of_error e
-  | `LoadError -> "[load_error]"
+  | `LoadError e -> "[load_error]\n" ^ string_of_error e
+  | `FileNotFound filename -> "[file_not_found_error] " ^ filename
 
 let execute_eval term : (cmd_result, execute_error) result =
   let open Elaboration in
@@ -69,6 +71,8 @@ let execute_definition gdef : (cmd_result, execute_error) result =
     Declarations.add name (term, ty);
     Ok Unit
 
+exception LoadFail of execute_error
+
 let rec execute file_parser cmd : (cmd_result, execute_error) result =
   let open Command in
   match cmd with
@@ -83,9 +87,14 @@ and execute_load file_parser filename =
   try
     let src = Stdio.In_channel.read_all filename in
     let cmds = file_parser src in
-    List.fold_left
-      (fun res cmd -> if Result.is_error res then res else execute file_parser cmd)
-      (Ok Unit)
-      cmds
+    List.iter
+      (fun cmd ->
+        match execute file_parser cmd with
+        | Ok res -> string_of_cmd_result res |> print_endline
+        | Error e -> raise (LoadFail e))
+      cmds;
+    Ok Unit
   with
-  | _ -> Error `LoadError
+  | LoadFail e ->
+    Error (`LoadError e)
+  | _ -> Error (`FileNotFound filename)
