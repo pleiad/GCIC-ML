@@ -12,6 +12,7 @@ let lower = [%sedlex.regexp? 'a' .. 'z']
 let upper = [%sedlex.regexp? 'A' .. 'Z']
 let alpha = [%sedlex.regexp? lower | upper]
 let id = [%sedlex.regexp? lower, Star (alpha | digit | '_')]
+let filename = [%sedlex.regexp? alpha, Star (alpha | digit | '_')]
 let universe = [%sedlex.regexp? "Type" | 0x25a1]
 let whitespace = [%sedlex.regexp? Plus ('\t' | ' ')]
 let newline = [%sedlex.regexp? '\r' | '\n' | "\r\n"]
@@ -36,11 +37,13 @@ let rec token lexbuf =
   | "def" -> VERNAC_DEFINITION
   | "set" -> VERNAC_SET
   | "variant" -> VERNAC_VARIANT
+  | "load" -> VERNAC_LOAD
   | ";;" -> VERNAC_SEPARATOR
   | "G" -> VERNAC_VARIANT_G
   | "N" -> VERNAC_VARIANT_N
   | "S" -> VERNAC_VARIANT_S
   | id -> ID (lexeme lexbuf)
+  (* | filename -> FILENAME (lexeme lexbuf) *)
   | number -> INT (int_of_string (lexeme lexbuf))
   | arrow -> ARROW
   | '(' -> LPAREN
@@ -49,6 +52,7 @@ let rec token lexbuf =
   | ':' -> COLON
   | '.' -> DOT
   | ',' -> COMMA
+  | '"' -> DOUBLE_QUOTE
   | whitespace -> token lexbuf
   | newline ->
     Sedlexing.new_line lexbuf;

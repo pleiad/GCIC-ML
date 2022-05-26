@@ -9,6 +9,9 @@
   open Common.Id
   open Kernel.Variant
 
+  (** Stores a global declaration (def) as a lambda. 
+      The body of the lambda is being ascribed to the expected type.
+  *)
   let mk_definition name args ty' body =
     let open Vernac.Command in
     let term = Lambda (args, Ascription (body, ty')) in
@@ -23,13 +26,14 @@
 */
 %token <int> INT
 %token <string> ID
-%token COLON DOT COMMA ARROW EQUAL
+// %token <string> FILENAME
+%token COLON DOT COMMA ARROW EQUAL DOUBLE_QUOTE
 %token LPAREN RPAREN
 %token KWD_UNIVERSE KWD_LAMBDA KWD_UNKNOWN KWD_UNKNOWN_T KWD_FORALL
 %token KWD_LET KWD_IN
 %token VERNAC_CHECK VERNAC_EVAL VERNAC_ELABORATE VERNAC_DEFINITION VERNAC_SET 
 %token VERNAC_VARIANT VERNAC_VARIANT_G VERNAC_VARIANT_S VERNAC_VARIANT_N
-%token VERNAC_SEPARATOR
+%token VERNAC_LOAD VERNAC_SEPARATOR
 %token EOF
 
 /* This reduces the number of error states.
@@ -38,27 +42,40 @@
 %on_error_reduce term
 
 /* Specify starting production */
-%start program_parser term_parser
+%start program_parser term_parser command_parser
 
 /* Types for the result of productions */
-%type <Ast.term Vernac.Command.t> program_parser
+%type <Ast.term Vernac.Command.t list> program_parser
 %type <Ast.term> term_parser
+%type <Ast.term Vernac.Command.t> command_parser
 
 %% /* Start grammar productions */
 program_parser :
-  cmd=command; VERNAC_SEPARATOR; EOF   { cmd }
+  cmds=list(sequenced_command); EOF   { cmds }
 
 term_parser :
   t=top; EOF   { t }
 
+command_parser : 
+  cmd=sequenced_command; EOF    { cmd }
+  
+sequenced_command :
+| cmd=command ; VERNAC_SEPARATOR   { cmd }
+
 command :
+// eval <top>
 | VERNAC_EVAL; t=top                       { Eval t }
+// check <top>
 | VERNAC_CHECK; t=top                      { Check t }
+// elab <top>
 | VERNAC_ELABORATE; t=top                  { Elab t }
+// set variant variant_name
 | VERNAC_SET; VERNAC_VARIANT; var=variant  { SetVariant var }
 // def foo (x : Type1) : Type1 = ...
 | VERNAC_DEFINITION; id=id; args=list(arg); COLON; ty=term; EQUAL ; body=top  
  { mk_definition id (List.flatten args) ty body }
+// load "filename"
+| VERNAC_LOAD; DOUBLE_QUOTE; filename=ID; DOUBLE_QUOTE  { Load filename }
 
 variant : 
 | VERNAC_VARIANT_G        { G }

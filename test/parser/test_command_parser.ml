@@ -82,9 +82,21 @@ let tests_set_variant () =
     true
     (parse_command "variant G;;" |> Result.is_error)
 
+let tests_load () =
+  Alcotest.check
+    pcommand
+    "load command"
+    (Ok (Load "file"))
+    (parse_command "load \"file\";;");
+  Alcotest.(check bool)
+    "Fails with not a quoted string"
+    true
+    (parse_command "load filename;;" |> Result.is_error)
+
 let tests =
   [ "eval command", `Quick, tests_eval
   ; "check command", `Quick, tests_check
   ; "elab command", `Quick, tests_elaborate
   ; "set variant command", `Quick, tests_set_variant
+  ; "load command", `Quick, tests_load
   ]
