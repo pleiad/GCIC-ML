@@ -75,7 +75,7 @@ You should see the changes in effect immediately.
 [Nix](https://nixos.org/) is a declarative package manager.
 
 #### Setup
-1. To start, install nix. You can check [nix's documentation] (https://nix.dev/tutorials/install-nix) for more information.
+1. To start, install nix. You can check [nix's documentation](https://nix.dev/tutorials/install-nix) for more information.
     ```shell
     # Linux
     sh <(curl -L https://nixos.org/nix/install) --daemon
@@ -87,6 +87,7 @@ You should see the changes in effect immediately.
     ```bash
     nix-shell
     ```
+    :warning: Not currently working for OS X
 4. Run it and test it out.
    ```bash
    gcic-repl
