@@ -18,7 +18,7 @@ type execute_error =
   [ Elaboration.elaboration_error
   | Typing.type_error
   | Reduction.reduction_error
-  | `LoadError 
+  | `LoadError
   ]
 
 let string_of_error = function
@@ -26,7 +26,7 @@ let string_of_error = function
     "[elaboration_error] " ^ Elaboration.string_of_error e
   | #Typing.type_error as e -> "[type_error] " ^ Typing.string_of_error e
   | #Reduction.reduction_error as e -> "[reduction_error] " ^ Reduction.string_of_error e
-  | `LoadError -> "[load_error]" 
+  | `LoadError -> "[load_error]"
 
 let execute_eval term : (cmd_result, execute_error) result =
   let open Elaboration in
@@ -78,17 +78,14 @@ let rec execute file_parser cmd : (cmd_result, execute_error) result =
   | SetVariant v -> execute_set_variant v
   | Definition gdef -> execute_definition gdef
   | Load filename -> execute_load file_parser filename
-and execute_load file_parser filename = 
-  let ch = open_in filename in
+
+and execute_load file_parser filename =
   try
-    let content = really_input_string ch (in_channel_length ch) in 
-    let cmds = file_parser content in 
-    let res = List.fold_left (fun res cmd -> if Result.is_error res then res else execute file_parser cmd) (Ok Unit) cmds in
-    (* close the input channel *)
-    close_in ch;
-    res
-  with _ ->
-    (* some unexpected exception occurs *)
-    close_in_noerr ch;
-    (* emergency closing *)
-    Error (`LoadError)
+    let src = Stdio.In_channel.read_all filename in
+    let cmds = file_parser src in
+    List.fold_left
+      (fun res cmd -> if Result.is_error res then res else execute file_parser cmd)
+      (Ok Unit)
+      cmds
+  with
+  | _ -> Error `LoadError

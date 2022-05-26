@@ -82,13 +82,13 @@ let tests_set_variant () =
     true
     (parse_command "variant G;;" |> Result.is_error)
 
-    let tests_load () =
-      Alcotest.check
-        pcommand
-        "load command"
-        (Ok (Load "file"))
-        (parse_command "load \"file\";;")
-      (* Alcotest.check
+let tests_load () =
+  Alcotest.check
+    pcommand
+    "load command"
+    (Ok (Load "file"))
+    (parse_command "load \"file\";;")
+(* Alcotest.check
         pcommand
         "set variant command"
         (Ok (SetVariant N))

@@ -86,4 +86,3 @@ let parse_commands text =
     Error error_msg
 
 let parse_command text = parse_commands text |> Result.map List.hd
-      

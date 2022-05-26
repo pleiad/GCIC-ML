@@ -13,4 +13,7 @@ type execute_error
 val string_of_error : execute_error -> string
 
 (** Executes a command *)
-val execute : (string -> Kernel.Ast.term Command.t list) -> Kernel.Ast.term Command.t -> (cmd_result, execute_error) result
+val execute
+  :  (string -> Kernel.Ast.term Command.t list)
+  -> Kernel.Ast.term Command.t
+  -> (cmd_result, execute_error) result
