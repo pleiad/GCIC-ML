@@ -1,4 +1,6 @@
 (library
  (name kernel)
  (modules ast variant)
+ (preprocess
+  (pps bisect_ppx))
  (libraries common))
