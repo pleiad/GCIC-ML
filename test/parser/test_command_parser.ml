@@ -87,33 +87,11 @@ let tests_load () =
     pcommand
     "load command"
     (Ok (Load "file"))
-    (parse_command "load \"file\";;")
-(* Alcotest.check
-        pcommand
-        "set variant command"
-        (Ok (SetVariant N))
-        (parse_command "set variant N;;");
-      Alcotest.check
-        pcommand
-        "set variant command"
-        (Ok (SetVariant S))
-        (parse_command "set variant S;;");
-      Alcotest.(check bool)
-        "Fails with not a variant"
-        true
-        (parse_command "set variant H;;" |> Result.is_error);
-      Alcotest.(check bool)
-        "Fails with missing variant"
-        true
-        (parse_command "set variant;;" |> Result.is_error);
-      Alcotest.(check bool)
-        "Fails if missing `variant` keyword"
-        true
-        (parse_command "set G;;" |> Result.is_error);
-      Alcotest.(check bool)
-        "Fails if missing `set` keyword"
-        true
-        (parse_command "variant G;;" |> Result.is_error) *)
+    (parse_command "load \"file\";;");
+  Alcotest.(check bool)
+    "Fails with not a quoted string"
+    true
+    (parse_command "load filename;;" |> Result.is_error)
 
 let tests =
   [ "eval command", `Quick, tests_eval
