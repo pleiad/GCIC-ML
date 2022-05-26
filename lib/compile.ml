@@ -45,6 +45,7 @@ let of_parsed_command : parsed_term Command.t -> term Command.t = function
   | Elab t -> Elab (of_parsed_term t)
   | SetVariant v -> SetVariant v
   | Definition gdef -> Definition (of_parsed_gdef gdef)
+  | Import filename -> Import filename
 
 (** Compiles a string and returns the stringified version of the AST *)
 let compile (line : string) =

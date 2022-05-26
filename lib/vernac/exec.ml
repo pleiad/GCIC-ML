@@ -75,3 +75,4 @@ let execute cmd : (cmd_result, execute_error) result =
   | Elab t -> execute_elab t
   | SetVariant v -> execute_set_variant v
   | Definition gdef -> execute_definition gdef
+  | Import _filename -> Ok Unit
