@@ -42,7 +42,7 @@ let rec to_string (t : term) =
   | Lambda { id; dom; body } ->
     asprintf "fun %s : %s. %s" (Name.to_string id) (to_string dom) (to_string body)
   | Prod { id; dom; body } ->
-    asprintf "Prod %s : %s. %s" (Name.to_string id) (to_string dom) (to_string body)
+    asprintf "Π %s : %s. %s" (Name.to_string id) (to_string dom) (to_string body)
   | Unknown ty -> asprintf "?_%s" (to_string ty)
   | Err ty -> asprintf "err_%s" (to_string ty)
   | Cast { source; target; term } ->

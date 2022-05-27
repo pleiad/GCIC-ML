@@ -121,7 +121,7 @@ let tests_to_string () =
     (to_string (Lambda { id = Name.of_string "x"; dom = Unknown idy; body = idx }));
   Alcotest.(check string)
     "Prod"
-    "Prod x : ▢1. err_▢1"
+    "Π x : ▢1. err_▢1"
     (to_string
        (Prod { id = Name.of_string "x"; dom = Universe 1; body = Err (Universe 1) }));
   Alcotest.(check string)

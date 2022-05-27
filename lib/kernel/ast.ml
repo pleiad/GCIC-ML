@@ -30,7 +30,7 @@ let rec to_string =
   | Lambda { id; dom; body } ->
     asprintf "fun %s : %s. %s" (Name.to_string id) (to_string dom) (to_string body)
   | Prod { id; dom; body } ->
-    asprintf "Prod %s : %s. %s" (Name.to_string id) (to_string dom) (to_string body)
+    asprintf "Π %s : %s. %s" (Name.to_string id) (to_string dom) (to_string body)
   | Unknown i -> asprintf "?_%i" i
   | Ascription (t, ty) -> asprintf "%s : %s" (to_string t) (to_string ty)
   | UnknownT i -> asprintf "?_▢%i" i

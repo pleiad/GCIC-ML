@@ -22,7 +22,7 @@ let rec to_string = function
   | Universe i -> asprintf "▢%i" i
   | App (t, t') -> asprintf "(%s %s)" (to_string t) (to_string t')
   | Lambda (args, b) -> asprintf "fun %s. %s" (string_of_args args) (to_string b)
-  | Prod (args, b) -> asprintf "forall %s, %s" (string_of_args args) (to_string b)
+  | Prod (args, b) -> asprintf "Π %s. %s" (string_of_args args) (to_string b)
   | Unknown i -> asprintf "?_%i" i
   | LetIn (id, ty, t1, t2) ->
     asprintf
