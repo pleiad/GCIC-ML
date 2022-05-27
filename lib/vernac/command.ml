@@ -6,7 +6,7 @@ type 'a t =
   | Check of 'a
   | Elab of 'a
   | SetVariant of Kernel.Variant.t
-  | Definition of 'a global_definition
+  | Define of 'a global_definition
   | Load of string
 
 and 'a global_definition =

@@ -7,12 +7,15 @@ type cmd_result =
   | Unit
   | Elaboration of Ast.term
   | Inference of Ast.term
+  | Definition of Name.t * Kernel.Ast.term
 
 let string_of_cmd_result : cmd_result -> string = function
   | Reduction t -> Ast.to_string t
   | Unit -> "OK"
   | Elaboration t -> Ast.to_string t
   | Inference t -> Ast.to_string t
+  | Definition (name, ty) ->
+    Name.to_string name ^ " : " ^ Kernel.Ast.to_string ty ^ " defined."
 
 type execute_error =
   [ Elaboration.elaboration_error
@@ -69,7 +72,7 @@ let execute_definition gdef : (cmd_result, execute_error) result =
     let* elab_term = check_elab reduce empty_ctx term elab_ty in
     let* _ = check_type empty_ctx elab_term elab_ty in
     Declarations.add name (term, ty);
-    Ok Unit
+    Ok (Definition (name, ty))
 
 exception LoadFail of execute_error
 
@@ -80,7 +83,7 @@ let rec execute file_parser cmd : (cmd_result, execute_error) result =
   | Check t -> execute_check t
   | Elab t -> execute_elab t
   | SetVariant v -> execute_set_variant v
-  | Definition gdef -> execute_definition gdef
+  | Define gdef -> execute_definition gdef
   | Load filename -> execute_load file_parser filename
 
 and execute_load file_parser filename =

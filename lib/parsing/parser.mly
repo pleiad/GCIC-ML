@@ -17,7 +17,7 @@
     let term = Lambda (args, Ascription (body, ty')) in
     let ty  = Prod (args, ty') in
     let const_def = Constant_def { name; ty; term } in
-    Definition const_def
+    Define const_def
 %}
 
 /* Token definitions 
