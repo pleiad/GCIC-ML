@@ -1,6 +1,5 @@
 (** This module specifies the AST for commands *)
 
-
 (** The AST for the commands *)
 type 'a t =
   | Eval of 'a

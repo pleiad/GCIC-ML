@@ -105,6 +105,7 @@ let tests_set_fuel () =
     "Fails if missing `fail` keyword"
     true
     (parse_command "set 0;;" |> Result.is_error)
+
 let tests_load () =
   Alcotest.check
     pcommand

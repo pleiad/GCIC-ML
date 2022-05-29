@@ -21,7 +21,7 @@ let command =
     | Eval t -> "eval " ^ to_string t
     | Check t -> "check " ^ to_string t
     | Elab t -> "elab " ^ to_string t
-    | Set flag -> "set " ^ Config.Flag.to_string flag 
+    | Set flag -> "set " ^ Config.Flag.to_string flag
     | Define gdef -> "definition " ^ def_to_string gdef
     | Load filename -> Format.asprintf "import \"%s\"" filename
   in
