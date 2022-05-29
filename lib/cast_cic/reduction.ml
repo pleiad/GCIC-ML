@@ -6,11 +6,13 @@ open Ast
 type reduction_error =
   [ `Err_not_enough_fuel
   | `Err_stuck_term of term
+  | `Err_free_const
   ]
 
 let string_of_error = function
   | `Err_not_enough_fuel -> "not enough fuel"
   | `Err_stuck_term _term -> "stuck term"
+  | `Err_free_const -> "free constant"
 
 (** Checks if a term corresponds to a type *)
 let is_type : term -> bool = function
@@ -42,11 +44,18 @@ type continuation =
 type state = term * continuation list
 
 exception Stuck_term of term
+exception Not_enough_fuel
 
 (** One step reduction of terms *)
-let reduce1 (term, cont) : state =
+let rec reduce1 (term, cont) : state =
   match term, cont with
   (* Redexes *)
+  | Const x, _ ->
+    let term, _ = Declarations.find x in
+    let elab = Elaboration.elaborate reduce Common.Id.Name.Map.empty term in
+    (match Result.map fst elab with
+    | Error _ -> raise (Stuck_term (Const x))
+    | Ok t -> t, cont)
   (* Beta *)
   | Lambda { id; dom = _; body }, KApp_l u :: cont -> subst1 id u body, cont
   (* Prod-Unk *)
@@ -119,7 +128,7 @@ let reduce1 (term, cont) : state =
         ; term = _
         }
     , _ )
-    when j == k && j > Kernel.Variant.cast_universe_level i -> Err tgt, cont
+    when j == k && j > Config.cast_universe_level i -> Err tgt, cont
   (* Congruence rules *)
   | term, KUnknown :: cont when is_canonical term -> Unknown term, cont
   | term, KErr :: cont when is_canonical term -> Err term, cont
@@ -135,23 +144,19 @@ let reduce1 (term, cont) : state =
   | Cast { source; target; term }, _ -> target, KCast_target (source, term) :: cont
   | _, _ -> raise (Stuck_term term)
 
-exception Not_enough_fuel
-
-let max_fuel : int ref = ref 10000
-let set_fuel (fuel : int) : unit = max_fuel := fuel
-
 (** Transitive clousure of reduce1 with fuel *)
-let rec reduce_fueled (fuel : int) ((term, cont) as s) : term =
-  if fuel < 0 && !max_fuel > 0
+and reduce_fueled (fuel : int) ((term, cont) as s) : term =
+  if fuel < 0 && Config.uses_fuel ()
   then raise Not_enough_fuel
   else if is_canonical term && cont = []
   then term
   else reduce_fueled (fuel - 1) (reduce1 s)
 
 (** Reduces a term *)
-let reduce term : (term, [> reduction_error ]) result =
+and reduce term : (term, [> reduction_error ]) result =
   let initial_state = term, [] in
-  try Ok (reduce_fueled !max_fuel initial_state) with
+  let initial_fuel = Config.initial_fuel () in
+  try Ok (reduce_fueled initial_fuel initial_state) with
   | Not_enough_fuel -> Error `Err_not_enough_fuel
   | Stuck_term term -> Error (`Err_stuck_term term)
 
@@ -170,5 +175,6 @@ let fill_hole term = List.fold_left fill_hole1 term
 let step term =
   let initial_state = term, [] in
   (try Ok (reduce1 initial_state) with
-  | Stuck_term t -> Error (`Err_stuck_term t))
+  | Stuck_term t -> Error (`Err_stuck_term t)
+  | Not_found -> Error `Err_free_const)
   |> Result.map (fun (t, cont) -> fill_hole t cont)

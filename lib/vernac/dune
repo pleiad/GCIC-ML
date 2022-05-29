@@ -1,4 +1,6 @@
 (library
  (name vernac)
- (libraries kernel cast_cic common)
- (modules ast config))
+ (libraries kernel cast_cic common stdio)
+ (preprocess
+  (pps bisect_ppx))
+ (modules command exec))

@@ -1,10 +1,9 @@
-(** COnfiguration options *)
 type t =
-  | Variant of Kernel.Variant.t
+  | Variant of Variant.t
   | Fuel of int
 
 let to_string = function
-  | Variant v -> "Variant " ^ Kernel.Variant.to_string v
+  | Variant v -> "Variant " ^ Variant.to_string v
   | Fuel i -> "Fuel " ^ string_of_int i
 
 let ( = ) cfg1 cfg2 =

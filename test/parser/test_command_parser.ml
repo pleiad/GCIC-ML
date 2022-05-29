@@ -10,10 +10,6 @@ let tests_eval () =
     (Ok (Eval (Universe 0)))
     (parse_command "eval Type 0;;");
   Alcotest.(check bool)
-    "Fails with :"
-    true
-    (parse_command "eval Type 0 : ?0;;" |> Result.is_error);
-  Alcotest.(check bool)
     "Fails if no expression"
     true
     (parse_command "eval;;" |> Result.is_error);
@@ -26,12 +22,8 @@ let tests_check () =
   Alcotest.check
     pcommand
     "check command"
-    (Ok (Check (Universe 0, Unknown 0)))
-    (parse_command "check Type0 : ?0;;");
-  Alcotest.(check bool)
-    "Fails without :"
-    true
-    (parse_command "check Type 0 ?0;;" |> Result.is_error);
+    (Ok (Check (Universe 0)))
+    (parse_command "check Type0;;");
   Alcotest.(check bool)
     "Fails if no expression"
     true
@@ -39,7 +31,7 @@ let tests_check () =
   Alcotest.(check bool)
     "Fails if no semi-colons"
     true
-    (parse_command "check ?0 : foo" |> Result.is_error)
+    (parse_command "check ?0" |> Result.is_error)
 
 let tests_elaborate () =
   Alcotest.check
@@ -47,10 +39,6 @@ let tests_elaborate () =
     "elab command"
     (Ok (Elab (Universe 0)))
     (parse_command "elab Type 0;;");
-  Alcotest.(check bool)
-    "Fails with :"
-    true
-    (parse_command "elab Type 0 : ?0;;" |> Result.is_error);
   Alcotest.(check bool)
     "Fails if no expression"
     true
@@ -61,7 +49,7 @@ let tests_elaborate () =
     (parse_command "elab ?0 foo" |> Result.is_error)
 
 let tests_set_variant () =
-  let open Kernel.Variant in
+  let open Config.Variant in
   Alcotest.check
     pcommand
     "set variant command"
@@ -117,6 +105,16 @@ let tests_set_fuel () =
     "Fails if missing `fail` keyword"
     true
     (parse_command "set 0;;" |> Result.is_error)
+let tests_load () =
+  Alcotest.check
+    pcommand
+    "load command"
+    (Ok (Load "file"))
+    (parse_command "load \"file\";;");
+  Alcotest.(check bool)
+    "Fails with not a quoted string"
+    true
+    (parse_command "load filename;;" |> Result.is_error)
 
 let tests =
   [ "eval command", `Quick, tests_eval
@@ -124,4 +122,5 @@ let tests =
   ; "elab command", `Quick, tests_elaborate
   ; "set variant command", `Quick, tests_set_variant
   ; "set fuel command", `Quick, tests_set_fuel
+  ; "load command", `Quick, tests_load
   ]

@@ -2,11 +2,11 @@
 
 (* TODO: This module should go somewhere else, but idk where *)
 
-open Reduction
+open Common.Id
 
 (** An error originating from elaboration  *)
 type elaboration_error =
-  [ `Err_free_identifier of Common.Id.Name.t
+  [ `Err_free_identifier of Name.t
   | `Err_inconsistent of Kernel.Ast.term * Ast.term * Ast.term
   | `Err_constrained_universe of Kernel.Ast.term
   | `Err_constrained_product of Kernel.Ast.term
@@ -21,6 +21,20 @@ type elaboration = Ast.term * Ast.term
 
 (** The elaboration procedure, as per the paper *)
 val elaborate
-  :  Context.context
+  :  (Ast.term -> (Ast.term, ([> elaboration_error ] as 'e)) result)
+  -> Ast.term Name.Map.t
   -> Kernel.Ast.term
-  -> (elaboration, [> elaboration_error | reduction_error ]) result
+  -> (elaboration, 'e) result
+
+val check_elab
+  :  (Ast.term -> (Ast.term, ([> elaboration_error ] as 'e)) result)
+  -> Ast.term Name.Map.t
+  -> Kernel.Ast.term
+  -> Ast.term
+  -> (Ast.term, 'e) result
+
+val elab_univ
+  :  (Ast.term -> (Ast.term, ([> elaboration_error ] as 'e)) result)
+  -> Ast.term Name.Map.t
+  -> Kernel.Ast.term
+  -> (Ast.term * int, 'e) result

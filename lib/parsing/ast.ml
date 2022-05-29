@@ -12,14 +12,17 @@ type term =
   | Prod of (Name.t option * term) list * term
   | Unknown of int
   | LetIn of (Name.t * term * term * term)
+  (* Extras *)
+  | Ascription of term * term
+  | UnknownT of int
 
 (** Returns the stringified version of a term *)
 let rec to_string = function
   | Var x -> Name.to_string x
-  | Universe i -> asprintf "Type%i" i
+  | Universe i -> asprintf "▢%i" i
   | App (t, t') -> asprintf "(%s %s)" (to_string t) (to_string t')
-  | Lambda (args, b) -> asprintf "lambda %s. %s" (string_of_args args) (to_string b)
-  | Prod (args, b) -> asprintf "forall %s, %s" (string_of_args args) (to_string b)
+  | Lambda (args, b) -> asprintf "fun %s. %s" (string_of_args args) (to_string b)
+  | Prod (args, b) -> asprintf "Π %s. %s" (string_of_args args) (to_string b)
   | Unknown i -> asprintf "?_%i" i
   | LetIn (id, ty, t1, t2) ->
     asprintf
@@ -28,6 +31,8 @@ let rec to_string = function
       (to_string ty)
       (to_string t1)
       (to_string t2)
+  | Ascription (t, ty) -> asprintf "%s : %s" (to_string t) (to_string ty)
+  | UnknownT i -> asprintf "?_▢%i" i
 
 and string_of_arg (id, dom) =
   let string_of_name = function
@@ -49,27 +54,9 @@ let rec eq_term t1 t2 =
   | Unknown i, Unknown j -> i == j
   | LetIn (id1, ty1, t11, t12), LetIn (id2, ty2, t21, t22) ->
     id1 = id2 && eq_term ty1 ty2 && eq_term t11 t21 && eq_term t12 t22
+  | Ascription (t1, ty1), Ascription (t2, ty2) -> eq_term t1 t2 && eq_term ty1 ty2
+  | UnknownT i, UnknownT j -> i == j
   | _ -> false
 
 and eq_arg (id1, dom1) (id2, dom2) = id1 = id2 && eq_term dom1 dom2
 and eq_args args1 args2 = List.for_all2 eq_arg args1 args2
-
-type command =
-  | Eval of term
-  | Check of term * term
-  | Elab of term
-  | Set of Vernac.Config.t
-
-let string_of_command : command -> string = function
-  | Eval t -> "Eval " ^ to_string t
-  | Check (t, ty) -> Format.asprintf "Check %s : %s" (to_string t) (to_string ty)
-  | Elab t -> "elab " ^ to_string t
-  | Set cfg -> "set " ^ Vernac.Config.to_string cfg
-
-let eq_command cmd1 cmd2 =
-  match cmd1, cmd2 with
-  | Eval t1, Eval t2 -> eq_term t1 t2
-  | Check (t1, ty1), Check (t2, ty2) -> eq_term t1 t2 && eq_term ty1 ty2
-  | Elab t1, Elab t2 -> eq_term t1 t2
-  | Set cfg1, Set cfg2 -> cfg1 = cfg2
-  | _ -> false

@@ -1,7 +1,7 @@
 open Cast_cic
 open Common.Id
 
-let empty_ctx = Context.NameMap.empty
+let empty_ctx = Name.Map.empty
 let name_of_int n = string_of_int n |> Name.of_string
 let id = Name.of_string "__"
 
@@ -26,7 +26,7 @@ let delta' i =
           ( Cast { source = dom; target = germ i HProd; term = Var id }
           , Cast
               { source = dom
-              ; target = unknown (Kernel.Variant.cast_universe_level i)
+              ; target = unknown (Config.cast_universe_level i)
               ; term = Var id
               } )
     }
@@ -44,7 +44,7 @@ let omega i =
   App
     ( d'
     , Cast
-        { source = Prod { id; dom; body = unknown (Kernel.Variant.cast_universe_level i) }
+        { source = Prod { id; dom; body = unknown (Config.cast_universe_level i) }
         ; target = dom
         ; term = d'
         } )

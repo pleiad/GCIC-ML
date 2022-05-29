@@ -25,7 +25,8 @@ let state checkpoint : int =
    delimited by the positions [pos1] and [pos2]. *)
 
 let show text positions =
-  E.extract text positions |> E.sanitize |> E.compress |> E.shorten 20 (* max width 43 *)
+  E.extract text positions |> E.sanitize |> E.compress |> E.shorten 20
+(* max width 43 *)
 
 (* [get text checkpoint i] extracts and shows the range of the input text that
    corresponds to the [i]-th stack cell. The top stack cell is numbered zero. *)
@@ -56,13 +57,13 @@ let fail text buffer (checkpoint : _ I.checkpoint) =
   let msg = asprintf "%s%s%s%!" location indication message in
   Error msg
 
-let parse_term text =
+let parse parser text =
   try
     let lexbuf = Sedlexing.Utf8.from_string text in
     let supplier = Sedlexing.with_tokenizer Lexer.token lexbuf in
     let buffer, supplier = E.wrap_supplier supplier in
     let start_position = fst (Sedlexing.lexing_positions lexbuf) in
-    let checkpoint = Parser.Incremental.term_parser start_position in
+    let checkpoint = parser start_position in
     I.loop_handle succeed (fail text buffer) supplier checkpoint
   with
   (* catch exception and turn into Error *)
@@ -70,16 +71,6 @@ let parse_term text =
     let error_msg = asprintf "%s" msg in
     Error error_msg
 
-let parse_command text =
-  try
-    let lexbuf = Sedlexing.Utf8.from_string text in
-    let supplier = Sedlexing.with_tokenizer Lexer.token lexbuf in
-    let buffer, supplier = E.wrap_supplier supplier in
-    let start_position = fst (Sedlexing.lexing_positions lexbuf) in
-    let checkpoint = Parser.Incremental.program_parser start_position in
-    I.loop_handle succeed (fail text buffer) supplier checkpoint
-  with
-  (* catch exception and turn into Error *)
-  | Lexer.SyntaxError msg ->
-    let error_msg = asprintf "%s" msg in
-    Error error_msg
+let parse_term = parse Parser.Incremental.term_parser
+let parse_program = parse Parser.Incremental.program_parser
+let parse_command = parse Parser.Incremental.command_parser
