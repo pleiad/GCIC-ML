@@ -3,10 +3,11 @@
 
 (** GCIC variants: Gradual, Normalizing and Shift *)
 type t =
-  | G
-  | N
-  | S
+  | G (** Gradual *)
+  | N (** Normalizing *)
+  | S (** Shift *)
 
+(** Returns the stringified version of a variant *)
 let to_string = function
   | G -> "G"
   | N -> "N"
