@@ -10,7 +10,7 @@ let from_opt_name id = Option.value id ~default:Name.default
    A better approach would be to have a list of global declarations and treat free identifiers as just free.  *)
 let rec of_parsed_term (t : parsed_term) : term =
   match t with
-  | Var x -> if Cast_cic.Declarations.exists x then Const x else Var x
+  | Var x -> if Kernel.Declarations.exists x then Const x else Var x
   | Universe i -> Universe i
   | App (t, u) -> App (of_parsed_term t, of_parsed_term u)
   | Lambda (args, body) -> expand_lambda (fun fi -> Kernel.Ast.Lambda fi) args body

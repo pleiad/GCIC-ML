@@ -98,7 +98,7 @@ let rec elaborate reduce ctx (term : Kernel.Ast.term)
   | UnknownT i -> Ok (Ast.Unknown (Ast.Universe i), Ast.Universe i)
   | Const x ->
     let* ty =
-      try Ok (Declarations.find x |> snd) with
+      try Ok (Kernel.Declarations.find x |> snd) with
       | Not_found -> Error (`Err_free_identifier x)
     in
     let* elab_ty, _ = elab_univ reduce Name.Map.empty ty in

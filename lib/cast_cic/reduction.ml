@@ -51,7 +51,7 @@ let rec reduce1 (term, cont) : state =
   match term, cont with
   (* Redexes *)
   | Const x, _ ->
-    let term, _ = Declarations.find x in
+    let term, _ = Kernel.Declarations.find x in
     let elab = Elaboration.elaborate reduce Common.Id.Name.Map.empty term in
     (match Result.map fst elab with
     | Error _ -> raise (Stuck_term (Const x))
