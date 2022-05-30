@@ -8,12 +8,49 @@
 *)
 open Common.Id
 
-(** Find a global declaration.
-    Raises [Not_found] if no binding for the name exists. *)
-val find : Name.t -> Ast.term * Ast.term
+(** Global declaration of constants *)
+type const_decl =
+  { name : Name.t
+  ; ty : Ast.term
+  ; term : Ast.term
+  }
 
-(** Add a global declaration. *)
-val add : Name.t -> Ast.term * Ast.term -> unit
+(** Global declaration of inductives *)
+type ind_decl =
+  { name : Name.t
+  ; params : (Name.t * Ast.term) list
+  ; sort : Ast.term
+  ; ctors : Name.t list
+  }
 
-(** Checks if the declaration exists. *)
-val exists : Name.t -> bool
+(** Global declaration of constructor *)
+type ctor_decl =
+  { name : Name.t
+  ; ind : Name.t
+  ; params : (Name.t * Ast.term) list
+  ; args : (Name.t * Ast.term) list
+  }
+
+(** Type of global declaration *)
+module type Store = sig
+  (** Type of global declaration *)
+  type t
+
+  (** Find a global declaration. *)
+  val find : Name.t -> t
+
+  (** Add a global declaration. *)
+  val add : Name.t -> t -> unit
+
+  (** Checks if the declaration exists. *)
+  val exists : Name.t -> bool
+end
+
+(** Global declaration of constants *)
+module Const : Store with type t = const_decl
+
+(** Global declaration of inductives *)
+module Ind : Store with type t = ind_decl
+
+(** Global declaration of constructors *)
+module Ctor : Store with type t = ctor_decl

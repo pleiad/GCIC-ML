@@ -71,7 +71,7 @@ let execute_definition gdef : (cmd_result, execute_error) result =
     let* elab_ty, _ = elab_univ reduce empty_ctx ty in
     let* elab_term = check_elab reduce empty_ctx term elab_ty in
     let* _ = check_type empty_ctx elab_term elab_ty in
-    Kernel.Declarations.add name (term, ty);
+    Kernel.Declarations.Const.add name { name; ty; term };
     Ok (Definition (name, ty))
 
 exception LoadFail of execute_error
