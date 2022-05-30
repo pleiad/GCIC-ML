@@ -114,19 +114,19 @@ let tests_subst () =
 let tests_to_string () =
   let idx = Var (Name.of_string "x") in
   let idy = Var (Name.of_string "y") in
-  Alcotest.(check string) "App" "(x y)" (to_string (App (idx, idy)));
+  Alcotest.(check string) "App" "x y" (to_string (App (idx, idy)));
   Alcotest.(check string)
     "lambda"
-    "fun x : ?_y. x"
+    "λ(x : ?_y). x"
     (to_string (Lambda { id = Name.of_string "x"; dom = Unknown idy; body = idx }));
   Alcotest.(check string)
     "Prod"
-    "Π x : ▢1. err_▢1"
+    "Π(x : ▢1). err_▢1"
     (to_string
        (Prod { id = Name.of_string "x"; dom = Universe 1; body = Err (Universe 1) }));
   Alcotest.(check string)
     "Cast"
-    "<▢1 <- ▢1> ▢1"
+    "⟨▢1 ⇐ ▢1⟩ ▢1"
     (to_string (Cast { source = Universe 1; target = Universe 1; term = Universe 1 }))
 
 let tests =

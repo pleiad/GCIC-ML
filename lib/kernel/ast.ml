@@ -20,18 +20,27 @@ and fun_info =
   ; body : term
   }
 
-(** Returns the stringified version of a term *)
-let rec to_string =
-  let open Format in
+(** Pretty printers *)
+
+open Fmt
+
+(** Pretty printer for term *)
+let rec pp_term ppf =
   function
-  | Var x -> Name.to_string x
-  | Universe i -> asprintf "▢%i" i
-  | App (t, t') -> asprintf "(%s %s)" (to_string t) (to_string t')
+  | Var x -> pf ppf "%a" Name.pp x
+  | Universe i -> pf ppf "▢%i" i
+  | App (t, t') -> pf ppf "@[%a@ %a@]" pp_term t pp_term t'
   | Lambda { id; dom; body } ->
-    asprintf "fun %s : %s. %s" (Name.to_string id) (to_string dom) (to_string body)
+    pf ppf "@[λ(%a : %a).@ %a@]" Name.pp id pp_term dom pp_term body
   | Prod { id; dom; body } ->
-    asprintf "Π %s : %s. %s" (Name.to_string id) (to_string dom) (to_string body)
-  | Unknown i -> asprintf "?_%i" i
-  | Ascription (t, ty) -> asprintf "%s : %s" (to_string t) (to_string ty)
-  | UnknownT i -> asprintf "?_▢%i" i
-  | Const x -> Name.to_string x
+    pf ppf "@[Π(%a : %a).@ %a@]" Name.pp id pp_term dom pp_term body
+  | Unknown i -> pf ppf "?%i" i
+  | Ascription (t, ty) -> pf ppf "%a : %a" pp_term t pp_term ty
+  | UnknownT i -> pf ppf "?▢%i" i
+  | Const x -> pf ppf "%a" Name.pp x
+
+(** Returns the prettified version of a term *)
+let to_string = to_to_string pp_term
+
+(** Prints the prettified version of a term *)
+let print = pp_term Format.std_formatter

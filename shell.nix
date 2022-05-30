@@ -5,7 +5,7 @@
 with pkgs;
 mkShell {
   nativeBuildInputs = (with ocamlPackages; [
-    ocaml stdio 
+    ocaml stdio fmt
     menhir menhirLib sedlex_2
     dune_2 merlin findlib ocaml-lsp utop
     alcotest qcheck qcheck-alcotest bisect_ppx

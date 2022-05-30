@@ -9,6 +9,7 @@ module type ID = sig
   val ( = ) : t -> t -> bool
   val compare : t -> t -> int
   val default : t
+  val pp : Format.formatter -> t -> unit
 
   (** Map of identifiers. *)
   module Map : Map.S with type key = t
@@ -23,6 +24,7 @@ module String_id = struct
   let ( = ) = String.equal
   let compare = String.compare
   let default = "_"
+  let pp ppf x = Fmt.pf ppf "%s" (to_string x)
 
   module Map = Map.Make (String)
 end

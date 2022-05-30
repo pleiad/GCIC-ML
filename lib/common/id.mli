@@ -9,6 +9,7 @@ module type ID = sig
   val ( = ) : t -> t -> bool
   val compare : t -> t -> int
   val default : t
+  val pp : Format.formatter -> t -> unit
 
   (** Map of identifiers. 
       Following Coq's approach  (https://github.com/coq/coq/blob/master/kernel/names.mli#L68) *)

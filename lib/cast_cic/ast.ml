@@ -32,22 +32,41 @@ and fun_info =
   ; body : term
   }
 
-(** Returns the stringified version of a term *)
-let rec to_string (t : term) =
-  let open Format in
-  match t with
-  | Var x -> Name.to_string x
-  | Universe i -> asprintf "▢%i" i
-  | App (t, t') -> asprintf "(%s %s)" (to_string t) (to_string t')
+(** Pretty printers *)
+
+open Fmt
+
+(** Returns if a term requires a parenthesis for unambiguation *)
+let need_parens = function
+| Lambda _ | Prod _ | Cast _ -> true
+| _ -> false
+
+(** Pretty printer for term *)
+let rec pp_term ppf =
+  function
+  | Var x -> pf ppf "%a" Name.pp x
+  | Universe i -> pf ppf "▢%i" i
+  | App (t, t') -> pf ppf "@[%a@ %a@]" maybe_parens t maybe_parens t'
   | Lambda { id; dom; body } ->
-    asprintf "fun %s : %s. %s" (Name.to_string id) (to_string dom) (to_string body)
+    pf ppf "@[<hov 1>λ(%a : %a).@ %a@]" Name.pp id pp_term dom pp_term body
   | Prod { id; dom; body } ->
-    asprintf "Π %s : %s. %s" (Name.to_string id) (to_string dom) (to_string body)
-  | Unknown ty -> asprintf "?_%s" (to_string ty)
-  | Err ty -> asprintf "err_%s" (to_string ty)
+    pf ppf "@[<hov 1>Π(%a : %a).@ %a@]" Name.pp id pp_term dom pp_term body
+  | Unknown ty -> pf ppf "?_%a" pp_term ty
+  | Err ty -> pf ppf "err_%a" pp_term ty
   | Cast { source; target; term } ->
-    asprintf "<%s <- %s> %s" (to_string target) (to_string source) (to_string term)
-  | Const x -> Name.to_string x
+    pf ppf "@[⟨%a@ ⇐ %a⟩@ %a@]" pp_term target pp_term source pp_term term
+  | Const x -> pf ppf "%a" Name.pp x
+
+(** Adds parenthesis around a term if needed *)
+and maybe_parens ppf t =
+  if need_parens t then parens pp_term ppf t else pp_term ppf t
+
+
+(** Returns the prettified version of a term *)
+let to_string = to_to_string pp_term
+
+(** Prints the prettified version of a term *)
+let print = pp_term Format.std_formatter
 
 (** Head constructors *)
 type head =
