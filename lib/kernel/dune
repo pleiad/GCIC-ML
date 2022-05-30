@@ -4,3 +4,4 @@
  (preprocess
   (pps bisect_ppx))
  (libraries common config fmt))
+
