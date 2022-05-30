@@ -114,20 +114,47 @@ let tests_subst () =
 let tests_to_string () =
   let idx = Var (Name.of_string "x") in
   let idy = Var (Name.of_string "y") in
-  Alcotest.(check string) "App" "(x y)" (to_string (App (idx, idy)));
+  let prod12 = Prod { id = Name.default; dom = Universe 1; body = Universe 2 } in
+  let lamid = Lambda { id = Name.of_string "x"; dom = Universe 0; body = idx } in
+  let prodid = Prod { id = Name.of_string "x"; dom = Universe 0; body = idx } in
+  Alcotest.(check string) "App" "x y" (to_string (App (idx, idy)));
   Alcotest.(check string)
     "lambda"
-    "fun x : ?_y. x"
+    "λ(x : ?_y). x"
     (to_string (Lambda { id = Name.of_string "x"; dom = Unknown idy; body = idx }));
   Alcotest.(check string)
     "Prod"
-    "Π x : ▢1. err_▢1"
+    "Π(x : ▢1). err_▢1"
     (to_string
        (Prod { id = Name.of_string "x"; dom = Universe 1; body = Err (Universe 1) }));
   Alcotest.(check string)
+    "arrow type"
+    "▢1 → err_▢2"
+    (to_string (Prod { id = Name.default; dom = Universe 1; body = Err (Universe 2) }));
+  Alcotest.(check string)
     "Cast"
-    "<▢1 <- ▢1> ▢1"
-    (to_string (Cast { source = Universe 1; target = Universe 1; term = Universe 1 }))
+    "⟨▢1 ⇐ ▢1⟩ ▢1"
+    (to_string (Cast { source = Universe 1; target = Universe 1; term = Universe 1 }));
+  Alcotest.(check string)
+    "lambda2 equal dom"
+    "λ(y : ▢0) (x : ▢0). x"
+    (to_string (Lambda { id = Name.of_string "y"; dom = Universe 0; body = lamid }));
+  Alcotest.(check string)
+    "lambda2 diff dom"
+    "λ(y : ▢1) (x : ▢0). x"
+    (to_string (Lambda { id = Name.of_string "y"; dom = Universe 1; body = lamid }));
+  Alcotest.(check string)
+    "prod2 equal dom"
+    "Π(y : ▢0) (x : ▢0). x"
+    (to_string (Prod { id = Name.of_string "y"; dom = Universe 0; body = prodid }));
+  Alcotest.(check string)
+    "prod2 diff dom"
+    "Π(y : ▢1) (x : ▢0). x"
+    (to_string (Prod { id = Name.of_string "y"; dom = Universe 1; body = prodid }));
+  Alcotest.(check string)
+    "Prod and arrow"
+    "Π(x : ▢0). ▢1 → ▢2"
+    (to_string (Prod { id = Name.of_string "x"; dom = Universe 0; body = prod12 }))
 
 let tests =
   [ "head", `Quick, tests_head

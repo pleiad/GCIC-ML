@@ -20,7 +20,7 @@ synopsis: "Manipulate, parse and generate OCaml compiler version strings"
 description: """
 This library provides facilities to parse version numbers of the OCaml
 compiler, and enumerates the various official OCaml releases and configuration
-Variant.
+variants.
 
 OCaml version numbers are of the form `major.minor.patch+extra`, where the
 `patch` and `extra` fields are optional.  This library offers the following

@@ -20,5 +20,11 @@ and fun_info =
   ; body : term
   }
 
-(** Returns the stringified version of a term *)
+(** Pretty printers *)
+val pp_term : Format.formatter -> term -> unit
+
+(** Returns the prettified version of a term *)
 val to_string : term -> string
+
+(** Prints the prettified version of a term *)
+val print : term -> unit
