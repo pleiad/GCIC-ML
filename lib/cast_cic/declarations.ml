@@ -8,3 +8,4 @@ there should be no issue with dependencies between new definitions and previous 
 let global_decls : (Kernel.Ast.term * Kernel.Ast.term) Name.Map.t ref = ref Name.Map.empty
 let find x = Name.Map.find x !global_decls
 let add x terms = global_decls := Name.Map.add x terms !global_decls
+let exists x = Name.Map.mem x !global_decls

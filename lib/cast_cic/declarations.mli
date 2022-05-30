@@ -12,5 +12,8 @@ open Common.Id
     Raises [Not_found] if no binding for the name exists. *)
 val find : Name.t -> Kernel.Ast.term * Kernel.Ast.term
 
-(** Add a global declaration *)
+(** Add a global declaration. *)
 val add : Name.t -> Kernel.Ast.term * Kernel.Ast.term -> unit
+
+(** Checks if the declaration exists. *)
+val exists : Name.t -> bool

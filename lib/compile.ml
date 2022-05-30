@@ -8,29 +8,28 @@ let from_opt_name id = Option.value id ~default:Name.default
 
 (* For simplicity, any free identifier is treated as a Const (an identifier refering to a global declaration).
    A better approach would be to have a list of global declarations and treat free identifiers as just free.  *)
-let rec of_parsed_term ?(ids : Name.t list = []) (t : parsed_term) : term =
+let rec of_parsed_term (t : parsed_term) : term =
   match t with
-  | Var x -> if List.mem x ids then Var x else Const x
+  | Var x -> if Cast_cic.Declarations.exists x then Const x else Var x
   | Universe i -> Universe i
-  | App (t, u) -> App (of_parsed_term ~ids t, of_parsed_term ~ids u)
-  | Lambda (args, body) -> expand_lambda (fun fi -> Kernel.Ast.Lambda fi) ids args body
-  | Prod (args, body) -> expand_lambda (fun fi -> Kernel.Ast.Prod fi) ids args body
+  | App (t, u) -> App (of_parsed_term t, of_parsed_term u)
+  | Lambda (args, body) -> expand_lambda (fun fi -> Kernel.Ast.Lambda fi) args body
+  | Prod (args, body) -> expand_lambda (fun fi -> Kernel.Ast.Prod fi) args body
   | Unknown i -> Unknown i
   | LetIn (id, ty, t1, t2) ->
     let f = Parsing.Ast.Lambda ([ Some id, ty ], t2) in
-    of_parsed_term ~ids (App (f, t1))
-  | Ascription (t, ty) -> Ascription (of_parsed_term ~ids t, of_parsed_term ~ids ty)
+    of_parsed_term (App (f, t1))
+  | Ascription (t, ty) -> Ascription (of_parsed_term t, of_parsed_term ty)
   | UnknownT i -> UnknownT i
 
-and expand_lambda (hd : Kernel.Ast.fun_info -> term) ids args body =
+and expand_lambda (hd : Kernel.Ast.fun_info -> term) args body =
   match args with
-  | [] -> of_parsed_term ~ids body
+  | [] -> of_parsed_term body
   | (id, dom) :: args ->
-    let new_scope = Option.fold ~none:ids ~some:(fun x -> x :: ids) id in
     hd
       { id = from_opt_name id
-      ; dom = of_parsed_term ~ids dom
-      ; body = expand_lambda hd new_scope args body
+      ; dom = of_parsed_term dom
+      ; body = expand_lambda hd args body
       }
 
 let of_parsed_gdef
