@@ -4,24 +4,24 @@ open Common.Id
 We are processing commands sequentially, so the telescope is built naturally, and 
 there should be no issue with dependencies between new definitions and previous ones.  *)
 
-type const_decl =
+type 'a const_decl =
   { name : Name.t
-  ; ty : Ast.term
-  ; term : Ast.term
+  ; ty : 'a
+  ; term : 'a
   }
 
-type ind_decl =
+type 'a ind_decl =
   { name : Name.t
-  ; params : (Name.t * Ast.term) list
-  ; sort : Ast.term
+  ; params : (Name.t * 'a) list
+  ; sort : 'a
   ; ctors : Name.t list
   }
 
-type ctor_decl =
+type 'a ctor_decl =
   { name : Name.t
   ; ind : Name.t
-  ; params : (Name.t * Ast.term) list
-  ; args : (Name.t * Ast.term) list
+  ; params : (Name.t * 'a) list
+  ; args : (Name.t * 'a) list
   }
 
 module type Store = sig
@@ -44,13 +44,13 @@ end) : Store with type t = D.t = struct
 end
 
 module Const = Make_Store (struct
-  type t = const_decl
+  type t = Ast.term const_decl
 end)
 
 module Ind = Make_Store (struct
-  type t = ind_decl
+  type t = Ast.term ind_decl
 end)
 
 module Ctor = Make_Store (struct
-  type t = ctor_decl
+  type t = Ast.term ctor_decl
 end)

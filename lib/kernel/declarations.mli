@@ -9,26 +9,26 @@
 open Common.Id
 
 (** Global declaration of constants *)
-type const_decl =
+type 'a const_decl =
   { name : Name.t
-  ; ty : Ast.term
-  ; term : Ast.term
+  ; ty : 'a
+  ; term : 'a
   }
 
 (** Global declaration of inductives *)
-type ind_decl =
+type 'a ind_decl =
   { name : Name.t
-  ; params : (Name.t * Ast.term) list
-  ; sort : Ast.term
+  ; params : (Name.t * 'a) list
+  ; sort : 'a
   ; ctors : Name.t list
   }
 
 (** Global declaration of constructor *)
-type ctor_decl =
+type 'a ctor_decl =
   { name : Name.t
   ; ind : Name.t
-  ; params : (Name.t * Ast.term) list
-  ; args : (Name.t * Ast.term) list
+  ; params : (Name.t * 'a) list
+  ; args : (Name.t * 'a) list
   }
 
 (** Type of global declaration *)
@@ -47,10 +47,10 @@ module type Store = sig
 end
 
 (** Global declaration of constants *)
-module Const : Store with type t = const_decl
+module Const : Store with type t = Ast.term const_decl
 
 (** Global declaration of inductives *)
-module Ind : Store with type t = ind_decl
+module Ind : Store with type t = Ast.term ind_decl
 
 (** Global declaration of constructors *)
-module Ctor : Store with type t = ctor_decl
+module Ctor : Store with type t = Ast.term ctor_decl
