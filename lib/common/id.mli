@@ -9,6 +9,7 @@ module type ID = sig
   val ( = ) : t -> t -> bool
   val compare : t -> t -> int
   val default : t
+  val is_default : t -> bool
   val pp : Format.formatter -> t -> unit
 
   (** Map of identifiers. 

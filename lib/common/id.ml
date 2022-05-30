@@ -9,6 +9,7 @@ module type ID = sig
   val ( = ) : t -> t -> bool
   val compare : t -> t -> int
   val default : t
+  val is_default : t -> bool
   val pp : Format.formatter -> t -> unit
 
   (** Map of identifiers. *)
@@ -24,6 +25,7 @@ module String_id = struct
   let ( = ) = String.equal
   let compare = String.compare
   let default = "_"
+  let is_default x = x = default
   let pp ppf x = Fmt.pf ppf "%s" (to_string x)
 
   module Map = Map.Make (String)

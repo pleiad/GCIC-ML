@@ -125,6 +125,10 @@ let tests_to_string () =
     (to_string
        (Prod { id = Name.of_string "x"; dom = Universe 1; body = Err (Universe 1) }));
   Alcotest.(check string)
+    "arrow type"
+    "▢1 → err_▢2"
+    (to_string (Prod { id = Name.default; dom = Universe 1; body = Err (Universe 2) }));
+  Alcotest.(check string)
     "Cast"
     "⟨▢1 ⇐ ▢1⟩ ▢1"
     (to_string (Cast { source = Universe 1; target = Universe 1; term = Universe 1 }))

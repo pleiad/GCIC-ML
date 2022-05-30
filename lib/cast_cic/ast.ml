@@ -49,7 +49,9 @@ let rec pp_term ppf = function
   | Lambda { id; dom; body } ->
     pf ppf "@[<hov 1>λ(%a : %a).@ %a@]" Name.pp id pp_term dom pp_term body
   | Prod { id; dom; body } ->
-    pf ppf "@[<hov 1>Π(%a : %a).@ %a@]" Name.pp id pp_term dom pp_term body
+    if Name.is_default id
+    then pf ppf "@[<hov 1>%a →@ %a@]" pp_term dom pp_term body
+    else pf ppf "@[<hov 1>Π(%a : %a).@ %a@]" Name.pp id pp_term dom pp_term body
   | Unknown ty -> pf ppf "?_%a" pp_term ty
   | Err ty -> pf ppf "err_%a" pp_term ty
   | Cast { source; target; term } ->
@@ -83,7 +85,7 @@ let germ i : head -> term = function
     let cprod = Config.cast_universe_level i in
     let univ = Universe cprod in
     if cprod >= 0
-    then Prod { id = Name.of_string "__"; dom = Unknown univ; body = Unknown univ }
+    then Prod { id = Name.default; dom = Unknown univ; body = Unknown univ }
     else Err univ
   | HUniverse j -> if j < i then Universe j else Err (Universe i)
 
