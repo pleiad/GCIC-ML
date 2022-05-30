@@ -128,7 +128,7 @@ let rec reduce1 (term, cont) : state =
         ; term = _
         }
     , _ )
-    when j == k && j > Kernel.Variant.cast_universe_level i -> Err tgt, cont
+    when j == k && j > Config.cast_universe_level i -> Err tgt, cont
   (* Congruence rules *)
   | term, KUnknown :: cont when is_canonical term -> Unknown term, cont
   | term, KErr :: cont when is_canonical term -> Err term, cont
@@ -146,7 +146,7 @@ let rec reduce1 (term, cont) : state =
 
 (** Transitive clousure of reduce1 with fuel *)
 and reduce_fueled (fuel : int) ((term, cont) as s) : term =
-  if fuel < 0
+  if fuel < 0 && Config.uses_fuel ()
   then raise Not_enough_fuel
   else if is_canonical term && cont = []
   then term
@@ -155,7 +155,8 @@ and reduce_fueled (fuel : int) ((term, cont) as s) : term =
 (** Reduces a term *)
 and reduce term : (term, [> reduction_error ]) result =
   let initial_state = term, [] in
-  try Ok (reduce_fueled 10000 initial_state) with
+  let initial_fuel = Config.initial_fuel () in
+  try Ok (reduce_fueled initial_fuel initial_state) with
   | Not_enough_fuel -> Error `Err_not_enough_fuel
   | Stuck_term term -> Error (`Err_stuck_term term)
 

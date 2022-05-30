@@ -43,7 +43,7 @@ let of_parsed_command : parsed_term Command.t -> term Command.t = function
   | Eval t -> Eval (of_parsed_term t)
   | Check t -> Check (of_parsed_term t)
   | Elab t -> Elab (of_parsed_term t)
-  | SetVariant v -> SetVariant v
+  | Set cfg -> Set cfg
   | Define gdef -> Define (of_parsed_gdef gdef)
   | Load filename -> Load filename
 

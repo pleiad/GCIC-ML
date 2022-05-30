@@ -1,0 +1,5 @@
+(library
+ (name config)
+ (modules flag config variant)
+ (preprocess
+  (pps bisect_ppx)))

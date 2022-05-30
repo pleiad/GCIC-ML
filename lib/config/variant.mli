@@ -3,9 +3,9 @@
 
 (** GCIC variants: Gradual, Normalizing and Shift *)
 type t =
-  | G
-  | N
-  | S
+  | G (** Gradual *)
+  | N (** Normalizing *)
+  | S (** Shift *)
 
 (** Returns the stringified version of a variant *)
 val to_string : t -> string

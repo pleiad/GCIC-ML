@@ -5,7 +5,7 @@ type 'a t =
   | Eval of 'a
   | Check of 'a
   | Elab of 'a
-  | SetVariant of Kernel.Variant.t
+  | Set of Config.Flag.t
   | Define of 'a global_definition
   | Load of string
 

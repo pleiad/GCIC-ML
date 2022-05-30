@@ -21,7 +21,7 @@ let command =
     | Eval t -> "eval " ^ to_string t
     | Check t -> "check " ^ to_string t
     | Elab t -> "elab " ^ to_string t
-    | SetVariant v -> "set variant " ^ Kernel.Variant.to_string v
+    | Set flag -> "set " ^ Config.Flag.to_string flag
     | Define gdef -> "definition " ^ def_to_string gdef
     | Load filename -> Format.asprintf "import \"%s\"" filename
   in
@@ -30,7 +30,7 @@ let command =
     | Eval t1, Eval t2 -> eq_term t1 t2
     | Check t1, Check t2 -> eq_term t1 t2
     | Elab t1, Elab t2 -> eq_term t1 t2
-    | SetVariant v1, SetVariant v2 -> v1 = v2
+    | Set flag1, Set flag2 -> flag1 = flag2
     | Define def1, Define def2 -> eq_definition def1 def2
     | Load fn1, Load fn2 -> fn1 = fn2
     | _ -> false

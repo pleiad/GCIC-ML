@@ -36,7 +36,8 @@ let rec token lexbuf =
   | "elab" -> VERNAC_ELABORATE
   | "def" -> VERNAC_DEFINITION
   | "set" -> VERNAC_SET
-  | "variant" -> VERNAC_VARIANT
+  | "variant" -> VERNAC_FLAG_VARIANT
+  | "fuel" -> VERNAC_FLAG_FUEL
   | "load" -> VERNAC_LOAD
   | ";;" -> VERNAC_SEPARATOR
   | "G" -> VERNAC_VARIANT_G

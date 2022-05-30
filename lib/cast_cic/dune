@@ -3,4 +3,4 @@
  (modules ast typing reduction elaboration declarations)
  (preprocess
   (pps bisect_ppx))
- (libraries common kernel))
+ (libraries common kernel config))

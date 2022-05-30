@@ -3,10 +3,11 @@
 
 (** GCIC variants: Gradual, Normalizing and Shift *)
 type t =
-  | G
-  | N
-  | S
+  | G (** Gradual *)
+  | N (** Normalizing *)
+  | S (** Shift *)
 
+(** Returns the stringified version of a variant *)
 let to_string = function
   | G -> "G"
   | N -> "N"
@@ -15,6 +16,7 @@ let to_string = function
 (** Parameter specifying the GCIC variant *)
 let variant : t ref = ref N
 
+(** Sets the current active variant *)
 let set_variant v = variant := v
 
 (** Computes the level of the universe of a dependent product, 

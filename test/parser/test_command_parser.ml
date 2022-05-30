@@ -49,21 +49,21 @@ let tests_elaborate () =
     (parse_command "elab ?0 foo" |> Result.is_error)
 
 let tests_set_variant () =
-  let open Kernel.Variant in
+  let open Config.Variant in
   Alcotest.check
     pcommand
     "set variant command"
-    (Ok (SetVariant G))
+    (Ok (Set (Variant G)))
     (parse_command "set variant G;;");
   Alcotest.check
     pcommand
     "set variant command"
-    (Ok (SetVariant N))
+    (Ok (Set (Variant N)))
     (parse_command "set variant N;;");
   Alcotest.check
     pcommand
     "set variant command"
-    (Ok (SetVariant S))
+    (Ok (Set (Variant S)))
     (parse_command "set variant S;;");
   Alcotest.(check bool)
     "Fails with not a variant"
@@ -82,6 +82,30 @@ let tests_set_variant () =
     true
     (parse_command "variant G;;" |> Result.is_error)
 
+let tests_set_fuel () =
+  Alcotest.check
+    pcommand
+    "set variant command"
+    (Ok (Set (Fuel 0)))
+    (parse_command "set fuel 0;;");
+  Alcotest.check
+    pcommand
+    "set variant command"
+    (Ok (Set (Fuel 1000)))
+    (parse_command "set fuel 1000;;");
+  Alcotest.(check bool)
+    "Fails with not an integer"
+    true
+    (parse_command "set fuel H;;" |> Result.is_error);
+  Alcotest.(check bool)
+    "Fails with missing integer"
+    true
+    (parse_command "set fuel;;" |> Result.is_error);
+  Alcotest.(check bool)
+    "Fails if missing `fail` keyword"
+    true
+    (parse_command "set 0;;" |> Result.is_error)
+
 let tests_load () =
   Alcotest.check
     pcommand
@@ -98,5 +122,6 @@ let tests =
   ; "check command", `Quick, tests_check
   ; "elab command", `Quick, tests_elaborate
   ; "set variant command", `Quick, tests_set_variant
+  ; "set fuel command", `Quick, tests_set_fuel
   ; "load command", `Quick, tests_load
   ]

@@ -56,8 +56,8 @@ let execute_elab term : (cmd_result, execute_error) result =
   let* elab_term, _ = elaborate Reduction.reduce Name.Map.empty term in
   Ok (Elaboration elab_term)
 
-let execute_set_variant var : (cmd_result, execute_error) result =
-  Kernel.Variant.set_variant var;
+let execute_set_flag (flag : Config.Flag.t) : (cmd_result, execute_error) result =
+  Config.set_flag flag;
   Ok Unit
 
 let execute_definition gdef : (cmd_result, execute_error) result =
@@ -82,7 +82,7 @@ let rec execute file_parser cmd : (cmd_result, execute_error) result =
   | Eval t -> execute_eval t
   | Check t -> execute_check t
   | Elab t -> execute_elab t
-  | SetVariant v -> execute_set_variant v
+  | Set f -> execute_set_flag f
   | Define gdef -> execute_definition gdef
   | Load filename -> execute_load file_parser filename
 

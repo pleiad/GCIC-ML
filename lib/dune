@@ -1,6 +1,6 @@
 (library
  (name gcic)
- (libraries parsing kernel cast_cic vernac)
+ (libraries parsing kernel cast_cic vernac config)
  (preprocess
   (pps bisect_ppx))
  (modules compile))

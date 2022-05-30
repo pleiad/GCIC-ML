@@ -42,7 +42,7 @@ let rec infer_type (ctx : typing_context) (t : term) : (term, [> type_error ]) r
   | Prod { id; dom; body } ->
     let* j = infer_univ ctx dom in
     let* i = infer_univ (Name.Map.add id dom ctx) body in
-    Ok (Universe (Kernel.Variant.product_universe_level i j))
+    Ok (Universe (Config.product_universe_level i j))
   | Unknown ty ->
     let* _ = infer_univ ctx ty in
     Ok ty

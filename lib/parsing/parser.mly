@@ -7,7 +7,8 @@
   [@@@coverage exclude_file]
   open Ast
   open Common.Id
-  open Kernel.Variant
+  open Config.Variant
+  open Config.Flag
 
   (** Stores a global declaration (def) as a lambda. 
       The body of the lambda is being ascribed to the expected type.
@@ -32,7 +33,8 @@
 %token KWD_UNIVERSE KWD_LAMBDA KWD_UNKNOWN KWD_UNKNOWN_T KWD_FORALL
 %token KWD_LET KWD_IN
 %token VERNAC_CHECK VERNAC_EVAL VERNAC_ELABORATE VERNAC_DEFINITION VERNAC_SET 
-%token VERNAC_VARIANT VERNAC_VARIANT_G VERNAC_VARIANT_S VERNAC_VARIANT_N
+%token VERNAC_FLAG_VARIANT VERNAC_FLAG_FUEL 
+%token VERNAC_VARIANT_G VERNAC_VARIANT_S VERNAC_VARIANT_N
 %token VERNAC_LOAD VERNAC_SEPARATOR
 %token EOF
 
@@ -42,12 +44,13 @@
 %on_error_reduce term
 
 /* Specify starting production */
-%start program_parser term_parser command_parser
+%start program_parser term_parser command_parser flag_parser
 
 /* Types for the result of productions */
 %type <Ast.term Vernac.Command.t list> program_parser
 %type <Ast.term> term_parser
 %type <Ast.term Vernac.Command.t> command_parser
+%type <Config.Flag.t> flag_parser
 
 %% /* Start grammar productions */
 program_parser :
@@ -62,6 +65,9 @@ command_parser :
 sequenced_command :
 | cmd=command ; VERNAC_SEPARATOR   { cmd }
 
+flag_parser : 
+  flag=flag; EOF    { flag }
+
 command :
 // eval <top>
 | VERNAC_EVAL; t=top                       { Eval t }
@@ -69,13 +75,17 @@ command :
 | VERNAC_CHECK; t=top                      { Check t }
 // elab <top>
 | VERNAC_ELABORATE; t=top                  { Elab t }
-// set variant variant_name
-| VERNAC_SET; VERNAC_VARIANT; var=variant  { SetVariant var }
+// set <flag>
+| VERNAC_SET; flag=flag                    { Set flag }
 // def foo (x : Type1) : Type1 = ...
 | VERNAC_DEFINITION; id=id; args=list(arg); COLON; ty=term; EQUAL ; body=top  
  { mk_definition id (List.flatten args) ty body }
 // load "filename"
 | VERNAC_LOAD; DOUBLE_QUOTE; filename=ID; DOUBLE_QUOTE  { Load filename }
+
+flag :
+| VERNAC_FLAG_VARIANT; var=variant { Variant var }
+| VERNAC_FLAG_FUEL; i=INT          { Fuel i }
 
 variant : 
 | VERNAC_VARIANT_G        { G }
