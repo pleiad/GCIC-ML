@@ -1,6 +1,5 @@
 open Vernac
 open Common.Id
-open Common.Std
 
 type parsed_term = Parsing.Ast.term
 type term = Kernel.Ast.term
@@ -33,32 +32,17 @@ and expand_lambda (hd : Kernel.Ast.fun_info -> term) args body =
       ; body = expand_lambda hd args body
       }
 
-let of_parsed_gdef
-    : parsed_term Command.global_definition -> term Command.global_definition
+let of_parsed_const_decl
+    : parsed_term Kernel.Declarations.const_decl -> term Kernel.Declarations.const_decl
   = function
-  | Constant_def { name; ty; term } ->
-    Constant_def { name; ty = of_parsed_term ty; term = of_parsed_term term }
-  | Inductive_def { name; params; sort; ctors } ->
-    Inductive_def
-      { name
-      ; params = List.map (map_snd of_parsed_term) params
-      ; sort = of_parsed_term sort
-      ; ctors
-      }
-  | Constructor_def { name; ind; params; args } ->
-    Constructor_def
-      { name
-      ; ind
-      ; params = List.map (map_snd of_parsed_term) params
-      ; args = List.map (map_snd of_parsed_term) args
-      }
+  | { name; ty; term } -> { name; ty = of_parsed_term ty; term = of_parsed_term term }
 
 let of_parsed_command : parsed_term Command.t -> term Command.t = function
   | Eval t -> Eval (of_parsed_term t)
   | Check t -> Check (of_parsed_term t)
   | Elab t -> Elab (of_parsed_term t)
   | Set cfg -> Set cfg
-  | Define gdef -> Define (of_parsed_gdef gdef)
+  | Define gdef -> Define (of_parsed_const_decl gdef)
   | Load filename -> Load filename
 
 let parse_file_content str =

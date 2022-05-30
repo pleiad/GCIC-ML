@@ -15,9 +15,10 @@
   *)
   let mk_definition name args ty' body =
     let open Vernac.Command in
+    let open Kernel.Declarations in
     let term = Lambda (args, Ascription (body, ty')) in
     let ty  = Prod (args, ty') in
-    let const_def = Constant_def { name; ty; term } in
+    let const_def = { name; ty; term } in
     Define const_def
 %}
 
@@ -32,7 +33,7 @@
 %token LPAREN RPAREN
 %token KWD_UNIVERSE KWD_LAMBDA KWD_UNKNOWN KWD_UNKNOWN_T KWD_FORALL
 %token KWD_LET KWD_IN
-%token VERNAC_CHECK VERNAC_EVAL VERNAC_ELABORATE VERNAC_DEFINITION VERNAC_SET 
+%token VERNAC_CHECK VERNAC_EVAL VERNAC_ELABORATE VERNAC_DEFINITION VERNAC_SET
 %token VERNAC_FLAG_VARIANT VERNAC_FLAG_FUEL 
 %token VERNAC_VARIANT_G VERNAC_VARIANT_S VERNAC_VARIANT_N
 %token VERNAC_LOAD VERNAC_SEPARATOR

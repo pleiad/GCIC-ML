@@ -64,18 +64,15 @@ let execute_definition gdef : (cmd_result, execute_error) result =
   let open Elaboration in
   let open Typing in
   let open Reduction in
-  let open Command in
+  let open Kernel.Declarations in
   let empty_ctx = Name.Map.empty in
   match gdef with
-  | Constant_def { name; ty; term } ->
+  | { name; ty; term } ->
     let* elab_ty, _ = elab_univ reduce empty_ctx ty in
     let* elab_term = check_elab reduce empty_ctx term elab_ty in
     let* _ = check_type empty_ctx elab_term elab_ty in
     Kernel.Declarations.Const.add name { name; ty; term };
     Ok (Definition (name, ty))
-  | _ ->
-    print_endline "WIP";
-    Ok Unit
 
 exception LoadFail of execute_error
 
