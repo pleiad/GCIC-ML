@@ -38,12 +38,11 @@ open Fmt
 
 (** Returns if a term requires a parenthesis for unambiguation *)
 let need_parens = function
-| Lambda _ | Prod _ | Cast _ -> true
-| _ -> false
+  | Lambda _ | Prod _ | Cast _ -> true
+  | _ -> false
 
 (** Pretty printer for term *)
-let rec pp_term ppf =
-  function
+let rec pp_term ppf = function
   | Var x -> pf ppf "%a" Name.pp x
   | Universe i -> pf ppf "▢%i" i
   | App (t, t') -> pf ppf "@[%a@ %a@]" maybe_parens t maybe_parens t'
@@ -58,9 +57,7 @@ let rec pp_term ppf =
   | Const x -> pf ppf "%a" Name.pp x
 
 (** Adds parenthesis around a term if needed *)
-and maybe_parens ppf t =
-  if need_parens t then parens pp_term ppf t else pp_term ppf t
-
+and maybe_parens ppf t = if need_parens t then parens pp_term ppf t else pp_term ppf t
 
 (** Returns the prettified version of a term *)
 let to_string = to_to_string pp_term

@@ -25,8 +25,7 @@ and fun_info =
 open Fmt
 
 (** Pretty printer for term *)
-let rec pp_term ppf =
-  function
+let rec pp_term ppf = function
   | Var x -> pf ppf "%a" Name.pp x
   | Universe i -> pf ppf "▢%i" i
   | App (t, t') -> pf ppf "@[%a@ %a@]" pp_term t pp_term t'
