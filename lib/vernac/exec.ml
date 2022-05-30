@@ -73,6 +73,9 @@ let execute_definition gdef : (cmd_result, execute_error) result =
     let* _ = check_type empty_ctx elab_term elab_ty in
     Kernel.Declarations.Const.add name { name; ty; term };
     Ok (Definition (name, ty))
+  | _ ->
+    print_endline "WIP";
+    Ok Unit
 
 exception LoadFail of execute_error
 

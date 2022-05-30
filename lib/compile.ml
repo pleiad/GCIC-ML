@@ -1,5 +1,6 @@
 open Vernac
 open Common.Id
+open Common.Std
 
 type parsed_term = Parsing.Ast.term
 type term = Kernel.Ast.term
@@ -37,6 +38,20 @@ let of_parsed_gdef
   = function
   | Constant_def { name; ty; term } ->
     Constant_def { name; ty = of_parsed_term ty; term = of_parsed_term term }
+  | Inductive_def { name; params; sort; ctors } ->
+    Inductive_def
+      { name
+      ; params = List.map (map_snd of_parsed_term) params
+      ; sort = of_parsed_term sort
+      ; ctors
+      }
+  | Constructor_def { name; ind; params; args } ->
+    Constructor_def
+      { name
+      ; ind
+      ; params = List.map (map_snd of_parsed_term) params
+      ; args = List.map (map_snd of_parsed_term) args
+      }
 
 let of_parsed_command : parsed_term Command.t -> term Command.t = function
   | Eval t -> Eval (of_parsed_term t)
