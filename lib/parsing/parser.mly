@@ -21,13 +21,17 @@
     let const_def = { name; ty; term } in
     Define const_def
 
-  let mk_ind_decl ind params sort ctors =
+  let mk_ind_decl ind params' sort ctors =
     let open Vernac.Command in
     let open Kernel.Declarations in
-    let mk_ctor_decl ( name, args, ty') =
-      let ty_args = List.map (fun (x,t) -> Some x, t) (List.append params args) in
+    let fix_name (x, t) = Option.value ~default:Name.default x, t in
+    let params = List.map fix_name params' in
+    let mk_ctor_decl ( name, args', ty') =
+      let ty_args = List.append params' args' in
       let ty = Prod (ty_args, ty') in
-      { name; ind; params; args; ty } in
+      let args = List.map fix_name args' in
+      { name; ind; params; args; ty }
+    in
     let ctor_decls = List.map mk_ctor_decl ctors in
     let ind_decl = { name = ind; params; sort; ctors=(List.map (fun c -> c.name) ctor_decls)} in
     Inductive (ind_decl, ctor_decls)
@@ -64,7 +68,16 @@
 %type <Ast.term Vernac.Command.t> command_parser
 %type <Config.Flag.t> flag_parser
 
-%% /* Start grammar productions */
+/* Dummy starts. Only used to reduce number of error messages. */
+%start ctor_decl_parser
+%type <unit> ctor_decl_parser
+
+%%
+/* Dummy parsers. Only used to reduce number of error messages. */
+ctor_decl_parser :
+  ctor_decl; EOF {} 
+
+ /* Start grammar productions */
 program_parser :
   cmds=list(sequenced_command); EOF   { cmds }
 
@@ -75,7 +88,7 @@ command_parser :
   cmd=sequenced_command; EOF    { cmd }
   
 sequenced_command :
-| cmd=command ; VERNAC_SEPARATOR   { cmd }
+  cmd=command ; VERNAC_SEPARATOR   { cmd }
 
 flag_parser : 
   flag=flag; EOF    { flag }
@@ -90,15 +103,15 @@ command :
 // set <flag>
 | VERNAC_SET; flag=flag                    { Set flag }
 // def foo (x : Type1) : Type1 = ...
-| VERNAC_DEFINITION; id=id; args=list(arg); COLON; ty=term; EQUAL ; body=top  
- { mk_definition id (List.flatten args) ty body }
+| VERNAC_DEFINITION; id=id; args=args0; COLON; ty=term; EQUAL ; body=top  
+ { mk_definition id args ty body }
 // load "filename"
 | VERNAC_LOAD; DOUBLE_QUOTE; filename=ID; DOUBLE_QUOTE  { Load filename }
 // inductive list (a : Type0) : Type0 = <ctor_decls>
-| VERNAC_INDUCTIVE; id=id; params=args0; COLON; ty=term; EQUAL; ctors=list(ctor_decls)
+| VERNAC_INDUCTIVE; id=id; params=args0; COLON; ty=term; EQUAL; ctors=list(ctor_decl)
  { mk_ind_decl id params ty ctors }
 
-ctor_decls :
+ctor_decl :
 | VBAR; id=id; args=args0; COLON; ty=term { (id, args, ty) }
 
 flag :
@@ -113,13 +126,6 @@ variant :
 id :
 | x=ID { Name.of_string x }
 
-arg0 :
-(* (x y z : A) *)
-| LPAREN; ids=nonempty_list(id); COLON; dom=term; RPAREN  { List.map (fun id -> (id, dom)) ids }
-
-%inline args0 :
-| args=list(arg0) { List.flatten(args) }
-
 arg :
 (* (x y z : A) *)
 | LPAREN; ids=nonempty_list(id); COLON; dom=term; RPAREN  { List.map (fun id -> (Some id, dom)) ids }
@@ -127,6 +133,8 @@ arg :
 
 %inline args :
 | args=nonempty_list(arg) { List.flatten(args) }
+%inline args0 :
+| args=list(arg) { List.flatten(args) }
 
 top :
 | t=top; COLON; ty=term                                           { Ascription (t, ty) }
