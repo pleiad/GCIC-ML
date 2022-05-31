@@ -9,15 +9,32 @@ type term =
   | Lambda of fun_info
   | Prod of fun_info
   | Unknown of int
+  (* Inductives *)
+  | Inductive of Name.t * term list
+  | Constructor of Name.t * term list * term list
+  | Match of
+      { ind : Name.t
+      ; discr : term
+      ; z : Name.t
+      ; pred : term
+      ; branches : branch list
+      }
   (* Extras *)
   | Ascription of term * term
   | UnknownT of int
   | Const of Name.t
 
+(* match discr as z return P with f*)
 and fun_info =
   { id : Name.t
   ; dom : term
   ; body : term
+  }
+
+and branch =
+  { ctor : Name.t
+  ; ids : Name.t list
+  ; term : term
   }
 
 (** Pretty printers *)

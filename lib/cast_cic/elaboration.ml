@@ -90,6 +90,10 @@ let rec elaborate reduce ctx (term : Kernel.Ast.term)
     let* t', id, dom, body = elab_prod reduce ctx t in
     let* u' = check_elab reduce ctx u dom in
     Ok (Ast.App (t', u'), Ast.subst1 id u' body)
+  (* Inductives *)
+  | Inductive _ -> assert false
+  | Constructor _ -> assert false
+  | Match _ -> assert false
   (* Extra rules *)
   | Ascription (t, ty) ->
     let* ty', _ = elab_univ reduce ctx ty in

@@ -9,6 +9,16 @@ type term =
   | Lambda of fun_info
   | Prod of fun_info
   | Unknown of int
+  (* Inductives *)
+  | Inductive of Name.t * term list
+  | Constructor of Name.t * term list * term list
+  | Match of
+      { ind : Name.t
+      ; discr : term
+      ; z : Name.t
+      ; pred : term
+      ; branches : branch list
+      }
   (* Extras *)
   | Ascription of term * term
   | UnknownT of int
@@ -18,6 +28,12 @@ and fun_info =
   { id : Name.t
   ; dom : term
   ; body : term
+  }
+
+and branch =
+  { ctor : Name.t
+  ; ids : Name.t list
+  ; term : term
   }
 
 (** Pretty printers *)
@@ -50,8 +66,13 @@ module Pretty = struct
       if Name.is_default id
       then pf ppf "@[<hov 1>%a →@ %a@]" pp dom pp body
       else group_prod_args [] t |> pp_prod ppf
-    | Ascription (t, ty) -> pf ppf "@[%a ::@ %a@]" pp t pp ty
     | Unknown i -> pf ppf "?%i" i
+    | Inductive (ind, params) -> pf ppf "@[%a@ %a@]" Name.pp ind (list pp) params
+    | Constructor (ctor, params, args) ->
+      pf ppf "@[%a@ %a@ %a@]" Name.pp ctor (list pp) params (list pp) args
+    | Match { discr; z; pred; _ } ->
+      pf ppf "@[match %a as %a return@ %a with@]" pp discr Name.pp z pp pred
+    | Ascription (t, ty) -> pf ppf "@[%a ::@ %a@]" pp t pp ty
     | UnknownT i -> pf ppf "?▢%i" i
     | Const x -> pf ppf "%a" Name.pp x
 
