@@ -27,31 +27,25 @@ type 'a ctor_decl =
 
 module type Store = sig
   type t
+  type cached_t
 
-  val find : Name.t -> t
+  val find : Name.t -> cached_t
   val add : Name.t -> t -> unit
   val exists : Name.t -> bool
+  val add_cache : Name.t -> cached_t -> unit
 end
 
 module Make_Store (D : sig
   type t
-end) : Store with type t = D.t = struct
+  type cached_t
+end) : Store with type t = D.t with type cached_t = D.cached_t = struct
   type t = D.t
+  type cached_t = D.cached_t
 
   let decls : t Name.Map.t ref = ref Name.Map.empty
-  let find x = Name.Map.find x !decls
+  let cached_decls : cached_t Name.Map.t ref = ref Name.Map.empty
+  let find x = Name.Map.find x !cached_decls
   let add x decl = decls := Name.Map.add x decl !decls
   let exists x = Name.Map.mem x !decls
+  let add_cache x decl = cached_decls := Name.Map.add x decl !cached_decls
 end
-
-module Const = Make_Store (struct
-  type t = Ast.term const_decl
-end)
-
-module Ind = Make_Store (struct
-  type t = Ast.term ind_decl
-end)
-
-module Ctor = Make_Store (struct
-  type t = Ast.term ctor_decl
-end)

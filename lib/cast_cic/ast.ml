@@ -25,11 +25,32 @@ type term =
       ; term : term
       }
   | Const of Name.t
+  (* Inductives *)
+  | Inductive of Name.t * int * term list
+  | Constructor of
+      { ctor : Name.t
+      ; level : int
+      ; params : term list
+      ; args : term list
+      }
+  | Match of
+      { ind : Name.t
+      ; discr : term
+      ; z : Name.t
+      ; pred : term
+      ; branches : branch list
+      }
 
 and fun_info =
   { id : Name.t
   ; dom : term
   ; body : term
+  }
+
+and branch =
+  { ctor : Name.t
+  ; ids : Name.t list
+  ; term : term
   }
 
 (** Pretty printer *)
@@ -65,6 +86,12 @@ module Pretty = struct
     | Cast { source; target; term } ->
       pf ppf "@[<hov 1>⟨%a ⇐@ %a⟩@ %a@]" pp target pp source pp term
     | Const x -> pf ppf "%a" Name.pp x
+    | Inductive (ind, i, params) ->
+      pf ppf "@[%a{%a}@ %a@]" Name.pp ind int i (list pp) params
+    | Constructor { ctor; level; params; args } ->
+      pf ppf "@[%a{%a}@ %a@ %a@]" Name.pp ctor int level (list pp) params (list pp) args
+    | Match { discr; z; pred; _ } ->
+      pf ppf "@[match %a as %a return@ %a with@]" pp discr Name.pp z pp pred
 
   (** Pretty-prints an argument of a lambda or prod *)
   and pp_arg ppf (x, ty) = pf ppf "@[(%a : %a)@]" Name.pp x pp ty
@@ -100,11 +127,13 @@ let print = Pretty.print
 type head =
   | HProd
   | HUniverse of int
+  | HInductive of Name.t
 
 (** Returns the head constructor of a type *)
 let head : term -> (head, string) result = function
   | Prod _ -> Ok HProd
   | Universe i -> Ok (HUniverse i)
+  | Inductive (ind, _, _) -> Ok (HInductive ind)
   | _ -> Error "invalid term to get head constructor"
 
 (** Returns the least precise type for the given head constructor, 
@@ -117,6 +146,12 @@ let germ i : head -> term = function
     then Prod { id = Name.default; dom = Unknown univ; body = Unknown univ }
     else Err univ
   | HUniverse j -> if j < i then Universe j else Err (Universe i)
+  | HInductive _ind -> assert false
+(*
+    let params = (Declarations.Ind.find ind).params in
+    let unk_params = List.map (fun (_, t) -> Unknown t) params in
+    Inductive (ind, unk_params)
+    *)
 
 (** Checks if a term corresponds to a germ at the provided universe level *)
 let is_germ i : term -> bool = function
@@ -192,6 +227,25 @@ let rec subst ctx = function
   | Cast { source; target; term } ->
     Cast { source = subst ctx source; target = subst ctx target; term = subst ctx term }
   | Const x -> Const x
+  | Inductive (ind, i, params) -> Inductive (ind, i, List.map (subst ctx) params)
+  | Constructor ci ->
+    Constructor
+      { ci with
+        params = List.map (subst ctx) ci.params
+      ; args = List.map (subst ctx) ci.args
+      }
+  | Match mi ->
+    Match
+      { mi with
+        discr = subst ctx mi.discr
+      ; pred = subst (Context.add mi.z None ctx) mi.pred
+      ; branches = List.map (subst_branch ctx) mi.branches
+      }
+
+and subst_branch ctx br =
+  let ids_ctx = List.map (fun x -> x, None) br.ids |> List.to_seq in
+  let ext_ctx = Context.add_seq ids_ctx ctx in
+  { br with term = subst ext_ctx br.term }
 
 let subst1 x v = subst (Context.add x (Some v) Context.empty)
 

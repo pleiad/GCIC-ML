@@ -37,21 +37,22 @@ module type Store = sig
   (** Type of global declaration *)
   type t
 
+  type cached_t
+
   (** Find a global declaration. *)
-  val find : Name.t -> t
+  val find : Name.t -> cached_t
 
   (** Add a global declaration. *)
   val add : Name.t -> t -> unit
 
   (** Checks if the declaration exists. *)
   val exists : Name.t -> bool
+
+  (** Cache the declaratoin using the current variant *)
+  val add_cache : Name.t -> cached_t -> unit
 end
 
-(** Global declaration of constants *)
-module Const : Store with type t = Ast.term const_decl
-
-(** Global declaration of inductives *)
-module Ind : Store with type t = Ast.term ind_decl
-
-(** Global declaration of constructors *)
-module Ctor : Store with type t = Ast.term ctor_decl
+module Make_Store (D : sig
+  type t
+  type cached_t
+end) : Store with type t = D.t with type cached_t = D.cached_t

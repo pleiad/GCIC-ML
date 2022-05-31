@@ -18,11 +18,32 @@ type term =
       ; term : term
       }
   | Const of Name.t
+  (* Inductives *)
+  | Inductive of Name.t * int * term list
+  | Constructor of
+      { ctor : Name.t
+      ; level : int
+      ; params : term list
+      ; args : term list
+      }
+  | Match of
+      { ind : Name.t
+      ; discr : term
+      ; z : Name.t
+      ; pred : term
+      ; branches : branch list
+      }
 
 and fun_info =
   { id : Name.t
   ; dom : term
   ; body : term
+  }
+
+and branch =
+  { ctor : Name.t
+  ; ids : Name.t list
+  ; term : term
   }
 
 (** Pretty printers *)
@@ -38,6 +59,7 @@ val print : term -> unit
 type head =
   | HProd
   | HUniverse of int
+  | HInductive of Name.t
 
 (** Returns the head constructor of a type *)
 val head : term -> (head, string) result

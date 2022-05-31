@@ -50,12 +50,7 @@ exception Not_enough_fuel
 let rec reduce1 (term, cont) : state =
   match term, cont with
   (* Redexes *)
-  | Const x, _ ->
-    let term = (Kernel.Declarations.Const.find x).term in
-    let elab = Elaboration.elaborate reduce Common.Id.Name.Map.empty term in
-    (match Result.map fst elab with
-    | Error _ -> raise (Stuck_term (Const x))
-    | Ok t -> t, cont)
+  | Const x, _ -> (Declarations.Const.find x).term, cont
   (* Beta *)
   | Lambda { id; dom = _; body }, KApp_l u :: cont -> subst1 id u body, cont
   (* Prod-Unk *)
@@ -159,6 +154,7 @@ and reduce term : (term, [> reduction_error ]) result =
   try Ok (reduce_fueled initial_fuel initial_state) with
   | Not_enough_fuel -> Error `Err_not_enough_fuel
   | Stuck_term term -> Error (`Err_stuck_term term)
+  | Not_found -> Error `Err_free_const
 
 let fill_hole1 term = function
   | KApp_l u -> App (term, u)

@@ -71,11 +71,12 @@ let execute_definition gdef : (cmd_result, execute_error) result =
     let* elab_ty, _ = elab_univ reduce empty_ctx ty in
     let* elab_term = check_elab reduce empty_ctx term elab_ty in
     let* _ = check_type empty_ctx elab_term elab_ty in
-    Kernel.Declarations.Const.add name { name; ty; term };
+    Declarations.Const.add name { name; ty; term };
+    Declarations.Const.add_cache name { name; ty = elab_ty; term = elab_term };
     Ok (Definition (name, ty))
 
 let execute_inductive ind ctors : (cmd_result, execute_error) result =
-  let open Kernel.Declarations in
+  let open Declarations in
   (* TODO *)
   let check_ind_decl (ind : Ind.t) : (Ind.t, execute_error) result = Ok ind in
   (* TODO *)
@@ -111,11 +112,12 @@ and execute_load file_parser filename =
   try
     let src = Stdio.In_channel.read_all filename in
     let cmds = file_parser src in
-    List.iter
-      (fun cmd ->
+    List.fold_left
+      (fun _ cmd ->
         match execute file_parser cmd with
         | Ok res -> string_of_cmd_result res |> print_endline
         | Error e -> raise (LoadFail e))
+      ()
       cmds;
     Ok Unit
   with

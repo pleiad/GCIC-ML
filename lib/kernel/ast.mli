@@ -24,7 +24,6 @@ type term =
   | UnknownT of int
   | Const of Name.t
 
-(* match discr as z return P with f*)
 and fun_info =
   { id : Name.t
   ; dom : term
