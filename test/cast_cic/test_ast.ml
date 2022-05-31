@@ -1,6 +1,7 @@
 open! Cast_cic.Ast
 open Example
 open Common.Id
+open Cast_cic.Reduction
 
 let is_type : term -> bool = function
   | Prod _ | Universe _ -> true

@@ -1,7 +1,7 @@
 open Cast_cic
 
 let head =
-  let open Ast in
+  let open Reduction in
   let pprint_head ppf = function
     | HProd -> Fmt.pf ppf "HProd"
     | HUniverse i -> Fmt.pf ppf "HUniverse: %d" i

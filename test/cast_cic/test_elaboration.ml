@@ -55,7 +55,7 @@ let tests_base_elaborations () =
     "app with unknown"
     ( App
         ( Cast
-            { source = unknown 1; target = Ast.germ 1 HProd; term = Unknown (unknown 1) }
+            { source = unknown 1; target = Reduction.(germ 1 HProd); term = Unknown (unknown 1) }
         , Cast { source = Universe 1; target = unknown 0; term = Universe 0 } )
     , unknown 0 )
     (elaborate empty_ctx (App (Unknown 1, Universe 0)) |> Result.get_ok)

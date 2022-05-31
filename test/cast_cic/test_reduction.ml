@@ -72,7 +72,7 @@ let test_casts_reduce () =
        }
    in
    Alcotest.check Testable.term "Canonical cast" canonical_cast (reduce canonical_cast));
-  (let prod_germ = germ 1 HProd in
+  (let prod_germ = Reduction.(germ 1 HProd) in
    Alcotest.check
      Testable.term
      "Prod-Germ"

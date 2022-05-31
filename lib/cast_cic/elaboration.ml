@@ -143,7 +143,7 @@ and elab_prod reduce ctx term
   | Prod { id; dom; body } -> Ok (t, id, dom, body)
   (* Inf-Prod? *)
   | Unknown (Universe i) when Config.cast_universe_level i >= 0 ->
-    let prod_germ = Ast.(germ i HProd) in
+    let prod_germ = Reduction.(germ i HProd) in
     (match prod_germ with
     | Prod fi as prod_germ ->
       Ok (Cast { source = ty; target = prod_germ; term = t }, fi.id, fi.dom, fi.body)

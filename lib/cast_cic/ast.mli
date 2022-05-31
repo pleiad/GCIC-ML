@@ -55,25 +55,6 @@ val to_string : term -> string
 (** Prints the prettified version of a term *)
 val print : term -> unit
 
-(** Head constructors *)
-type head =
-  | HProd
-  | HUniverse of int
-  | HInductive of Name.t
-
-(** Returns the head constructor of a type *)
-val head : term -> (head, string) result
-
-(** Returns the least precise type for the given head constructor, 
-    at the provided level *)
-val germ : int -> head -> term
-
-(** Checks if a term corresponds to a germ at the provided universe level *)
-val is_germ : int -> term -> bool
-
-(** Checks if a term corresponds to a germ for a level >= to the provided universe level *)
-val is_germ_for_gte_level : int -> term -> bool
-
 (** Checks if a term is in neutral form *)
 val is_neutral : term -> bool
 

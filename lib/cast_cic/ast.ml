@@ -123,55 +123,6 @@ let to_string = Pretty.to_string
 (** Prints the prettified version of a term *)
 let print = Pretty.print
 
-(** Head constructors *)
-type head =
-  | HProd
-  | HUniverse of int
-  | HInductive of Name.t
-
-(** Returns the head constructor of a type *)
-let head : term -> (head, string) result = function
-  | Prod _ -> Ok HProd
-  | Universe i -> Ok (HUniverse i)
-  | Inductive (ind, _, _) -> Ok (HInductive ind)
-  | _ -> Error "invalid term to get head constructor"
-
-(** Returns the least precise type for the given head constructor, 
-    at the provided level *)
-let germ i : head -> term = function
-  | HProd ->
-    let cprod = Config.cast_universe_level i in
-    let univ = Universe cprod in
-    if cprod >= 0
-    then Prod { id = Name.default; dom = Unknown univ; body = Unknown univ }
-    else Err univ
-  | HUniverse j -> if j < i then Universe j else Err (Universe i)
-  | HInductive _ind -> assert false
-(*
-    let params = (Declarations.Ind.find ind).params in
-    let unk_params = List.map (fun (_, t) -> Unknown t) params in
-    Inductive (ind, unk_params)
-    *)
-
-(** Checks if a term corresponds to a germ at the provided universe level *)
-let is_germ i : term -> bool = function
-  | Prod { id = _; dom = Unknown (Universe j); body = Unknown (Universe k) } ->
-    Config.cast_universe_level i = j && j = k && j >= 0
-  | Err (Universe j) -> i = j
-  | Universe j -> j < i
-  | _ -> false
-
-(** Checks if a term corresponds to a germ for a level >= to the provided universe level.
-    We are adding this predicate mostly for the Prod-Germ rule in reduction, 
-    where we need to check that the type being cast to ? is not a germ for any 
-    j >= i. We cannot build an arbitrary j there, so we resort to this.  
-  *)
-let is_germ_for_gte_level i : term -> bool = function
-  | Prod { id = _; dom = Unknown (Universe j); body = Unknown (Universe k) } ->
-    j >= Config.cast_universe_level i && j = k && j >= 0
-  | Err (Universe j) -> j = i && Config.cast_universe_level i < 0
-  | _ -> false
-
 (** Checks if a term is in neutral form *)
 let rec is_neutral : term -> bool = function
   | Var _ -> true
@@ -190,6 +141,14 @@ let is_unknown_or_error_canonical term : bool =
   match term with
   | Universe _ | Unknown (Universe _) | Err (Universe _) -> true
   | _ -> is_neutral term
+
+(** Checks if a term corresponds to a germ at the provided universe level *)
+let is_germ i : term -> bool = function
+  | Prod { id = _; dom = Unknown (Universe j); body = Unknown (Universe k) } ->
+    Config.cast_universe_level i = j && j = k && j >= 0
+  | Err (Universe j) -> i = j
+  | Universe j -> j < i
+  | _ -> false
 
 (** Checks if a term is in canonical form *)
 let is_canonical : term -> bool = function
