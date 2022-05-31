@@ -74,6 +74,27 @@ let execute_definition gdef : (cmd_result, execute_error) result =
     Kernel.Declarations.Const.add name { name; ty; term };
     Ok (Definition (name, ty))
 
+let execute_inductive ind ctors : (cmd_result, execute_error) result =
+  let open Kernel in
+  let open Kernel.Declarations in
+  (* TODO *)
+  let check_ind_decl (ind : Ind.t) : (Ind.t, execute_error) result = Ok ind in
+  (* TODO *)
+  let check_ctor_decl (ctor : Ctor.t) : (Ctor.t, execute_error) result = Ok ctor in
+  let execute_ind_decl (ind : Ind.t) : unit =
+    Ind.add ind.name ind;
+    string_of_cmd_result (Definition (ind.name, ind.sort)) |> print_endline
+  in
+  let execute_ctor_decl (ctor : Ctor.t) : unit =
+    Ctor.add ctor.name ctor;
+    string_of_cmd_result (Definition (ctor.name, Ast.Var ctor.ind)) |> print_endline
+  in
+  let* ind' = check_ind_decl ind in
+  let* ctors' = map_results check_ctor_decl ctors in
+  execute_ind_decl ind';
+  List.iter execute_ctor_decl ctors';
+  Ok Unit
+
 exception LoadFail of execute_error
 
 let rec execute file_parser cmd : (cmd_result, execute_error) result =
@@ -85,6 +106,7 @@ let rec execute file_parser cmd : (cmd_result, execute_error) result =
   | Set f -> execute_set_flag f
   | Define gdef -> execute_definition gdef
   | Load filename -> execute_load file_parser filename
+  | Inductive (ind, ctors) -> execute_inductive ind ctors
 
 and execute_load file_parser filename =
   try

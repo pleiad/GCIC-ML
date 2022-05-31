@@ -1,5 +1,7 @@
 open Vernac
 open Common.Id
+open Common.Std
+open Kernel.Declarations
 
 type parsed_term = Parsing.Ast.term
 type term = Kernel.Ast.term
@@ -32,18 +34,30 @@ and expand_lambda (hd : Kernel.Ast.fun_info -> term) args body =
       ; body = expand_lambda hd args body
       }
 
-let of_parsed_const_decl
-    : parsed_term Kernel.Declarations.const_decl -> term Kernel.Declarations.const_decl
-  = function
-  | { name; ty; term } -> { name; ty = of_parsed_term ty; term = of_parsed_term term }
+let of_parsed_const_decl (d : parsed_term const_decl) =
+  { d with ty = of_parsed_term d.ty; term = of_parsed_term d.term }
+
+let of_parsed_ind_decl (d : parsed_term ind_decl) =
+  { d with
+    params = List.map (map_snd of_parsed_term) d.params
+  ; sort = of_parsed_term d.sort
+  }
+
+let of_parsed_ctor_decl (d : parsed_term ctor_decl) =
+  { d with
+    params = List.map (map_snd of_parsed_term) d.params
+  ; args = List.map (map_snd of_parsed_term) d.args
+  }
 
 let of_parsed_command : parsed_term Command.t -> term Command.t = function
   | Eval t -> Eval (of_parsed_term t)
   | Check t -> Check (of_parsed_term t)
   | Elab t -> Elab (of_parsed_term t)
   | Set cfg -> Set cfg
-  | Define gdef -> Define (of_parsed_const_decl gdef)
+  | Define d -> Define (of_parsed_const_decl d)
   | Load filename -> Load filename
+  | Inductive (ind, ctors) ->
+    Inductive (of_parsed_ind_decl ind, List.map of_parsed_ctor_decl ctors)
 
 let parse_file_content str =
   match Parsing.Lex_and_parse.parse_program str with
