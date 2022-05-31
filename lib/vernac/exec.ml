@@ -75,7 +75,6 @@ let execute_definition gdef : (cmd_result, execute_error) result =
     Ok (Definition (name, ty))
 
 let execute_inductive ind ctors : (cmd_result, execute_error) result =
-  let open Kernel in
   let open Kernel.Declarations in
   (* TODO *)
   let check_ind_decl (ind : Ind.t) : (Ind.t, execute_error) result = Ok ind in
@@ -87,7 +86,7 @@ let execute_inductive ind ctors : (cmd_result, execute_error) result =
   in
   let execute_ctor_decl (ctor : Ctor.t) : unit =
     Ctor.add ctor.name ctor;
-    string_of_cmd_result (Definition (ctor.name, Ast.Var ctor.ind)) |> print_endline
+    string_of_cmd_result (Definition (ctor.name, ctor.ty)) |> print_endline
   in
   let* ind' = check_ind_decl ind in
   let* ctors' = map_results check_ctor_decl ctors in

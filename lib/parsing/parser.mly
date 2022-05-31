@@ -20,6 +20,17 @@
     let ty  = Prod (args, ty') in
     let const_def = { name; ty; term } in
     Define const_def
+
+  let mk_ind_decl ind params sort ctors =
+    let open Vernac.Command in
+    let open Kernel.Declarations in
+    let mk_ctor_decl ( name, args, ty') =
+      let ty_args = List.map (fun (x,t) -> Some x, t) (List.append params args) in
+      let ty = Prod (ty_args, ty') in
+      { name; ind; params; args; ty } in
+    let ctor_decls = List.map mk_ctor_decl ctors in
+    let ind_decl = { name = ind; params; sort; ctors=(List.map (fun c -> c.name) ctor_decls)} in
+    Inductive (ind_decl, ctor_decls)
 %}
 
 /* Token definitions 
@@ -29,11 +40,11 @@
 %token <int> INT
 %token <string> ID
 // %token <string> FILENAME
-%token COLON DOT COMMA ARROW EQUAL DOUBLE_QUOTE
+%token COLON DOT COMMA ARROW EQUAL DOUBLE_QUOTE VBAR
 %token LPAREN RPAREN
 %token KWD_UNIVERSE KWD_LAMBDA KWD_UNKNOWN KWD_UNKNOWN_T KWD_FORALL
 %token KWD_LET KWD_IN
-%token VERNAC_CHECK VERNAC_EVAL VERNAC_ELABORATE VERNAC_DEFINITION VERNAC_SET
+%token VERNAC_CHECK VERNAC_EVAL VERNAC_ELABORATE VERNAC_DEFINITION VERNAC_SET VERNAC_INDUCTIVE
 %token VERNAC_FLAG_VARIANT VERNAC_FLAG_FUEL 
 %token VERNAC_VARIANT_G VERNAC_VARIANT_S VERNAC_VARIANT_N
 %token VERNAC_LOAD VERNAC_SEPARATOR
@@ -83,6 +94,12 @@ command :
  { mk_definition id (List.flatten args) ty body }
 // load "filename"
 | VERNAC_LOAD; DOUBLE_QUOTE; filename=ID; DOUBLE_QUOTE  { Load filename }
+// inductive list (a : Type0) : Type0 = <ctor_decls>
+| VERNAC_INDUCTIVE; id=id; params=args0; COLON; ty=term; EQUAL; ctors=list(ctor_decls)
+ { mk_ind_decl id params ty ctors }
+
+ctor_decls :
+| VBAR; id=id; args=args0; COLON; ty=term { (id, args, ty) }
 
 flag :
 | VERNAC_FLAG_VARIANT; var=variant { Variant var }
@@ -96,9 +113,17 @@ variant :
 id :
 | x=ID { Name.of_string x }
 
+arg0 :
+(* (x y z : A) *)
+| LPAREN; ids=nonempty_list(id); COLON; dom=term; RPAREN  { List.map (fun id -> (id, dom)) ids }
+
+%inline args0 :
+| args=list(arg0) { List.flatten(args) }
+
 arg :
 (* (x y z : A) *)
 | LPAREN; ids=nonempty_list(id); COLON; dom=term; RPAREN  { List.map (fun id -> (Some id, dom)) ids }
+
 
 %inline args :
 | args=nonempty_list(arg) { List.flatten(args) }

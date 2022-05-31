@@ -1,8 +1,8 @@
 term_parser: ID ARROW RPAREN
 ##
-## Ends in an error in state: 36.
+## Ends in an error in state: 40.
 ##
-## term -> fact ARROW . term [ VERNAC_SEPARATOR RPAREN KWD_IN EQUAL EOF COLON ]
+## term -> fact ARROW . term [ VERNAC_SEPARATOR VBAR RPAREN KWD_IN EQUAL EOF COLON ]
 ##
 ## The known suffix of the stack is as follows:
 ## fact ARROW
@@ -14,7 +14,7 @@ For example:
 
 term_parser: ID RPAREN
 ##
-## Ends in an error in state: 89.
+## Ends in an error in state: 110.
 ##
 ## term_parser -> top . EOF [ # ]
 ## top -> top . COLON term [ EOF COLON ]
@@ -26,8 +26,8 @@ term_parser: ID RPAREN
 ## This implies that, although the LR(1) items shown above provide an
 ## accurate view of the past (what has been recognized so far), they
 ## may provide an INCOMPLETE view of the future (what was expected next).
-## In state 35, spurious reduction of production term -> fact
-## In state 58, spurious reduction of production top -> term
+## In state 39, spurious reduction of production term -> fact
+## In state 62, spurious reduction of production top -> term
 ##
 
 I'm currently parsing a term.
@@ -35,9 +35,9 @@ After `$0`, the end of file is expected.
 
 term_parser: KWD_FORALL LPAREN ID COLON ID RPAREN COMMA RPAREN
 ##
-## Ends in an error in state: 32.
+## Ends in an error in state: 36.
 ##
-## term -> KWD_FORALL nonempty_list(arg) COMMA . term [ VERNAC_SEPARATOR RPAREN KWD_IN EQUAL EOF COLON ]
+## term -> KWD_FORALL nonempty_list(arg) COMMA . term [ VERNAC_SEPARATOR VBAR RPAREN KWD_IN EQUAL EOF COLON ]
 ##
 ## The known suffix of the stack is as follows:
 ## KWD_FORALL nonempty_list(arg) COMMA
@@ -50,9 +50,9 @@ For example:
 
 term_parser: KWD_FORALL RPAREN
 ##
-## Ends in an error in state: 30.
+## Ends in an error in state: 34.
 ##
-## term -> KWD_FORALL . nonempty_list(arg) COMMA term [ VERNAC_SEPARATOR RPAREN KWD_IN EQUAL EOF COLON ]
+## term -> KWD_FORALL . nonempty_list(arg) COMMA term [ VERNAC_SEPARATOR VBAR RPAREN KWD_IN EQUAL EOF COLON ]
 ##
 ## The known suffix of the stack is as follows:
 ## KWD_FORALL
@@ -66,7 +66,7 @@ For example:
 
 term_parser: KWD_LAMBDA LPAREN ID COLON ID KWD_LET
 ##
-## Ends in an error in state: 42.
+## Ends in an error in state: 46.
 ##
 ## arg -> LPAREN nonempty_list(id) COLON term . RPAREN [ LPAREN DOT COMMA COLON ]
 ##
@@ -77,7 +77,7 @@ term_parser: KWD_LAMBDA LPAREN ID COLON ID KWD_LET
 ## This implies that, although the LR(1) items shown above provide an
 ## accurate view of the past (what has been recognized so far), they
 ## may provide an INCOMPLETE view of the future (what was expected next).
-## In state 35, spurious reduction of production term -> fact
+## In state 39, spurious reduction of production term -> fact
 ##
 
 I'm currently parsing arguments to a pi type or lambda expression.
@@ -85,7 +85,7 @@ After the `$0`, a closing parenthesis is expected `)`.
 
 term_parser: KWD_LAMBDA LPAREN ID COLON ID RPAREN RPAREN
 ##
-## Ends in an error in state: 40.
+## Ends in an error in state: 44.
 ##
 ## nonempty_list(arg) -> arg . [ DOT COMMA ]
 ## nonempty_list(arg) -> arg . nonempty_list(arg) [ DOT COMMA ]
@@ -103,7 +103,7 @@ For example:
 
 term_parser: KWD_LAMBDA LPAREN ID COLON RPAREN
 ##
-## Ends in an error in state: 29.
+## Ends in an error in state: 33.
 ##
 ## arg -> LPAREN nonempty_list(id) COLON . term RPAREN [ LPAREN DOT COMMA COLON ]
 ##
@@ -118,7 +118,7 @@ For example:
 
 term_parser: KWD_LAMBDA LPAREN ID RPAREN
 ##
-## Ends in an error in state: 44.
+## Ends in an error in state: 48.
 ##
 ## nonempty_list(id) -> id . [ COLON ]
 ## nonempty_list(id) -> id . nonempty_list(id) [ COLON ]
@@ -135,7 +135,7 @@ For example:
 
 term_parser: KWD_LAMBDA LPAREN RPAREN
 ##
-## Ends in an error in state: 27.
+## Ends in an error in state: 31.
 ##
 ## arg -> LPAREN . nonempty_list(id) COLON term RPAREN [ LPAREN DOT COMMA COLON ]
 ##
@@ -152,9 +152,9 @@ For example:
 
 term_parser: KWD_LAMBDA RPAREN
 ##
-## Ends in an error in state: 26.
+## Ends in an error in state: 30.
 ##
-## term -> KWD_LAMBDA . nonempty_list(arg) DOT term [ VERNAC_SEPARATOR RPAREN KWD_IN EQUAL EOF COLON ]
+## term -> KWD_LAMBDA . nonempty_list(arg) DOT term [ VERNAC_SEPARATOR VBAR RPAREN KWD_IN EQUAL EOF COLON ]
 ##
 ## The known suffix of the stack is as follows:
 ## KWD_LAMBDA
@@ -168,9 +168,9 @@ For example:
 
 term_parser: KWD_LET ID COLON ID EQUAL ID KWD_IN RPAREN
 ##
-## Ends in an error in state: 52.
+## Ends in an error in state: 56.
 ##
-## term -> KWD_LET id COLON term EQUAL term KWD_IN . term [ VERNAC_SEPARATOR RPAREN KWD_IN EQUAL EOF COLON ]
+## term -> KWD_LET id COLON term EQUAL term KWD_IN . term [ VERNAC_SEPARATOR VBAR RPAREN KWD_IN EQUAL EOF COLON ]
 ##
 ## The known suffix of the stack is as follows:
 ## KWD_LET id COLON term EQUAL term KWD_IN
@@ -181,9 +181,9 @@ After the `in`, an expression is expected.
 
 term_parser: KWD_LET ID COLON ID EQUAL ID RPAREN
 ##
-## Ends in an error in state: 51.
+## Ends in an error in state: 55.
 ##
-## term -> KWD_LET id COLON term EQUAL term . KWD_IN term [ VERNAC_SEPARATOR RPAREN KWD_IN EQUAL EOF COLON ]
+## term -> KWD_LET id COLON term EQUAL term . KWD_IN term [ VERNAC_SEPARATOR VBAR RPAREN KWD_IN EQUAL EOF COLON ]
 ##
 ## The known suffix of the stack is as follows:
 ## KWD_LET id COLON term EQUAL term
@@ -192,7 +192,7 @@ term_parser: KWD_LET ID COLON ID EQUAL ID RPAREN
 ## This implies that, although the LR(1) items shown above provide an
 ## accurate view of the past (what has been recognized so far), they
 ## may provide an INCOMPLETE view of the future (what was expected next).
-## In state 35, spurious reduction of production term -> fact
+## In state 39, spurious reduction of production term -> fact
 ##
 
 I'm currently parsing the bounded term of a let expression.
@@ -202,9 +202,9 @@ For example:
 
 term_parser: KWD_LET ID COLON ID EQUAL RPAREN
 ##
-## Ends in an error in state: 50.
+## Ends in an error in state: 54.
 ##
-## term -> KWD_LET id COLON term EQUAL . term KWD_IN term [ VERNAC_SEPARATOR RPAREN KWD_IN EQUAL EOF COLON ]
+## term -> KWD_LET id COLON term EQUAL . term KWD_IN term [ VERNAC_SEPARATOR VBAR RPAREN KWD_IN EQUAL EOF COLON ]
 ##
 ## The known suffix of the stack is as follows:
 ## KWD_LET id COLON term EQUAL
@@ -217,9 +217,9 @@ For example:
 
 term_parser: KWD_LET ID COLON ID RPAREN
 ##
-## Ends in an error in state: 49.
+## Ends in an error in state: 53.
 ##
-## term -> KWD_LET id COLON term . EQUAL term KWD_IN term [ VERNAC_SEPARATOR RPAREN KWD_IN EQUAL EOF COLON ]
+## term -> KWD_LET id COLON term . EQUAL term KWD_IN term [ VERNAC_SEPARATOR VBAR RPAREN KWD_IN EQUAL EOF COLON ]
 ##
 ## The known suffix of the stack is as follows:
 ## KWD_LET id COLON term
@@ -228,7 +228,7 @@ term_parser: KWD_LET ID COLON ID RPAREN
 ## This implies that, although the LR(1) items shown above provide an
 ## accurate view of the past (what has been recognized so far), they
 ## may provide an INCOMPLETE view of the future (what was expected next).
-## In state 35, spurious reduction of production term -> fact
+## In state 39, spurious reduction of production term -> fact
 ##
 
 I'm currently parsing the bounded term's type of a let expression.
@@ -239,9 +239,9 @@ For example:
 
 term_parser: KWD_LET ID COLON RPAREN
 ##
-## Ends in an error in state: 25.
+## Ends in an error in state: 29.
 ##
-## term -> KWD_LET id COLON . term EQUAL term KWD_IN term [ VERNAC_SEPARATOR RPAREN KWD_IN EQUAL EOF COLON ]
+## term -> KWD_LET id COLON . term EQUAL term KWD_IN term [ VERNAC_SEPARATOR VBAR RPAREN KWD_IN EQUAL EOF COLON ]
 ##
 ## The known suffix of the stack is as follows:
 ## KWD_LET id COLON
@@ -255,9 +255,9 @@ For example:
 
 term_parser: KWD_LET ID RPAREN
 ##
-## Ends in an error in state: 24.
+## Ends in an error in state: 28.
 ##
-## term -> KWD_LET id . COLON term EQUAL term KWD_IN term [ VERNAC_SEPARATOR RPAREN KWD_IN EQUAL EOF COLON ]
+## term -> KWD_LET id . COLON term EQUAL term KWD_IN term [ VERNAC_SEPARATOR VBAR RPAREN KWD_IN EQUAL EOF COLON ]
 ##
 ## The known suffix of the stack is as follows:
 ## KWD_LET id
@@ -271,9 +271,9 @@ For example:
 
 term_parser: KWD_LET RPAREN
 ##
-## Ends in an error in state: 22.
+## Ends in an error in state: 27.
 ##
-## term -> KWD_LET . id COLON term EQUAL term KWD_IN term [ VERNAC_SEPARATOR RPAREN KWD_IN EQUAL EOF COLON ]
+## term -> KWD_LET . id COLON term EQUAL term KWD_IN term [ VERNAC_SEPARATOR VBAR RPAREN KWD_IN EQUAL EOF COLON ]
 ##
 ## The known suffix of the stack is as follows:
 ## KWD_LET
@@ -287,9 +287,9 @@ For example:
 
 term_parser: KWD_UNIVERSE RPAREN
 ##
-## Ends in an error in state: 20.
+## Ends in an error in state: 25.
 ##
-## atom -> KWD_UNIVERSE . INT [ VERNAC_SEPARATOR RPAREN LPAREN KWD_UNKNOWN_T KWD_UNKNOWN KWD_UNIVERSE KWD_IN ID EQUAL EOF COLON ARROW ]
+## atom -> KWD_UNIVERSE . INT [ VERNAC_SEPARATOR VBAR RPAREN LPAREN KWD_UNKNOWN_T KWD_UNKNOWN KWD_UNIVERSE KWD_IN ID EQUAL EOF COLON ARROW ]
 ##
 ## The known suffix of the stack is as follows:
 ## KWD_UNIVERSE
@@ -304,9 +304,9 @@ For example:
 
 term_parser: KWD_UNKNOWN RPAREN
 ##
-## Ends in an error in state: 18.
+## Ends in an error in state: 23.
 ##
-## atom -> KWD_UNKNOWN . INT [ VERNAC_SEPARATOR RPAREN LPAREN KWD_UNKNOWN_T KWD_UNKNOWN KWD_UNIVERSE KWD_IN ID EQUAL EOF COLON ARROW ]
+## atom -> KWD_UNKNOWN . INT [ VERNAC_SEPARATOR VBAR RPAREN LPAREN KWD_UNKNOWN_T KWD_UNKNOWN KWD_UNIVERSE KWD_IN ID EQUAL EOF COLON ARROW ]
 ##
 ## The known suffix of the stack is as follows:
 ## KWD_UNKNOWN
@@ -320,9 +320,9 @@ For example:
 
 term_parser: KWD_UNKNOWN_T RPAREN
 ##
-## Ends in an error in state: 16.
+## Ends in an error in state: 21.
 ##
-## atom -> KWD_UNKNOWN_T . INT [ VERNAC_SEPARATOR RPAREN LPAREN KWD_UNKNOWN_T KWD_UNKNOWN KWD_UNIVERSE KWD_IN ID EQUAL EOF COLON ARROW ]
+## atom -> KWD_UNKNOWN_T . INT [ VERNAC_SEPARATOR VBAR RPAREN LPAREN KWD_UNKNOWN_T KWD_UNKNOWN KWD_UNIVERSE KWD_IN ID EQUAL EOF COLON ARROW ]
 ##
 ## The known suffix of the stack is as follows:
 ## KWD_UNKNOWN_T
@@ -336,9 +336,9 @@ For example:
 
 term_parser: LPAREN RPAREN
 ##
-## Ends in an error in state: 15.
+## Ends in an error in state: 20.
 ##
-## atom -> LPAREN . top RPAREN [ VERNAC_SEPARATOR RPAREN LPAREN KWD_UNKNOWN_T KWD_UNKNOWN KWD_UNIVERSE KWD_IN ID EQUAL EOF COLON ARROW ]
+## atom -> LPAREN . top RPAREN [ VERNAC_SEPARATOR VBAR RPAREN LPAREN KWD_UNKNOWN_T KWD_UNKNOWN KWD_UNIVERSE KWD_IN ID EQUAL EOF COLON ARROW ]
 ##
 ## The known suffix of the stack is as follows:
 ## LPAREN
@@ -353,7 +353,7 @@ For example:
 
 term_parser: RPAREN
 ##
-## Ends in an error in state: 88.
+## Ends in an error in state: 109.
 ##
 ## term_parser' -> . term_parser [ # ]
 ##
@@ -369,7 +369,7 @@ For example:
 
 program_parser: RPAREN
 ##
-## Ends in an error in state: 82.
+## Ends in an error in state: 103.
 ##
 ## program_parser' -> . program_parser [ # ]
 ##
@@ -386,7 +386,7 @@ For example:
 
 program_parser: VERNAC_EVAL VERNAC_SEPARATOR
 ##
-## Ends in an error in state: 14.
+## Ends in an error in state: 79.
 ##
 ## command -> VERNAC_EVAL . top [ VERNAC_SEPARATOR ]
 ##
@@ -400,9 +400,9 @@ For example:
 
 term_parser: KWD_FORALL LPAREN ID COLON ID RPAREN DOT
 ##
-## Ends in an error in state: 31.
+## Ends in an error in state: 35.
 ##
-## term -> KWD_FORALL nonempty_list(arg) . COMMA term [ VERNAC_SEPARATOR RPAREN KWD_IN EQUAL EOF COLON ]
+## term -> KWD_FORALL nonempty_list(arg) . COMMA term [ VERNAC_SEPARATOR VBAR RPAREN KWD_IN EQUAL EOF COLON ]
 ##
 ## The known suffix of the stack is as follows:
 ## KWD_FORALL nonempty_list(arg)
@@ -411,7 +411,7 @@ term_parser: KWD_FORALL LPAREN ID COLON ID RPAREN DOT
 ## This implies that, although the LR(1) items shown above provide an
 ## accurate view of the past (what has been recognized so far), they
 ## may provide an INCOMPLETE view of the future (what was expected next).
-## In state 40, spurious reduction of production nonempty_list(arg) -> arg
+## In state 44, spurious reduction of production nonempty_list(arg) -> arg
 ##
 
 I'm currently parsing the arguments of a pi type.
@@ -423,9 +423,9 @@ For example:
 
 term_parser: KWD_LAMBDA LPAREN ID COLON ID RPAREN COMMA
 ##
-## Ends in an error in state: 46.
+## Ends in an error in state: 50.
 ##
-## term -> KWD_LAMBDA nonempty_list(arg) . DOT term [ VERNAC_SEPARATOR RPAREN KWD_IN EQUAL EOF COLON ]
+## term -> KWD_LAMBDA nonempty_list(arg) . DOT term [ VERNAC_SEPARATOR VBAR RPAREN KWD_IN EQUAL EOF COLON ]
 ##
 ## The known suffix of the stack is as follows:
 ## KWD_LAMBDA nonempty_list(arg)
@@ -434,7 +434,7 @@ term_parser: KWD_LAMBDA LPAREN ID COLON ID RPAREN COMMA
 ## This implies that, although the LR(1) items shown above provide an
 ## accurate view of the past (what has been recognized so far), they
 ## may provide an INCOMPLETE view of the future (what was expected next).
-## In state 40, spurious reduction of production nonempty_list(arg) -> arg
+## In state 44, spurious reduction of production nonempty_list(arg) -> arg
 ##
 
 I'm currently parsing the arguments of a lambda expression.
@@ -446,9 +446,9 @@ For example:
 
 term_parser: KWD_LAMBDA LPAREN ID COLON ID RPAREN DOT VERNAC_SEPARATOR
 ##
-## Ends in an error in state: 47.
+## Ends in an error in state: 51.
 ##
-## term -> KWD_LAMBDA nonempty_list(arg) DOT . term [ VERNAC_SEPARATOR RPAREN KWD_IN EQUAL EOF COLON ]
+## term -> KWD_LAMBDA nonempty_list(arg) DOT . term [ VERNAC_SEPARATOR VBAR RPAREN KWD_IN EQUAL EOF COLON ]
 ##
 ## The known suffix of the stack is as follows:
 ## KWD_LAMBDA nonempty_list(arg) DOT
@@ -461,7 +461,7 @@ For example:
 
 program_parser: VERNAC_ELABORATE VERNAC_SEPARATOR
 ##
-## Ends in an error in state: 60.
+## Ends in an error in state: 81.
 ##
 ## command -> VERNAC_ELABORATE . top [ VERNAC_SEPARATOR ]
 ##
@@ -475,7 +475,7 @@ For example:
 
 program_parser: VERNAC_CHECK VERNAC_SEPARATOR
 ##
-## Ends in an error in state: 71.
+## Ends in an error in state: 92.
 ##
 ## command -> VERNAC_CHECK . top [ VERNAC_SEPARATOR ]
 ##
@@ -489,7 +489,7 @@ For example:
 
 program_parser: VERNAC_ELABORATE ID VERNAC_SEPARATOR VERNAC_SEPARATOR
 ##
-## Ends in an error in state: 83.
+## Ends in an error in state: 104.
 ##
 ## list(sequenced_command) -> sequenced_command . list(sequenced_command) [ EOF ]
 ##
@@ -517,9 +517,9 @@ For example:
 
 term_parser: LPAREN ID VERNAC_SEPARATOR
 ##
-## Ends in an error in state: 54.
+## Ends in an error in state: 58.
 ##
-## atom -> LPAREN top . RPAREN [ VERNAC_SEPARATOR RPAREN LPAREN KWD_UNKNOWN_T KWD_UNKNOWN KWD_UNIVERSE KWD_IN ID EQUAL EOF COLON ARROW ]
+## atom -> LPAREN top . RPAREN [ VERNAC_SEPARATOR VBAR RPAREN LPAREN KWD_UNKNOWN_T KWD_UNKNOWN KWD_UNIVERSE KWD_IN ID EQUAL EOF COLON ARROW ]
 ## top -> top . COLON term [ RPAREN COLON ]
 ##
 ## The known suffix of the stack is as follows:
@@ -529,15 +529,15 @@ term_parser: LPAREN ID VERNAC_SEPARATOR
 ## This implies that, although the LR(1) items shown above provide an
 ## accurate view of the past (what has been recognized so far), they
 ## may provide an INCOMPLETE view of the future (what was expected next).
-## In state 35, spurious reduction of production term -> fact
-## In state 58, spurious reduction of production top -> term
+## In state 39, spurious reduction of production term -> fact
+## In state 62, spurious reduction of production top -> term
 ##
 
 Missing `)` after $0, to close the parenthesised term.
 
 term_parser: ID COLON VERNAC_VARIANT_S
 ##
-## Ends in an error in state: 56.
+## Ends in an error in state: 60.
 ##
 ## top -> top COLON . term [ VERNAC_SEPARATOR RPAREN EOF COLON ]
 ##
@@ -552,7 +552,7 @@ For example:
 
 program_parser: VERNAC_CHECK ID RPAREN
 ##
-## Ends in an error in state: 72.
+## Ends in an error in state: 93.
 ##
 ## command -> VERNAC_CHECK top . [ VERNAC_SEPARATOR ]
 ## top -> top . COLON term [ VERNAC_SEPARATOR COLON ]
@@ -564,8 +564,8 @@ program_parser: VERNAC_CHECK ID RPAREN
 ## This implies that, although the LR(1) items shown above provide an
 ## accurate view of the past (what has been recognized so far), they
 ## may provide an INCOMPLETE view of the future (what was expected next).
-## In state 35, spurious reduction of production term -> fact
-## In state 58, spurious reduction of production top -> term
+## In state 39, spurious reduction of production term -> fact
+## In state 62, spurious reduction of production top -> term
 ##
 
 Missing a `;;` after $0, to close the command. 
@@ -574,7 +574,7 @@ For example:
 
 program_parser: VERNAC_ELABORATE ID VERNAC_VARIANT_S
 ##
-## Ends in an error in state: 61.
+## Ends in an error in state: 82.
 ##
 ## command -> VERNAC_ELABORATE top . [ VERNAC_SEPARATOR ]
 ## top -> top . COLON term [ VERNAC_SEPARATOR COLON ]
@@ -586,8 +586,8 @@ program_parser: VERNAC_ELABORATE ID VERNAC_VARIANT_S
 ## This implies that, although the LR(1) items shown above provide an
 ## accurate view of the past (what has been recognized so far), they
 ## may provide an INCOMPLETE view of the future (what was expected next).
-## In state 35, spurious reduction of production term -> fact
-## In state 58, spurious reduction of production top -> term
+## In state 39, spurious reduction of production term -> fact
+## In state 62, spurious reduction of production top -> term
 ##
 
 Missing a `;;` after $0, to close the command. 
@@ -596,7 +596,7 @@ For example:
 
 program_parser: VERNAC_EVAL ID VERNAC_VARIANT_S
 ##
-## Ends in an error in state: 59.
+## Ends in an error in state: 80.
 ##
 ## command -> VERNAC_EVAL top . [ VERNAC_SEPARATOR ]
 ## top -> top . COLON term [ VERNAC_SEPARATOR COLON ]
@@ -608,8 +608,8 @@ program_parser: VERNAC_EVAL ID VERNAC_VARIANT_S
 ## This implies that, although the LR(1) items shown above provide an
 ## accurate view of the past (what has been recognized so far), they
 ## may provide an INCOMPLETE view of the future (what was expected next).
-## In state 35, spurious reduction of production term -> fact
-## In state 58, spurious reduction of production top -> term
+## In state 39, spurious reduction of production term -> fact
+## In state 62, spurious reduction of production top -> term
 ##
 
 Missing a `;;` after $0, to close the command. 
@@ -619,7 +619,7 @@ For example:
 
 program_parser: VERNAC_DEFINITION VERNAC_VARIANT_S
 ##
-## Ends in an error in state: 62.
+## Ends in an error in state: 83.
 ##
 ## command -> VERNAC_DEFINITION . id list(arg) COLON term EQUAL top [ VERNAC_SEPARATOR ]
 ##
@@ -633,7 +633,7 @@ For example:
 
 program_parser: VERNAC_DEFINITION ID VERNAC_VARIANT_S
 ##
-## Ends in an error in state: 63.
+## Ends in an error in state: 84.
 ##
 ## command -> VERNAC_DEFINITION id . list(arg) COLON term EQUAL top [ VERNAC_SEPARATOR ]
 ##
@@ -649,7 +649,7 @@ For example:
 
 program_parser: VERNAC_DEFINITION ID LPAREN ID COLON ID RPAREN DOT
 ##
-## Ends in an error in state: 69.
+## Ends in an error in state: 90.
 ##
 ## list(arg) -> arg . list(arg) [ COLON ]
 ##
@@ -665,7 +665,7 @@ For example:
 
 program_parser: VERNAC_DEFINITION ID COLON VERNAC_VARIANT_S
 ##
-## Ends in an error in state: 65.
+## Ends in an error in state: 86.
 ##
 ## command -> VERNAC_DEFINITION id list(arg) COLON . term EQUAL top [ VERNAC_SEPARATOR ]
 ##
@@ -679,7 +679,7 @@ For example:
 
 program_parser: VERNAC_DEFINITION ID COLON ID VERNAC_VARIANT_S
 ##
-## Ends in an error in state: 66.
+## Ends in an error in state: 87.
 ##
 ## command -> VERNAC_DEFINITION id list(arg) COLON term . EQUAL top [ VERNAC_SEPARATOR ]
 ##
@@ -690,7 +690,7 @@ program_parser: VERNAC_DEFINITION ID COLON ID VERNAC_VARIANT_S
 ## This implies that, although the LR(1) items shown above provide an
 ## accurate view of the past (what has been recognized so far), they
 ## may provide an INCOMPLETE view of the future (what was expected next).
-## In state 35, spurious reduction of production term -> fact
+## In state 39, spurious reduction of production term -> fact
 ##
 
 I expect an `=` (equal) followed by the body of the definition.
@@ -699,7 +699,7 @@ For example:
 
 program_parser: VERNAC_DEFINITION ID COLON ID EQUAL VERNAC_VARIANT_S
 ##
-## Ends in an error in state: 67.
+## Ends in an error in state: 88.
 ##
 ## command -> VERNAC_DEFINITION id list(arg) COLON term EQUAL . top [ VERNAC_SEPARATOR ]
 ##
@@ -713,7 +713,7 @@ For example:
 
 program_parser: VERNAC_DEFINITION ID COLON ID EQUAL ID VERNAC_VARIANT_S
 ##
-## Ends in an error in state: 68.
+## Ends in an error in state: 89.
 ##
 ## command -> VERNAC_DEFINITION id list(arg) COLON term EQUAL top . [ VERNAC_SEPARATOR ]
 ## top -> top . COLON term [ VERNAC_SEPARATOR COLON ]
@@ -725,8 +725,8 @@ program_parser: VERNAC_DEFINITION ID COLON ID EQUAL ID VERNAC_VARIANT_S
 ## This implies that, although the LR(1) items shown above provide an
 ## accurate view of the past (what has been recognized so far), they
 ## may provide an INCOMPLETE view of the future (what was expected next).
-## In state 35, spurious reduction of production term -> fact
-## In state 58, spurious reduction of production top -> term
+## In state 39, spurious reduction of production term -> fact
+## In state 62, spurious reduction of production top -> term
 ##
 
 Missing a `;;` after $0, to close the command. 
@@ -785,7 +785,7 @@ For example:
 
 command_parser: VERNAC_CHECK ID VERNAC_SEPARATOR VERNAC_VARIANT_S
 ##
-## Ends in an error in state: 73.
+## Ends in an error in state: 94.
 ##
 ## command_parser -> sequenced_command . EOF [ # ]
 ##
@@ -830,9 +830,9 @@ For example:
 
 command_parser: VERNAC_SET VERNAC_FLAG_FUEL INT VERNAC_VARIANT_S
 ##
-## Ends in an error in state: 76.
+## Ends in an error in state: 97.
 ##
-## sequenced_command -> command . VERNAC_SEPARATOR [ VERNAC_SET VERNAC_LOAD VERNAC_EVAL VERNAC_ELABORATE VERNAC_DEFINITION VERNAC_CHECK EOF ]
+## sequenced_command -> command . VERNAC_SEPARATOR [ VERNAC_SET VERNAC_LOAD VERNAC_INDUCTIVE VERNAC_EVAL VERNAC_ELABORATE VERNAC_DEFINITION VERNAC_CHECK EOF ]
 ##
 ## The known suffix of the stack is as follows:
 ## command
@@ -844,7 +844,7 @@ For example:
 
 flag_parser: VERNAC_VARIANT_S
 ##
-## Ends in an error in state: 78.
+## Ends in an error in state: 99.
 ##
 ## flag_parser' -> . flag_parser [ # ]
 ##
@@ -859,7 +859,7 @@ For example:
 
 flag_parser: VERNAC_FLAG_FUEL INT VERNAC_VARIANT_S
 ##
-## Ends in an error in state: 80.
+## Ends in an error in state: 101.
 ##
 ## flag_parser -> flag . EOF [ # ]
 ##
@@ -869,3 +869,178 @@ flag_parser: VERNAC_FLAG_FUEL INT VERNAC_VARIANT_S
 
 I'm currently parsing a single flag.
 After `$0`, the end of file is expected.
+
+command_parser: VERNAC_INDUCTIVE VERNAC_VARIANT_S
+##
+## Ends in an error in state: 14.
+##
+## command -> VERNAC_INDUCTIVE . id list(arg0) COLON term EQUAL list(ctor_decls) [ VERNAC_SEPARATOR ]
+##
+## The known suffix of the stack is as follows:
+## VERNAC_INDUCTIVE
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>
+
+command_parser: VERNAC_INDUCTIVE ID VERNAC_VARIANT_S
+##
+## Ends in an error in state: 16.
+##
+## command -> VERNAC_INDUCTIVE id . list(arg0) COLON term EQUAL list(ctor_decls) [ VERNAC_SEPARATOR ]
+##
+## The known suffix of the stack is as follows:
+## VERNAC_INDUCTIVE id
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>
+
+command_parser: VERNAC_INDUCTIVE ID LPAREN VERNAC_VARIANT_S
+##
+## Ends in an error in state: 17.
+##
+## arg0 -> LPAREN . nonempty_list(id) COLON term RPAREN [ LPAREN COLON ]
+##
+## The known suffix of the stack is as follows:
+## LPAREN
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>
+
+command_parser: VERNAC_INDUCTIVE ID LPAREN ID COLON VERNAC_VARIANT_S
+##
+## Ends in an error in state: 19.
+##
+## arg0 -> LPAREN nonempty_list(id) COLON . term RPAREN [ LPAREN COLON ]
+##
+## The known suffix of the stack is as follows:
+## LPAREN nonempty_list(id) COLON
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>
+
+command_parser: VERNAC_INDUCTIVE ID LPAREN ID COLON ID VERNAC_VARIANT_S
+##
+## Ends in an error in state: 63.
+##
+## arg0 -> LPAREN nonempty_list(id) COLON term . RPAREN [ LPAREN COLON ]
+##
+## The known suffix of the stack is as follows:
+## LPAREN nonempty_list(id) COLON term
+##
+## WARNING: This example involves spurious reductions.
+## This implies that, although the LR(1) items shown above provide an
+## accurate view of the past (what has been recognized so far), they
+## may provide an INCOMPLETE view of the future (what was expected next).
+## In state 39, spurious reduction of production term -> fact
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>
+
+command_parser: VERNAC_INDUCTIVE ID COLON VERNAC_VARIANT_S
+##
+## Ends in an error in state: 66.
+##
+## command -> VERNAC_INDUCTIVE id list(arg0) COLON . term EQUAL list(ctor_decls) [ VERNAC_SEPARATOR ]
+##
+## The known suffix of the stack is as follows:
+## VERNAC_INDUCTIVE id list(arg0) COLON
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>
+
+command_parser: VERNAC_INDUCTIVE ID COLON ID VERNAC_VARIANT_S
+##
+## Ends in an error in state: 67.
+##
+## command -> VERNAC_INDUCTIVE id list(arg0) COLON term . EQUAL list(ctor_decls) [ VERNAC_SEPARATOR ]
+##
+## The known suffix of the stack is as follows:
+## VERNAC_INDUCTIVE id list(arg0) COLON term
+##
+## WARNING: This example involves spurious reductions.
+## This implies that, although the LR(1) items shown above provide an
+## accurate view of the past (what has been recognized so far), they
+## may provide an INCOMPLETE view of the future (what was expected next).
+## In state 39, spurious reduction of production term -> fact
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>
+
+command_parser: VERNAC_INDUCTIVE ID COLON ID EQUAL VERNAC_VARIANT_S
+##
+## Ends in an error in state: 68.
+##
+## command -> VERNAC_INDUCTIVE id list(arg0) COLON term EQUAL . list(ctor_decls) [ VERNAC_SEPARATOR ]
+##
+## The known suffix of the stack is as follows:
+## VERNAC_INDUCTIVE id list(arg0) COLON term EQUAL
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>
+
+command_parser: VERNAC_INDUCTIVE ID COLON ID EQUAL VBAR VERNAC_VARIANT_S
+##
+## Ends in an error in state: 69.
+##
+## ctor_decls -> VBAR . id list(arg0) COLON term [ VERNAC_SEPARATOR VBAR ]
+##
+## The known suffix of the stack is as follows:
+## VBAR
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>
+
+command_parser: VERNAC_INDUCTIVE ID COLON ID EQUAL VBAR ID VERNAC_VARIANT_S
+##
+## Ends in an error in state: 70.
+##
+## ctor_decls -> VBAR id . list(arg0) COLON term [ VERNAC_SEPARATOR VBAR ]
+##
+## The known suffix of the stack is as follows:
+## VBAR id
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>
+
+command_parser: VERNAC_INDUCTIVE ID COLON ID EQUAL VBAR ID COLON VERNAC_VARIANT_S
+##
+## Ends in an error in state: 72.
+##
+## ctor_decls -> VBAR id list(arg0) COLON . term [ VERNAC_SEPARATOR VBAR ]
+##
+## The known suffix of the stack is as follows:
+## VBAR id list(arg0) COLON
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>
+
+command_parser: VERNAC_INDUCTIVE ID LPAREN ID COLON ID RPAREN VERNAC_VARIANT_S
+##
+## Ends in an error in state: 74.
+##
+## list(arg0) -> arg0 . list(arg0) [ COLON ]
+##
+## The known suffix of the stack is as follows:
+## arg0
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>
+
+command_parser: VERNAC_INDUCTIVE ID COLON ID EQUAL VBAR ID COLON ID VERNAC_VARIANT_S
+##
+## Ends in an error in state: 77.
+##
+## list(ctor_decls) -> ctor_decls . list(ctor_decls) [ VERNAC_SEPARATOR ]
+##
+## The known suffix of the stack is as follows:
+## ctor_decls
+##
+## WARNING: This example involves spurious reductions.
+## This implies that, although the LR(1) items shown above provide an
+## accurate view of the past (what has been recognized so far), they
+## may provide an INCOMPLETE view of the future (what was expected next).
+## In state 39, spurious reduction of production term -> fact
+## In state 73, spurious reduction of production ctor_decls -> VBAR id list(arg0) COLON term
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>

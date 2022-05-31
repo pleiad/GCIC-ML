@@ -35,6 +35,7 @@ let rec token lexbuf =
   | "eval" -> VERNAC_EVAL
   | "elab" -> VERNAC_ELABORATE
   | "def" -> VERNAC_DEFINITION
+  | "inductive" -> VERNAC_INDUCTIVE
   | "set" -> VERNAC_SET
   | "variant" -> VERNAC_FLAG_VARIANT
   | "fuel" -> VERNAC_FLAG_FUEL
@@ -53,6 +54,7 @@ let rec token lexbuf =
   | ':' -> COLON
   | '.' -> DOT
   | ',' -> COMMA
+  | '|' -> VBAR
   | '"' -> DOUBLE_QUOTE
   | whitespace -> token lexbuf
   | newline ->

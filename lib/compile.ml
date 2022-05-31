@@ -47,6 +47,7 @@ let of_parsed_ctor_decl (d : parsed_term ctor_decl) =
   { d with
     params = List.map (map_snd of_parsed_term) d.params
   ; args = List.map (map_snd of_parsed_term) d.args
+  ; ty = of_parsed_term d.ty
   }
 
 let of_parsed_command : parsed_term Command.t -> term Command.t = function

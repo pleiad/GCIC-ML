@@ -29,6 +29,7 @@ type 'a ctor_decl =
   ; ind : Name.t
   ; params : (Name.t * 'a) list
   ; args : (Name.t * 'a) list
+  ; ty : 'a
   }
 
 (** Type of global declaration *)
