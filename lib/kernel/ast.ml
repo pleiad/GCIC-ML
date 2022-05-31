@@ -22,24 +22,65 @@ and fun_info =
 
 (** Pretty printers *)
 
-open Fmt
+(** Pretty printer *)
+module Pretty = struct
+  open Fmt
+
+  (** Returns if a term requires a parenthesis for unambiguation *)
+  let need_parens = function
+    | Lambda _ | Prod _ | Ascription _ -> true
+    | _ -> false
+
+  let rec group_lambda_args acc = function
+    | Lambda { id; dom; body } -> group_lambda_args ((id, dom) :: acc) body
+    | t -> List.rev acc, t
+
+  let rec group_prod_args acc = function
+    | Prod { id; dom; body } when not (Name.is_default id) ->
+      group_prod_args ((id, dom) :: acc) body
+    | t -> List.rev acc, t
+
+  (** Pretty printer for term *)
+  let rec pp ppf = function
+    | Var x -> pf ppf "%a" Name.pp x
+    | Universe i -> pf ppf "▢%i" i
+    | App (t, t') -> pf ppf "@[%a@ %a@]" maybe_parens t maybe_parens t'
+    | Lambda _ as t -> group_lambda_args [] t |> pp_lambda ppf
+    | Prod { id; dom; body } as t ->
+      if Name.is_default id
+      then pf ppf "@[<hov 1>%a →@ %a@]" pp dom pp body
+      else group_prod_args [] t |> pp_prod ppf
+    | Ascription (t, ty) -> pf ppf "@[%a ::@ %a@]" pp t pp ty
+    | Unknown i -> pf ppf "?%i" i
+    | UnknownT i -> pf ppf "?▢%i" i
+    | Const x -> pf ppf "%a" Name.pp x
+
+  (** Pretty-prints an argument of a lambda or prod *)
+  and pp_arg ppf (x, ty) = pf ppf "@[(%a : %a)@]" Name.pp x pp ty
+
+  (** Pretty-prints a lambda *)
+  and pp_lambda ppf (args, body) =
+    pf ppf "@[<hov 1>λ%a.@ %a@]" (list ~sep:sp pp_arg) args pp body
+
+  (** Pretty-prints a prod *)
+  and pp_prod ppf (args, body) =
+    pf ppf "@[<hov 1>Π%a.@ %a@]" (list ~sep:sp pp_arg) args pp body
+
+  (** Adds parenthesis around a term if needed *)
+  and maybe_parens ppf t = if need_parens t then parens pp ppf t else pp ppf t
+
+  (** Returns the prettified version of a term *)
+  let to_string = to_to_string pp
+
+  (** Prints the prettified version of a term *)
+  let print = pp Format.std_formatter
+end
 
 (** Pretty printer for term *)
-let rec pp_term ppf = function
-  | Var x -> pf ppf "%a" Name.pp x
-  | Universe i -> pf ppf "▢%i" i
-  | App (t, t') -> pf ppf "@[%a@ %a@]" pp_term t pp_term t'
-  | Lambda { id; dom; body } ->
-    pf ppf "@[λ(%a : %a).@ %a@]" Name.pp id pp_term dom pp_term body
-  | Prod { id; dom; body } ->
-    pf ppf "@[Π(%a : %a).@ %a@]" Name.pp id pp_term dom pp_term body
-  | Unknown i -> pf ppf "?%i" i
-  | Ascription (t, ty) -> pf ppf "%a : %a" pp_term t pp_term ty
-  | UnknownT i -> pf ppf "?▢%i" i
-  | Const x -> pf ppf "%a" Name.pp x
+let pp_term = Pretty.pp
 
 (** Returns the prettified version of a term *)
-let to_string = to_to_string pp_term
+let to_string = Pretty.to_string
 
 (** Prints the prettified version of a term *)
-let print = pp_term Format.std_formatter
+let print = Pretty.print
