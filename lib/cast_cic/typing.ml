@@ -12,6 +12,7 @@ type type_error =
   | `Err_free_identifier of Name.t
   | `Err_not_product of term * term
   | `Err_not_universe of term * term
+  | `Err_not_inductive of term * term
   ]
 
 let string_of_error = function
@@ -19,6 +20,7 @@ let string_of_error = function
   | `Err_free_identifier _x -> "free identifier"
   | `Err_not_product (_t1, _t2) -> "not a product"
   | `Err_not_universe (_t1, _t2) -> "not a universe"
+  | `Err_not_inductive (_t1, _t2) -> "not an inductive"
 
 let are_convertible t1 t2 : (unit, [> type_error ]) result =
   let* v1 = reduce t1 in
@@ -57,9 +59,33 @@ let rec infer_type (ctx : typing_context) (t : term) : (term, [> type_error ]) r
   | Const x ->
     (try Ok (Declarations.Const.find x).ty with
     | Not_found -> Error (`Err_free_identifier x))
-  | Inductive _ -> assert false
-  | Constructor _ -> assert false
-  | Match _ -> assert false
+  | Inductive (ind, i, params) ->
+    let params_ty = (Declarations.Ind.find ind).params |> List.map snd in
+    let params_with_ty = List.combine params params_ty in
+    let* _ = map_results (fun (t, ty) -> check_type ctx t ty) params_with_ty in
+    Ok (Universe i)
+  | Constructor { ctor; level; args; params } ->
+    let ctor_info = Declarations.Ctor.find ctor in
+    let args_ty = List.map snd ctor_info.args in
+    let params_ty = List.map snd ctor_info.params in
+    let args_with_ty = List.combine args args_ty in
+    let params_with_ty = List.combine params params_ty in
+    let* _ = map_results (fun (t, ty) -> check_type ctx t ty) args_with_ty in
+    let* _ = map_results (fun (t, ty) -> check_type ctx t ty) params_with_ty in
+    Ok (Inductive (ctor_info.ind, level, params))
+  | Match { discr; z; pred; branches; _ } ->
+    let* ind, level, params = infer_ind ctx discr in
+    let pred_ctx = Name.Map.add z (Inductive (ind, level, params)) ctx in
+    let* j = infer_univ pred_ctx pred in
+    let _ = j, check_branch, branches in
+    (* TODO *)
+    Ok (subst1 z discr pred)
+
+and check_branch (ctx : typing_context) (br : branch) (pred : term)
+    : (unit, [> type_error ]) result
+  =
+  let _ = ctx, br, pred in
+  Ok ()
 
 and check_type (ctx : typing_context) (t : term) (ty : term)
     : (unit, [> type_error ]) result
@@ -82,3 +108,12 @@ and infer_univ (ctx : typing_context) (t : term) : (int, [> type_error ]) result
   match v with
   | Universe i -> Ok i
   | _ -> Error (`Err_not_universe (t, ty))
+
+and infer_ind (ctx : typing_context) (t : term)
+    : (Name.t * int * term list, [> type_error ]) result
+  =
+  let* ty = infer_type ctx t in
+  let* v = reduce ty in
+  match v with
+  | Inductive (ind, i, params) -> Ok (ind, i, params)
+  | _ -> Error (`Err_not_inductive (t, ty))

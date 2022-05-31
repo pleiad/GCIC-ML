@@ -38,7 +38,7 @@ let germ i : head -> term = function
     then Prod { id = Name.default; dom = Unknown univ; body = Unknown univ }
     else Err univ
   | HUniverse j -> if j < i then Universe j else Err (Universe i)
-  | HInductive ind -> 
+  | HInductive ind ->
     let params = (Declarations.Ind.find ind).params in
     let unk_params = List.map (fun (_, t) -> Unknown t) params in
     Inductive (ind, i, unk_params)
@@ -52,7 +52,6 @@ let is_germ i : term -> bool = function
   | Inductive (ind, _, params) ->
     let param_tys = (Declarations.Ind.find ind).params |> List.map snd in
     List.for_all2 (fun t ty -> alpha_equal t (Unknown ty)) params param_tys
-
   | _ -> false
 
 (** Checks if a term corresponds to a germ for a level >= to the provided universe level.
@@ -65,15 +64,17 @@ let is_germ_for_gte_level i : term -> bool = function
     j >= Config.cast_universe_level i && j = k && j >= 0
   | Err (Universe j) -> j = i && Config.cast_universe_level i < 0
   | _ -> false
+
 (** Checks if a term corresponds to a type *)
 let is_type : term -> bool = function
-  | Prod _ | Universe _ -> true
+  | Prod _ | Universe _ | Inductive _ -> true
   | _ -> false
 
 let equal_head t1 t2 : bool =
   match head t1, head t2 with
   | Ok HProd, Ok HProd -> true
   | Ok (HUniverse i), Ok (HUniverse j) -> i = j
+  | Ok (HInductive i), Ok (HInductive j) -> i = j
   | _, _ -> assert false
 
 (** Checks if a term is in neutral form *)
@@ -82,22 +83,25 @@ let rec is_neutral : term -> bool = function
   | App (t, _)
   | Unknown t
   | Err t
-  | Cast { source = Unknown (Universe _); target = _; term = t }
-  | Cast { source = Universe _; target = t; term = _ }
+  | Cast { source = Unknown (Universe _); term = t; _ }
+  | Cast { source = Universe _; target = t; _ }
   | Cast { source = Prod _; target = Prod _; term = t }
-  | Cast { source = Prod _; target = t; term = _ }
+  | Cast { source = Prod _; target = t; _ }
+  | Cast { source = Inductive _; target = Inductive _; term = t }
+  | Cast { source = Inductive _; target = t; _ }
   | Cast { source = t; target = _; term = _ } -> is_neutral t
+  | Match { discr; _ } -> is_neutral discr
   | _ -> false
 
 (** Checks if a type t makes ?_t or err t canonical *)
 let is_unknown_or_error_canonical term : bool =
   match term with
-  | Universe _ | Unknown (Universe _) | Err (Universe _) -> true
+  | Universe _ | Unknown (Universe _) | Err (Universe _) | Inductive _ -> true
   | _ -> is_neutral term
 
 (** Checks if a term is in canonical form *)
 let is_canonical : term -> bool = function
-  | Universe _ | Lambda _ | Prod _ -> true
+  | Universe _ | Lambda _ | Prod _ | Constructor _ | Inductive _ -> true
   | Unknown t -> is_unknown_or_error_canonical t
   | Err t -> is_unknown_or_error_canonical t
   | Cast { source = ty; target = Unknown (Universe i); term = _ } when is_germ i ty ->

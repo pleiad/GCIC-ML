@@ -205,8 +205,7 @@ let rec alpha_equal t1 t2 =
     && List.equal alpha_equal c1.args c2.args
     && List.equal alpha_equal c1.params c2.params
   | Match m1, Match m2 ->
-    let alpha_equal_branch b1 b2 =
-      b1.ctor = b2.ctor && true (** TODO *) in
+    let alpha_equal_branch b1 b2 = b1.ctor = b2.ctor && true (* TODO *) in
     m1.ind = m2.ind
     && alpha_equal m1.discr m2.discr
     && m1.z = m2.z
@@ -237,4 +236,16 @@ let rec alpha_consistent t1 t2 : bool =
   | _, Unknown _ -> true
   | Unknown _, _ -> true
   | Const x, Const y -> x = y
+  | Inductive (ind1, i1, params1), Inductive (ind2, i2, params2) ->
+    ind1 = ind2 && i1 = i2 && List.for_all2 alpha_consistent params1 params2
+  | Constructor c1, Constructor c2 ->
+    c1.ctor = c2.ctor
+    && c1.level = c2.level
+    && List.for_all2 alpha_consistent c1.args c2.args
+    && List.for_all2 alpha_consistent c1.params c2.params
+  | Match m1, Match m2 ->
+    alpha_consistent m1.discr m2.discr
+    && m1.ind = m2.ind
+    && alpha_consistent m1.pred m2.pred
+    && true (* TODO *)
   | _ -> false

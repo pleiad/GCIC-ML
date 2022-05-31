@@ -13,6 +13,7 @@ type type_error =
   | `Err_free_identifier of Name.t
   | `Err_not_product of term * term
   | `Err_not_universe of term * term
+  | `Err_not_inductive of term * term
   ]
 
 (** Extracts the error message or description *)
