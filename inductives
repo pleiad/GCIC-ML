@@ -1,0 +1,4 @@
+inductive list (a : □0) : □0 =
+| nil : list a
+| cons : a -> list a -> list a
+;;

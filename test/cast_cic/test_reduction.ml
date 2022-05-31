@@ -7,7 +7,7 @@ let strong_normalization =
   QCheck.(
     Test.make ~count:1000 ~name:"strong normalization" Arbitrary.term (fun t ->
         assume (Typing.infer_type empty_ctx t |> Result.is_ok);
-        reduce t |> Ast.is_canonical))
+        reduce t |> Reduction.is_canonical))
 
 let subject_reduction_empty_ctx =
   let ctx = empty_ctx in
@@ -24,7 +24,7 @@ let progress_empty_ctx =
   QCheck.(
     Test.make ~count:1000 ~name:"progress in empty ctx" Arbitrary.term (fun t ->
         assume (Typing.infer_type ctx t |> Result.is_ok);
-        Ast.is_canonical t || Reduction.step t |> Result.is_ok))
+        Reduction.is_canonical t || Reduction.step t |> Result.is_ok))
 
 let test_app_reduce () =
   let open Ast in

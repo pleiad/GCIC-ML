@@ -123,42 +123,6 @@ let to_string = Pretty.to_string
 (** Prints the prettified version of a term *)
 let print = Pretty.print
 
-(** Checks if a term is in neutral form *)
-let rec is_neutral : term -> bool = function
-  | Var _ -> true
-  | App (t, _)
-  | Unknown t
-  | Err t
-  | Cast { source = Unknown (Universe _); target = _; term = t }
-  | Cast { source = Universe _; target = t; term = _ }
-  | Cast { source = Prod _; target = Prod _; term = t }
-  | Cast { source = Prod _; target = t; term = _ }
-  | Cast { source = t; target = _; term = _ } -> is_neutral t
-  | _ -> false
-
-(** Checks if a type t makes ?_t or err t canonical *)
-let is_unknown_or_error_canonical term : bool =
-  match term with
-  | Universe _ | Unknown (Universe _) | Err (Universe _) -> true
-  | _ -> is_neutral term
-
-(** Checks if a term corresponds to a germ at the provided universe level *)
-let is_germ i : term -> bool = function
-  | Prod { id = _; dom = Unknown (Universe j); body = Unknown (Universe k) } ->
-    Config.cast_universe_level i = j && j = k && j >= 0
-  | Err (Universe j) -> i = j
-  | Universe j -> j < i
-  | _ -> false
-
-(** Checks if a term is in canonical form *)
-let is_canonical : term -> bool = function
-  | Universe _ | Lambda _ | Prod _ -> true
-  | Unknown t -> is_unknown_or_error_canonical t
-  | Err t -> is_unknown_or_error_canonical t
-  | Cast { source = ty; target = Unknown (Universe i); term = _ } when is_germ i ty ->
-    true
-  | t -> is_neutral t
-
 (* Module alias *)
 module Context = Name.Map
 
@@ -233,6 +197,21 @@ let rec alpha_equal t1 t2 =
     && alpha_equal ci1.target ci2.target
     && alpha_equal ci1.term ci2.term
   | Const x, Const y -> x = y
+  | Inductive (ind1, i1, params1), Inductive (ind2, i2, params2) ->
+    ind1 = ind2 && i1 = i2 && List.equal alpha_equal params1 params2
+  | Constructor c1, Constructor c2 ->
+    c1.ctor = c2.ctor
+    && c1.level = c2.level
+    && List.equal alpha_equal c1.args c2.args
+    && List.equal alpha_equal c1.params c2.params
+  | Match m1, Match m2 ->
+    let alpha_equal_branch b1 b2 =
+      b1.ctor = b2.ctor && true (** TODO *) in
+    m1.ind = m2.ind
+    && alpha_equal m1.discr m2.discr
+    && m1.z = m2.z
+    && alpha_equal m1.pred m2.pred
+    && List.equal alpha_equal_branch m1.branches m2.branches
   | _ -> false
 
 (** Checks if two terms are alpha consistent *)

@@ -6,8 +6,7 @@ open Kernel.Declarations
 type parsed_term = Parsing.Ast.term
 type term = Kernel.Ast.term
 
-let defined_ids : [`Const | `Ind | `Ctor] Name.Map.t ref = ref Name.Map.empty
-
+let defined_ids : [ `Const | `Ind | `Ctor ] Name.Map.t ref = ref Name.Map.empty
 let from_opt_name id = Option.value id ~default:Name.default
 
 (* For simplicity, any free identifier is treated as a Const (an identifier refering to a global declaration).
@@ -64,7 +63,6 @@ let of_parsed_command : parsed_term Command.t -> term Command.t = function
   | Load filename -> Load filename
   | Inductive (ind, ctors) ->
     Inductive (of_parsed_ind_decl ind, List.map of_parsed_ctor_decl ctors)
-
 
 let parse_file_content str =
   match Parsing.Lex_and_parse.parse_program str with

@@ -49,6 +49,10 @@ let is_germ i : term -> bool = function
     Config.cast_universe_level i = j && j = k && j >= 0
   | Err (Universe j) -> i = j
   | Universe j -> j < i
+  | Inductive (ind, _, params) ->
+    let param_tys = (Declarations.Ind.find ind).params |> List.map snd in
+    List.for_all2 (fun t ty -> alpha_equal t (Unknown ty)) params param_tys
+
   | _ -> false
 
 (** Checks if a term corresponds to a germ for a level >= to the provided universe level.
@@ -71,6 +75,34 @@ let equal_head t1 t2 : bool =
   | Ok HProd, Ok HProd -> true
   | Ok (HUniverse i), Ok (HUniverse j) -> i = j
   | _, _ -> assert false
+
+(** Checks if a term is in neutral form *)
+let rec is_neutral : term -> bool = function
+  | Var _ -> true
+  | App (t, _)
+  | Unknown t
+  | Err t
+  | Cast { source = Unknown (Universe _); target = _; term = t }
+  | Cast { source = Universe _; target = t; term = _ }
+  | Cast { source = Prod _; target = Prod _; term = t }
+  | Cast { source = Prod _; target = t; term = _ }
+  | Cast { source = t; target = _; term = _ } -> is_neutral t
+  | _ -> false
+
+(** Checks if a type t makes ?_t or err t canonical *)
+let is_unknown_or_error_canonical term : bool =
+  match term with
+  | Universe _ | Unknown (Universe _) | Err (Universe _) -> true
+  | _ -> is_neutral term
+
+(** Checks if a term is in canonical form *)
+let is_canonical : term -> bool = function
+  | Universe _ | Lambda _ | Prod _ -> true
+  | Unknown t -> is_unknown_or_error_canonical t
+  | Err t -> is_unknown_or_error_canonical t
+  | Cast { source = ty; target = Unknown (Universe i); term = _ } when is_germ i ty ->
+    true
+  | t -> is_neutral t
 
 (** The representation of a continuation of the CEK machine *)
 type continuation =

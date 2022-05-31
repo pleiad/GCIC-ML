@@ -55,12 +55,6 @@ val to_string : term -> string
 (** Prints the prettified version of a term *)
 val print : term -> unit
 
-(** Checks if a term is in neutral form *)
-val is_neutral : term -> bool
-
-(** Checks if a term is in canonical form *)
-val is_canonical : term -> bool
-
 (** Performs substitution inside a term *)
 val subst : term option Name.Map.t -> term -> term
 

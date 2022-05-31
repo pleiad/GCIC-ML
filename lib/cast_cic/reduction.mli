@@ -29,6 +29,11 @@ val is_germ : int -> term -> bool
 (** Checks if a term corresponds to a germ for a level >= to the provided universe level *)
 val is_germ_for_gte_level : int -> term -> bool
 
+(** Checks if a term is in neutral form *)
+val is_neutral : term -> bool
+
+(** Checks if a term is in canonical form *)
+val is_canonical : term -> bool
 
 (** Reduces a term *)
 val reduce : term -> (term, [> reduction_error ]) result
