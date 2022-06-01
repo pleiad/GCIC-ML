@@ -91,7 +91,10 @@ let rec elaborate reduce ctx (term : Kernel.Ast.term)
     let* u' = check_elab reduce ctx u dom in
     Ok (Ast.App (t', u'), Ast.subst1 id u' body)
   (* Inductives *)
-  | Inductive _ -> assert false
+  | Inductive (ind, i, params) ->
+    let params_ty = (Declarations.Ind.find ind).params in
+    let* elab_params = check_elab_params reduce ctx params_ty params in
+    Ok Ast.(Inductive (ind, i, elab_params), Universe i)
   | Constructor _ -> assert false
   | Match _ -> assert false
   (* Extra rules *)
@@ -106,6 +109,13 @@ let rec elaborate reduce ctx (term : Kernel.Ast.term)
       | Not_found -> Error (`Err_free_identifier x)
     in
     Ok (Ast.Const x, ty)
+
+and check_elab_params reduce ctx params_ty params =
+  let check_elab_param reduce ctx (elab_params, params_ty) param =
+    let* elab_param = check_elab reduce ctx param (List.hd params_ty |> snd) in
+    Ok (elab_param :: elab_params, Ast.subst1_tele params_ty elab_param)
+  in
+  fold_results (check_elab_param reduce ctx) (Ok ([], params_ty)) params |> Result.map fst
 
 and check_elab reduce ctx term (s_ty : Ast.term)
     : (Ast.term, [> elaboration_error ]) result

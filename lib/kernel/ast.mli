@@ -10,7 +10,7 @@ type term =
   | Prod of fun_info
   | Unknown of int
   (* Inductives *)
-  | Inductive of Name.t * term list
+  | Inductive of Name.t * int * term list
   | Constructor of Name.t * term list * term list
   | Match of
       { ind : Name.t

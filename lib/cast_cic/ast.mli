@@ -70,3 +70,5 @@ val alpha_consistent : term -> term -> bool
 
 (** Substitute arguments in a telescope *)
 val subst_tele : ?acc:term list -> term list -> (Name.t * term) list -> term list
+
+val subst1_tele : (Name.t * term) list -> term -> (Name.t * term) list

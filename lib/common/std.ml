@@ -9,6 +9,18 @@ let rec map_results (f : 'a -> ('b, 'e) result) (xs : 'a list) : ('b list, 'e) r
     let* ys = map_results f xs in
     Ok (y :: ys)
 
+let rec fold_results
+    (f : 'a -> 'b -> ('a, 'e) result)
+    (z : ('a, 'e) result)
+    (xs : 'b list)
+    : ('a, 'e) result
+  =
+  match xs with
+  | [] -> z
+  | x :: xs ->
+    let* acc = z in
+    fold_results f (f acc x) xs
+
 module List = struct
   include List
 

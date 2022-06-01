@@ -10,7 +10,7 @@ type term =
   | Prod of fun_info
   | Unknown of int
   (* Inductives *)
-  | Inductive of Name.t * term list
+  | Inductive of Name.t * int * term list
   | Constructor of Name.t * term list * term list
   | Match of
       { ind : Name.t
@@ -67,7 +67,8 @@ module Pretty = struct
       then pf ppf "@[<hov 1>%a →@ %a@]" pp dom pp body
       else group_prod_args [] t |> pp_prod ppf
     | Unknown i -> pf ppf "?%i" i
-    | Inductive (ind, params) -> pf ppf "@[%a@ %a@]" Name.pp ind (list pp) params
+    | Inductive (ind, level, params) ->
+      pf ppf "@[%a{%a}@ %a@]" Name.pp ind int level (list pp) params
     | Constructor (ctor, params, args) ->
       pf ppf "@[%a@ %a@ %a@]" Name.pp ctor (list pp) params (list pp) args
     | Match { discr; z; pred; _ } ->
