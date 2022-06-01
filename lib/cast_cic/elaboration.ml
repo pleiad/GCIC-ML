@@ -95,7 +95,17 @@ let rec elaborate reduce ctx (term : Kernel.Ast.term)
     let params_ty = (Declarations.Ind.find ind).params in
     let* elab_params = check_elab_params reduce ctx params_ty params in
     Ok Ast.(Inductive (ind, i, elab_params), Universe i)
-  | Constructor _ -> assert false
+  | Constructor (ctor, pargs) ->
+    let cinfo = Declarations.Ctor.find ctor in
+    let* elab_pargs =
+      check_elab_params reduce ctx (List.append cinfo.params cinfo.args) pargs
+    in
+    let elab_params, elab_args = List.split_at (List.length cinfo.params) elab_pargs in
+    let level = 0 (* TODO *) in
+    let elab_ctor =
+      Ast.Constructor { ctor; level; params = elab_params; args = elab_args }
+    in
+    Ok (elab_ctor, Ast.Inductive (cinfo.ind, level, elab_params))
   | Match _ -> assert false
   (* Extra rules *)
   | Ascription (t, ty) ->

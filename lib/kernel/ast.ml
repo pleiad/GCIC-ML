@@ -11,7 +11,7 @@ type term =
   | Unknown of int
   (* Inductives *)
   | Inductive of Name.t * int * term list
-  | Constructor of Name.t * term list * term list
+  | Constructor of Name.t * term list
   | Match of
       { ind : Name.t
       ; discr : term
@@ -69,8 +69,7 @@ module Pretty = struct
     | Unknown i -> pf ppf "?%i" i
     | Inductive (ind, level, params) ->
       pf ppf "@[%a{%a}@ %a@]" Name.pp ind int level (list pp) params
-    | Constructor (ctor, params, args) ->
-      pf ppf "@[%a@ %a@ %a@]" Name.pp ctor (list pp) params (list pp) args
+    | Constructor (ctor, args) -> pf ppf "@[%a@ %a@]" Name.pp ctor (list pp) args
     | Match { discr; z; pred; _ } ->
       pf ppf "@[match %a as %a return@ %a with@]" pp discr Name.pp z pp pred
     | Ascription (t, ty) -> pf ppf "@[%a ::@ %a@]" pp t pp ty

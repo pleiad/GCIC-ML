@@ -11,7 +11,7 @@ type term =
   | Unknown of int
   (* Inductives *)
   | Inductive of Name.t * int * term list
-  | Constructor of Name.t * term list * term list
+  | Constructor of Name.t * term list
   | Match of
       { ind : Name.t
       ; discr : term

@@ -29,4 +29,13 @@ module List = struct
     | 0, xs -> xs
     | n, _ :: xs -> drop (n - 1) xs
     | _ -> xs
+
+  let split_at n xs =
+    let rec go acc n xs =
+      match n, xs with
+      | 0, xs -> List.rev acc, xs
+      | n, x :: xs -> go (x :: acc) (n - 1) xs
+      | _ -> List.rev acc, []
+    in
+    go [] n xs
 end

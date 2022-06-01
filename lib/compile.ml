@@ -13,9 +13,22 @@ let from_opt_name id = Option.value id ~default:Name.default
    A better approach would be to have a list of global declarations and treat free identifiers as just free.  *)
 let rec of_parsed_term (t : parsed_term) : term =
   match t with
-  | Var x -> if Name.Map.mem x !defined_ids then Const x else Var x
+  | Var x ->
+    (try
+       match Name.Map.find x !defined_ids with
+       | `Const -> Const x
+       | `Ind -> Inductive (x, 0, [])
+       | `Ctor -> Constructor (x, [])
+     with
+    | Not_found -> Var x)
   | Universe i -> Universe i
-  | App (t, u) -> App (of_parsed_term t, of_parsed_term u)
+  | App (t, u) ->
+    let t' = of_parsed_term t in
+    let u' = of_parsed_term u in
+    (match t' with
+    | Inductive (ind, i, params) -> Inductive (ind, i, List.append params [ u' ])
+    | Constructor (ctor, args) -> Constructor (ctor, List.append args [ u' ])
+    | _ -> App (t', u'))
   | Lambda (args, body) -> expand_lambda (fun fi -> Kernel.Ast.Lambda fi) args body
   | Prod (args, body) -> expand_lambda (fun fi -> Kernel.Ast.Prod fi) args body
   | Unknown i -> Unknown i

@@ -257,7 +257,7 @@ let rec subst_tele ?(acc = []) ts params =
   | t :: ts, (x, ty) :: params ->
     let params' = List.map (fun (y, ty) -> y, subst1 x t ty) params in
     subst_tele ~acc:(ty :: acc) ts params'
-  | _ -> assert false
+  | _ -> assert false (* Fails on partial application of inductives or constructors *)
 
 let subst1_tele params t =
   match params with
