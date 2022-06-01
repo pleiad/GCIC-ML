@@ -73,19 +73,34 @@ let rec infer_type (ctx : typing_context) (t : term) : (term, [> type_error ]) r
     let* _ = map_results (fun (t, ty) -> check_type ctx t ty) args_with_ty in
     let* _ = map_results (fun (t, ty) -> check_type ctx t ty) params_with_ty in
     Ok (Inductive (ctor_info.ind, level, params))
-  | Match { discr; z; pred; branches; _ } ->
+  | Match { discr; z; pred; f; branches; _ } ->
     let* ind, level, params = infer_ind ctx discr in
-    let pred_ctx = Name.Map.add z (Inductive (ind, level, params)) ctx in
-    let* j = infer_univ pred_ctx pred in
-    let _ = j, check_branch, branches in
-    (* TODO *)
+    let indt = Inductive (ind, level, params) in
+    let pred_ctx = Name.Map.add z indt ctx in
+    let* _ = infer_univ pred_ctx pred in
+    let branch_ctx = Name.Map.add f (Prod { id = z; dom = indt; body = pred }) ctx in
+    let* _ = map_results (check_branch branch_ctx z pred params level) branches in
     Ok (subst1 z discr pred)
 
-and check_branch (ctx : typing_context) (br : branch) (pred : term)
+and check_branch
+    (ctx : typing_context)
+    (z : Name.t)
+    (pred : term)
+    (params : term list)
+    (level : int)
+    (br : branch)
     : (unit, [> type_error ]) result
   =
-  let _ = ctx, br, pred in
-  Ok ()
+  let ctor_info = Declarations.Ctor.find br.ctor in
+  let all_tys = List.append ctor_info.params ctor_info.args in
+  let vars = List.map (fun x -> Var x) br.ids in
+  let all_terms = List.append params vars in
+  let arg_tys = subst_tele all_terms all_tys |> List.drop (List.length params) in
+  let args_ctx = List.combine br.ids arg_tys |> List.to_seq in
+  let branch_ctx = Name.Map.add_seq args_ctx ctx in
+  let ctor = Constructor { ctor = br.ctor; level; params; args = vars } in
+  let ty = subst1 z ctor pred in
+  check_type branch_ctx br.term ty
 
 and check_type (ctx : typing_context) (t : term) (ty : term)
     : (unit, [> type_error ]) result

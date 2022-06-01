@@ -27,10 +27,11 @@ type term =
       ; args : term list
       }
   | Match of
-      { ind : Name.t
+      { ind : Name.t (* TODO REMOVE *)
       ; discr : term
       ; z : Name.t
       ; pred : term
+      ; f : Name.t
       ; branches : branch list
       }
 
@@ -42,7 +43,6 @@ and fun_info =
 
 and branch =
   { ctor : Name.t
-  ; f : Name.t
   ; ids : Name.t list
   ; term : term
   }
