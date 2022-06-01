@@ -75,24 +75,48 @@ let execute_definition gdef : (cmd_result, execute_error) result =
     Declarations.Const.add_cache name { name; ty = elab_ty; term = elab_term };
     Ok (Definition (name, ty))
 
+(* TODO CHECK STUFF! *)
 let execute_inductive ind ctors : (cmd_result, execute_error) result =
   let open Declarations in
-  (* TODO *)
-  let check_ind_decl (ind : Ind.t) : (Ind.t, execute_error) result = Ok ind in
-  (* TODO *)
-  let check_ctor_decl (ctor : Ctor.t) : (Ctor.t, execute_error) result = Ok ctor in
-  let execute_ind_decl (ind : Ind.t) : unit =
+  let open Elaboration in
+  let open Reduction in
+  let empty_ctx = Name.Map.empty in
+  let execute_ind_decl (ind : Ind.t) =
+    let* elab_sort, _ = elab_univ reduce empty_ctx ind.sort in
+    let* elab_param_tys =
+      map_results (elab_univ reduce empty_ctx) (List.map snd ind.params)
+    in
+    let elab_params =
+      List.combine (List.map fst ind.params) (List.map fst elab_param_tys)
+    in
+    let cached_ind = { ind with sort = elab_sort; params = elab_params } in
     Ind.add ind.name ind;
-    string_of_cmd_result (Definition (ind.name, ind.sort)) |> print_endline
+    Ind.add_cache ind.name cached_ind;
+    string_of_cmd_result (Definition (ind.name, ind.sort)) |> print_endline;
+    Ok Unit
   in
-  let execute_ctor_decl (ctor : Ctor.t) : unit =
+  let execute_ctor_decl (ctor : Ctor.t) =
+    let* elab_arg_tys =
+      map_results (elab_univ reduce empty_ctx) (List.map snd ctor.args)
+    in
+    let elab_args = List.combine (List.map fst ctor.args) (List.map fst elab_arg_tys) in
+    let* elab_param_tys =
+      map_results (elab_univ reduce empty_ctx) (List.map snd ctor.params)
+    in
+    let elab_params =
+      List.combine (List.map fst ctor.params) (List.map fst elab_param_tys)
+    in
+    let* elab_ty, _ = elab_univ reduce empty_ctx ctor.ty in
+    let cached_ctor =
+      { ctor with args = elab_args; params = elab_params; ty = elab_ty }
+    in
     Ctor.add ctor.name ctor;
-    string_of_cmd_result (Definition (ctor.name, ctor.ty)) |> print_endline
+    Ctor.add_cache ctor.name cached_ctor;
+    string_of_cmd_result (Definition (ctor.name, ctor.ty)) |> print_endline;
+    Ok Unit
   in
-  let* ind' = check_ind_decl ind in
-  let* ctors' = map_results check_ctor_decl ctors in
-  execute_ind_decl ind';
-  List.iter execute_ctor_decl ctors';
+  let* _ = execute_ind_decl ind in
+  let* _ = map_results execute_ctor_decl ctors in
   Ok Unit
 
 exception LoadFail of execute_error
