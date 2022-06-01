@@ -3,6 +3,7 @@
 
 open Ast
 open Common.Id
+open Common.Std
 
 type reduction_error =
   [ `Err_not_enough_fuel
@@ -63,6 +64,7 @@ let is_germ_for_gte_level i : term -> bool = function
   | Prod { id = _; dom = Unknown (Universe j); body = Unknown (Universe k) } ->
     j >= Config.cast_universe_level i && j = k && j >= 0
   | Err (Universe j) -> j = i && Config.cast_universe_level i < 0
+  | Inductive _ as t -> is_germ i t
   | _ -> false
 
 (** Checks if a term corresponds to a type *)
@@ -136,10 +138,38 @@ let rec reduce1 (term, cont) : state =
   | Const x, _ -> (Declarations.Const.find x).term, cont
   (* Beta *)
   | Lambda { id; dom = _; body }, KApp_l u :: cont -> subst1 id u body, cont
+  (* Iota)
+  | Match { ind; discr = Constructor ci; z; pred; f; branches }, _ -> assert false
+  *)
   (* Prod-Unk *)
   | Unknown (Prod fi), _ -> Lambda { fi with body = Unknown fi.body }, cont
   (* Prod-Err *)
-  | Err (Prod fi), _ -> Lambda { fi with body = Err fi.body }, cont (* Down-Unk *)
+  | Err (Prod fi), _ -> Lambda { fi with body = Err fi.body }, cont
+  (* Match-Unk *)
+  | Match { discr = Unknown (Inductive _) as t; z; pred; _ }, _ ->
+    Unknown (subst1 z t pred), cont
+  (* Match-Err *)
+  | Match { discr = Err (Inductive _) as discr; z; pred; _ }, _ ->
+    Err (subst1 z discr pred), cont
+  (* Ind-Unk *)
+  | ( Cast
+        { source = Inductive (ind1, i1, _)
+        ; target = Inductive (ind2, i2, _) as target
+        ; term = Unknown (Inductive _)
+        }
+    , _ )
+  (* Is this necessary??? *)
+    when ind1 = ind2 && i1 = i2 -> Unknown target, cont
+  (* Ind-Err *)
+  | ( Cast
+        { source = Inductive (ind1, i1, _)
+        ; target = Inductive (ind2, i2, _) as target
+        ; term = Err (Inductive _)
+        }
+    , _ )
+  (* Is this necessary??? *)
+    when ind1 = ind2 && i1 = i2 -> Err target, cont
+  (* Down-Unk *)
   | ( Cast { source = Unknown (Universe i); target; term = Unknown (Unknown (Universe j)) }
     , _ )
     when i = j (* is this necessary? *) -> Unknown target, cont
@@ -169,7 +199,37 @@ let rec reduce1 (term, cont) : state =
     Lambda { id = y; dom = target_fi.dom; body = new_body }, cont
   (* Univ-Univ *)
   | Cast { source = Universe i; target = Universe j; term }, _ when i == j -> term, cont
-  (* Head-Err *)
+  (* Ind-Ind *)
+  | ( Cast
+        { source = Inductive (ind1, i1, source_params)
+        ; target = Inductive (ind2, i2, target_params)
+        ; term = Constructor ci
+        }
+    , _ )
+    when ind1 = ind2 && i1 = i2 ->
+    let cinfo = Declarations.Ctor.find ci.ctor in
+    let ind_params = cinfo.params in
+    let ctor_args = cinfo.args in
+    let n_params = List.length source_params in
+    let arg_ids = List.map fst ctor_args in
+    let arg_vars = List.map (fun x -> Var x) arg_ids in
+    let source_args =
+      subst_tele (source_params @ ci.args) (ind_params @ ctor_args) |> List.drop n_params
+    in
+    let target_args =
+      subst_tele (target_params @ arg_vars) (ind_params @ ctor_args) |> List.drop n_params
+    in
+    let target_args = List.combine arg_ids target_args in
+    let cast_arg (casted_args, tys) (source, term) =
+      let target = List.hd tys |> snd in
+      let casted_arg = Cast { source; term; target } in
+      casted_arg :: casted_args, subst1_tele tys casted_arg
+    in
+    let casted_args, _ =
+      List.fold_left cast_arg ([], target_args) (List.combine source_args ci.args)
+    in
+    Constructor { ci with params = target_params; args = casted_args }, cont
+    (* Head-Err *)
   | Cast { source; target; term = _ }, _
     when is_type source && is_type target && not (equal_head source target) ->
     Err target, cont
@@ -182,6 +242,18 @@ let rec reduce1 (term, cont) : state =
   | Cast { source = Prod _ as src; target = Unknown (Universe i) as tgt; term }, _
     when not (is_germ_for_gte_level i src) ->
     let middle = germ i HProd in
+    let inner_cast = Cast { source = src; target = middle; term } in
+    let outer_cast = Cast { source = middle; target = tgt; term = inner_cast } in
+    outer_cast, cont
+    (* Ind-Germ *)
+  | ( Cast
+        { source = Inductive (ind, _, _) as src
+        ; target = Unknown (Universe i) as tgt
+        ; term
+        }
+    , _ )
+    when not (is_germ_for_gte_level i src) ->
+    let middle = germ i (HInductive ind) in
     let inner_cast = Cast { source = src; target = middle; term } in
     let outer_cast = Cast { source = middle; target = tgt; term = inner_cast } in
     outer_cast, cont
