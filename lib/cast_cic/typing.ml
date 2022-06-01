@@ -60,14 +60,14 @@ let rec infer_type (ctx : typing_context) (t : term) : (term, [> type_error ]) r
     (try Ok (Declarations.Const.find x).ty with
     | Not_found -> Error (`Err_free_identifier x))
   | Inductive (ind, i, params) ->
-    let params_ty = (Declarations.Ind.find ind).params |> List.map snd in
+    let params_ty = (Declarations.Ind.find ind).params |> subst_tele params in
     let params_with_ty = List.combine params params_ty in
     let* _ = map_results (fun (t, ty) -> check_type ctx t ty) params_with_ty in
     Ok (Universe i)
   | Constructor { ctor; level; args; params } ->
     let ctor_info = Declarations.Ctor.find ctor in
-    let args_ty = List.map snd ctor_info.args in
-    let params_ty = List.map snd ctor_info.params in
+    let args_ty = subst_tele args ctor_info.args in
+    let params_ty = subst_tele params ctor_info.params in
     let args_with_ty = List.combine args args_ty in
     let params_with_ty = List.combine params params_ty in
     let* _ = map_results (fun (t, ty) -> check_type ctx t ty) args_with_ty in

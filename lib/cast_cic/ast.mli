@@ -42,6 +42,7 @@ and fun_info =
 
 and branch =
   { ctor : Name.t
+  ; f : Name.t
   ; ids : Name.t list
   ; term : term
   }
@@ -66,3 +67,6 @@ val alpha_equal : term -> term -> bool
 
 (** Checks if two terms are alpha consistent *)
 val alpha_consistent : term -> term -> bool
+
+(** Substitute arguments in a telescope *)
+val subst_tele : ?acc:term list -> term list -> (Name.t * term) list -> term list

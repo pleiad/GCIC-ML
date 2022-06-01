@@ -49,6 +49,7 @@ and fun_info =
 
 and branch =
   { ctor : Name.t
+  ; f : Name.t
   ; ids : Name.t list
   ; term : term
   }
@@ -249,3 +250,11 @@ let rec alpha_consistent t1 t2 : bool =
     && alpha_consistent m1.pred m2.pred
     && true (* TODO *)
   | _ -> false
+
+let rec subst_tele ?(acc = []) ts params =
+  match ts, params with
+  | [], [] -> List.rev acc
+  | t :: ts, (x, ty) :: params ->
+    let params' = List.map (fun (y, ty) -> y, subst1 x t ty) params in
+    subst_tele ~acc:(ty :: acc) ts params'
+  | _ -> assert false
