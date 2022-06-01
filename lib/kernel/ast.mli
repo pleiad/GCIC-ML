@@ -17,6 +17,7 @@ type term =
       ; discr : term
       ; z : Name.t
       ; pred : term
+      ; f : Name.t
       ; branches : branch list
       }
   (* Extras *)

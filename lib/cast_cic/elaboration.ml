@@ -14,7 +14,7 @@ type elaboration_error =
   | `Err_inconsistent of Kernel.Ast.term * Ast.term * Ast.term
   | `Err_constrained_universe of Kernel.Ast.term
   | `Err_constrained_product of Kernel.Ast.term
-  | `Err_impossible of Kernel.Ast.term
+  | `Err_constrained_inductive of Kernel.Ast.term
   ]
 
 let string_of_error err =
@@ -24,7 +24,7 @@ let string_of_error err =
     | `Err_inconsistent _ -> "inconsistent_terms"
     | `Err_constrained_universe _ -> "constrained_univ_elab"
     | `Err_constrained_product _ -> "constrained_prod_elab"
-    | `Err_impossible _ -> "impossible"
+    | `Err_constrained_inductive _ -> "constrained_ind_elab"
   in
   let message =
     match err with
@@ -32,7 +32,7 @@ let string_of_error err =
     | `Err_inconsistent (_term, _ty, _s_ty) -> "terms are not consistent"
     | `Err_constrained_universe _term -> "term does not elaborate to universe"
     | `Err_constrained_product _term -> "term does not elaborate to product"
-    | `Err_impossible _ -> "impossible state"
+    | `Err_constrained_inductive _term -> "term does not elaborate to inductive"
   in
   let term =
     match err with
@@ -40,7 +40,7 @@ let string_of_error err =
     | `Err_inconsistent (term, _, _) -> Kernel.Ast.to_string term
     | `Err_constrained_universe term -> Kernel.Ast.to_string term
     | `Err_constrained_product term -> Kernel.Ast.to_string term
-    | `Err_impossible term -> Kernel.Ast.to_string term
+    | `Err_constrained_inductive term -> Kernel.Ast.to_string term
   in
   Format.asprintf "[%s] elaboration of term (%s) failed: %s" error_code term message
 
@@ -106,7 +106,24 @@ let rec elaborate reduce ctx (term : Kernel.Ast.term)
       Ast.Constructor { ctor; level; params = elab_params; args = elab_args }
     in
     Ok (elab_ctor, Ast.Inductive (cinfo.ind, level, elab_params))
-  | Match _ -> assert false
+  | Match { ind; discr; z; pred; f; branches } ->
+    let* elab_discr, ind', level, params = elab_ind reduce ctx ind discr in
+    (* TODO Check that ind matches the one elaborated by elab_ind *)
+    assert (ind = ind');
+    let indt = Ast.Inductive (ind, level, params) in
+    let pred_ctx = Name.Map.add z indt ctx in
+    let* elab_pred, _ = elab_univ reduce pred_ctx pred in
+    let branch_ctx =
+      Name.Map.add f (Ast.Prod { id = z; dom = indt; body = elab_pred }) ctx
+    in
+    let* elab_branches =
+      map_results (check_elab_branch reduce branch_ctx z elab_pred params level) branches
+    in
+    let elab_match =
+      Ast.Match
+        { ind; discr = elab_discr; z; pred = elab_pred; f; branches = elab_branches }
+    in
+    Ok (elab_match, Ast.subst1 z elab_discr elab_pred)
   (* Extra rules *)
   | Ascription (t, ty) ->
     let* ty', _ = elab_univ reduce ctx ty in
@@ -119,6 +136,20 @@ let rec elaborate reduce ctx (term : Kernel.Ast.term)
       | Not_found -> Error (`Err_free_identifier x)
     in
     Ok (Ast.Const x, ty)
+
+and check_elab_branch reduce ctx z pred params level br =
+  let open Ast in
+  let ctor_info = Declarations.Ctor.find br.ctor in
+  let all_tys = List.append ctor_info.params ctor_info.args in
+  let vars = List.map (fun x -> Var x) br.ids in
+  let all_terms = List.append params vars in
+  let arg_tys = subst_tele all_terms all_tys |> List.drop (List.length params) in
+  let args_ctx = List.combine br.ids arg_tys |> List.to_seq in
+  let branch_ctx = Name.Map.add_seq args_ctx ctx in
+  let ctor = Constructor { ctor = br.ctor; level; params; args = vars } in
+  let ty = subst1 z ctor pred in
+  let* term = check_elab reduce branch_ctx br.term ty in
+  Ok { ctor = br.ctor; ids = br.ids; term }
 
 and check_elab_params reduce ctx params_ty params =
   let check_elab_param reduce ctx (elab_params, params_ty) param =
@@ -168,5 +199,22 @@ and elab_prod reduce ctx term
     | Prod fi as prod_germ ->
       Ok (Cast { source = ty; target = prod_germ; term = t }, fi.id, fi.dom, fi.body)
     (* if cast level is gt 0, then germ should never reach this*)
-    | _ -> Error (`Err_impossible term))
+    | _ -> assert false)
   | _ -> Error (`Err_constrained_product term)
+
+and elab_ind reduce ctx ind term
+    : (Ast.term * Name.t * int * Ast.term list, [> elaboration_error ]) result
+  =
+  let* t, ty = elaborate reduce ctx term in
+  let* v = reduce ty in
+  match v with
+  (* Inf-Ind *)
+  | Inductive (ind, i, params) -> Ok (t, ind, i, params)
+  (* Inf-Ind? *)
+  | Unknown (Universe i) ->
+    let ind_germ = Reduction.(germ i (HInductive ind)) in
+    (match ind_germ with
+    | Inductive (ind, i, params) ->
+      Ok (Ast.Cast { source = ty; target = ind_germ; term = t }, ind, i, params)
+    | _ -> assert false)
+  | _ -> Error (`Err_constrained_inductive term)
