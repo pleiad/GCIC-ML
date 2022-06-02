@@ -29,7 +29,13 @@ let string_of_error err =
   let message =
     match err with
     | `Err_free_identifier _x -> "free_id"
-    | `Err_inconsistent (_term, _ty, _s_ty) -> "terms are not consistent"
+    | `Err_inconsistent (_term, ty, s_ty) ->
+      Fmt.str
+        "elaborated type@ %a@ is not consistent with the expected type@ %a"
+        Ast.pp_term
+        ty
+        Ast.pp_term
+        s_ty
     | `Err_constrained_universe _term -> "term does not elaborate to universe"
     | `Err_constrained_product _term -> "term does not elaborate to product"
     | `Err_constrained_inductive _term -> "term does not elaborate to inductive"
@@ -156,14 +162,19 @@ and check_elab_params reduce ctx params_ty params =
     let* elab_param = check_elab reduce ctx param (List.hd params_ty |> snd) in
     Ok (elab_param :: elab_params, Ast.subst1_tele params_ty elab_param)
   in
-  fold_results (check_elab_param reduce ctx) (Ok ([], params_ty)) params |> Result.map fst
+  fold_results (check_elab_param reduce ctx) (Ok ([], params_ty)) params
+  |> Result.map (fun (l, _) -> List.rev l)
 
 and check_elab reduce ctx term (s_ty : Ast.term)
     : (Ast.term, [> elaboration_error ]) result
   =
   let* t', ty = elaborate reduce ctx term in
   if are_consistent reduce ty s_ty
-  then Ok (Ast.Cast { source = ty; target = s_ty; term = t' })
+  then
+    Ok
+      (if Ast.alpha_equal ty s_ty
+      then t'
+      else Ast.Cast { source = ty; target = s_ty; term = t' })
   else Error (`Err_inconsistent (term, ty, s_ty))
 
 (* Instead of returning the complete Universe type, we only return the level.

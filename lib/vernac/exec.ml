@@ -81,14 +81,17 @@ let execute_inductive ind ctors : (cmd_result, execute_error) result =
   let open Elaboration in
   let open Reduction in
   let empty_ctx = Name.Map.empty in
+  let elab_univ_param (elab_params, ctx) (id, param) =
+    let* elab_param, _ = elab_univ reduce ctx param in
+    Ok ((id, elab_param) :: elab_params, Name.Map.add id elab_param ctx)
+  in
+  let elab_univ_params ctx params =
+    let* elab_params, elab_ctx = fold_results elab_univ_param (Ok ([], ctx)) params in
+    Ok (List.rev elab_params, elab_ctx)
+  in
   let execute_ind_decl (ind : Ind.t) =
     let* elab_sort, _ = elab_univ reduce empty_ctx ind.sort in
-    let* elab_param_tys =
-      map_results (elab_univ reduce empty_ctx) (List.map snd ind.params)
-    in
-    let elab_params =
-      List.combine (List.map fst ind.params) (List.map fst elab_param_tys)
-    in
+    let* elab_params, _ = elab_univ_params empty_ctx ind.params in
     let cached_ind = { ind with sort = elab_sort; params = elab_params } in
     Ind.add ind.name ind;
     Ind.add_cache ind.name cached_ind;
@@ -96,16 +99,8 @@ let execute_inductive ind ctors : (cmd_result, execute_error) result =
     Ok Unit
   in
   let execute_ctor_decl (ctor : Ctor.t) =
-    let* elab_arg_tys =
-      map_results (elab_univ reduce empty_ctx) (List.map snd ctor.args)
-    in
-    let elab_args = List.combine (List.map fst ctor.args) (List.map fst elab_arg_tys) in
-    let* elab_param_tys =
-      map_results (elab_univ reduce empty_ctx) (List.map snd ctor.params)
-    in
-    let elab_params =
-      List.combine (List.map fst ctor.params) (List.map fst elab_param_tys)
-    in
+    let* elab_params, elab_ctx = elab_univ_params empty_ctx ctor.params in
+    let* elab_args, _ = elab_univ_params elab_ctx ctor.args in
     let* elab_ty, _ = elab_univ reduce empty_ctx ctor.ty in
     let cached_ctor =
       { ctor with args = elab_args; params = elab_params; ty = elab_ty }

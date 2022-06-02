@@ -45,7 +45,7 @@ module Pretty = struct
 
   (** Returns if a term requires a parenthesis for unambiguation *)
   let need_parens = function
-    | Lambda _ | Prod _ | Ascription _ -> true
+    | Lambda _ | Prod _ | Ascription _ | Inductive _ | Constructor _ | Match _ -> true
     | _ -> false
 
   let rec group_lambda_args acc = function
@@ -68,11 +68,20 @@ module Pretty = struct
       then pf ppf "@[<hov 1>%a →@ %a@]" pp dom pp body
       else group_prod_args [] t |> pp_prod ppf
     | Unknown i -> pf ppf "?%i" i
-    | Inductive (ind, level, params) ->
-      pf ppf "@[%a{%a}@ %a@]" Name.pp ind int level (list pp) params
-    | Constructor (ctor, args) -> pf ppf "@[%a@ %a@]" Name.pp ctor (list pp) args
+    | Inductive (ind, _, params) ->
+      pf ppf "@[%a@ %a@]" Name.pp ind (list maybe_parens) params
+    | Constructor (ctor, args) ->
+      pf ppf "@[%a@ %a@]" Name.pp ctor (list maybe_parens) args
     | Match { discr; z; pred; _ } ->
-      pf ppf "@[match %a as %a return@ %a with@]" pp discr Name.pp z pp pred
+      pf
+        ppf
+        "@[match %a as %a return@ %a with@]"
+        maybe_parens
+        discr
+        Name.pp
+        z
+        maybe_parens
+        pred
     | Ascription (t, ty) -> pf ppf "@[%a ::@ %a@]" pp t pp ty
     | UnknownT i -> pf ppf "?▢%i" i
     | Const x -> pf ppf "%a" Name.pp x

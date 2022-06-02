@@ -16,7 +16,8 @@ type type_error =
   ]
 
 let string_of_error = function
-  | `Err_not_convertible (_t1, _t2) -> "not convertible"
+  | `Err_not_convertible (t1, t2) ->
+    Fmt.str "not convertible: %a, %a" Ast.pp_term t1 Ast.pp_term t2
   | `Err_free_identifier _x -> "free identifier"
   | `Err_not_product (_t1, _t2) -> "not a product"
   | `Err_not_universe (_t1, _t2) -> "not a universe"
@@ -66,8 +67,8 @@ let rec infer_type (ctx : typing_context) (t : term) : (term, [> type_error ]) r
     Ok (Universe i)
   | Constructor { ctor; level; args; params } ->
     let ctor_info = Declarations.Ctor.find ctor in
-    let args_ty = subst_tele args ctor_info.args in
-    let params_ty = subst_tele params ctor_info.params in
+    let pargs_ty = subst_tele (params @ args) (ctor_info.params @ ctor_info.args) in
+    let params_ty, args_ty = List.split_at (List.length params) pargs_ty in
     let args_with_ty = List.combine args args_ty in
     let params_with_ty = List.combine params params_ty in
     let* _ = map_results (fun (t, ty) -> check_type ctx t ty) args_with_ty in
