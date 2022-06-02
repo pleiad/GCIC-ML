@@ -44,14 +44,16 @@
 %token <int> INT
 %token <string> ID
 // %token <string> FILENAME
-%token COLON DOT COMMA ARROW EQUAL DOUBLE_QUOTE VBAR
+%token COLON DOT COMMA ARROW BIG_ARROW EQUAL DOUBLE_QUOTE VBAR AT
 %token LPAREN RPAREN
 %token KWD_UNIVERSE KWD_LAMBDA KWD_UNKNOWN KWD_UNKNOWN_T KWD_FORALL
 %token KWD_LET KWD_IN
-%token VERNAC_CHECK VERNAC_EVAL VERNAC_ELABORATE VERNAC_DEFINITION VERNAC_SET VERNAC_INDUCTIVE
-%token VERNAC_FLAG_VARIANT VERNAC_FLAG_FUEL 
+%token KWD_MATCH KWD_AS KWD_RETURN KWD_WITH KWD_END
+%token VERNAC_CHECK VERNAC_EVAL VERNAC_ELABORATE VERNAC_LOAD
+%token VERNAC_DEFINITION VERNAC_INDUCTIVE  
+%token VERNAC_SET VERNAC_FLAG_VARIANT VERNAC_FLAG_FUEL 
 %token VERNAC_VARIANT_G VERNAC_VARIANT_S VERNAC_VARIANT_N
-%token VERNAC_LOAD VERNAC_SEPARATOR
+%token VERNAC_SEPARATOR
 %token EOF
 
 /* This reduces the number of error states.
@@ -145,7 +147,15 @@ term :
 | KWD_FORALL; args=args; COMMA; body=term                         { Prod (args, body) }
 | dom=fact; ARROW; body=term                                      { Prod ([(None, dom)], body) }
 | KWD_LET; id=id; COLON; ty=term; EQUAL; t1=term; KWD_IN; t2=term { LetIn (id, ty, t1, t2) }
-| t=fact                                                          { t } 
+// match@list nil as z return P with <branch_decls>
+| KWD_MATCH; AT; ind=id; discr=top; KWD_AS; z=id; 
+  KWD_RETURN; pred=top; KWD_WITH; branches=list(branch_decl); KWD_END
+  { Match {ind; discr; z; pred; branches} }
+| t=fact  
+                                                        { t } 
+
+branch_decl : 
+| VBAR; ctor=id; ids=list(id); BIG_ARROW; body=top { { ctor; ids; body} }
 
 fact :
 | t=fact; u=atom                                       { App (t, u) }

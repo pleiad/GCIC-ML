@@ -32,6 +32,14 @@ let rec of_parsed_term (t : parsed_term) : term =
   | Lambda (args, body) -> expand_lambda (fun fi -> Kernel.Ast.Lambda fi) args body
   | Prod (args, body) -> expand_lambda (fun fi -> Kernel.Ast.Prod fi) args body
   | Unknown i -> Unknown i
+  | Match mi ->
+    let discr = of_parsed_term mi.discr in
+    let pred = of_parsed_term mi.pred in
+    let of_parsed_branch (branch : Parsing.Ast.branch) : Kernel.Ast.branch = 
+      { ctor = branch.ctor; ids = branch.ids; term = of_parsed_term branch.body } in
+    let branches = List.map of_parsed_branch mi.branches in
+    Match
+      { mi with discr; pred; branches; f = Name.of_string ("rec_" ^ Name.to_string mi.ind) }
   | LetIn (id, ty, t1, t2) ->
     let f = Parsing.Ast.Lambda ([ Some id, ty ], t2) in
     of_parsed_term (App (f, t1))
