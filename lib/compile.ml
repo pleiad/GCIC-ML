@@ -35,11 +35,18 @@ let rec of_parsed_term (t : parsed_term) : term =
   | Match mi ->
     let discr = of_parsed_term mi.discr in
     let pred = of_parsed_term mi.pred in
-    let of_parsed_branch (branch : Parsing.Ast.branch) : Kernel.Ast.branch = 
-      { ctor = branch.ctor; ids = branch.ids; term = of_parsed_term branch.body } in
+    let of_parsed_branch (branch : Parsing.Ast.branch) : Kernel.Ast.branch =
+      { ctor = branch.ctor; ids = branch.ids; term = of_parsed_term branch.body }
+    in
     let branches = List.map of_parsed_branch mi.branches in
     Match
-      { mi with discr; pred; branches; f = Name.of_string ("rec_" ^ Name.to_string mi.ind) }
+      { discr
+      ; pred
+      ; branches
+      ; ind = mi.ind
+      ; z = mi.z
+      ; f = Name.of_string ("rec_" ^ Name.to_string mi.ind)
+      }
   | LetIn (id, ty, t1, t2) ->
     let f = Parsing.Ast.Lambda ([ Some id, ty ], t2) in
     of_parsed_term (App (f, t1))
@@ -83,7 +90,9 @@ let of_parsed_command : parsed_term Command.t -> term Command.t = function
   | Define d -> Define (of_parsed_const_decl d)
   | Load filename -> Load filename
   | Inductive (ind, ctors) ->
-    Inductive (of_parsed_ind_decl ind, List.map of_parsed_ctor_decl ctors)
+    let ind' = of_parsed_ind_decl ind in
+    let ctors' = List.map of_parsed_ctor_decl ctors in
+    Inductive (ind', ctors')
 
 let parse_file_content str =
   match Parsing.Lex_and_parse.parse_program str with
