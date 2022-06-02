@@ -124,6 +124,8 @@ type continuation =
   | KCast_target of (term * term)
   (* Reducing the term of a cast. The source and target are stored in the state *)
   | KCast_term of (term * term)
+  (* Reducing the discriminee of a match. *)
+  | KMatch_discr of (Name.t * Name.t * term * Name.t * branch list)
 
 (* Type alias *)
 type state = term * continuation list
@@ -138,9 +140,24 @@ let rec reduce1 (term, cont) : state =
   | Const x, _ -> (Declarations.Const.find x).term, cont
   (* Beta *)
   | Lambda { id; dom = _; body }, KApp_l u :: cont -> subst1 id u body, cont
-  (* Iota)
-  | Match { ind; discr = Constructor ci; z; pred; f; branches }, _ -> assert false
-  *)
+  (* Iota *)
+  | Match ({ ind; discr = Constructor ci; f; branches; _ } as mi), _ ->
+    (* Might raise Not_found *)
+    let branch = List.find (fun br -> br.ctor = ci.ctor) branches in
+    let f_subst =
+      let new_id = new_identifier () in
+      Lambda
+        { id = new_id
+        ; dom = Inductive (ind, ci.level, ci.params)
+        ; body = Match { mi with discr = Var new_id }
+        }
+    in
+    let body_w_f = subst1 f f_subst branch.term in
+    let zipped_args = List.combine branch.ids ci.args in
+    let body_w_args =
+      List.fold_left (fun acc (id, arg) -> subst1 id arg acc) body_w_f zipped_args
+    in
+    body_w_args, cont
   (* Prod-Unk *)
   | Unknown (Prod fi), _ -> Lambda { fi with body = Unknown fi.body }, cont
   (* Prod-Err *)
@@ -288,10 +305,14 @@ let rec reduce1 (term, cont) : state =
     term, KCast_term (source, target) :: cont
   | term, KCast_term (source, target) :: cont when is_canonical term ->
     Cast { source; target; term }, cont
+  | discr, KMatch_discr (ind, z, pred, f, branches) :: cont when is_canonical discr ->
+    Match { ind; discr; z; pred; f; branches }, cont
   | App (t, u), _ -> t, KApp_l u :: cont
   | Unknown t, _ -> t, KUnknown :: cont
   | Err t, _ -> t, KErr :: cont
   | Cast { source; target; term }, _ -> target, KCast_target (source, term) :: cont
+  | Match { ind; discr; z; pred; f; branches }, _ ->
+    discr, KMatch_discr (ind, z, pred, f, branches) :: cont
   | _, _ -> raise (Stuck_term term)
 
 (** Transitive clousure of reduce1 with fuel *)
@@ -318,6 +339,8 @@ let fill_hole1 term = function
   | KCast_source (target, term') -> Cast { source = term; target; term = term' }
   | KCast_target (source, term') -> Cast { source; target = term; term = term' }
   | KCast_term (source, target) -> Cast { source; target; term }
+  | KMatch_discr (ind, z, pred, f, branches) ->
+    Match { ind; discr = term; z; pred; f; branches }
 
 (** Fills a continuation with the given term *)
 let fill_hole term = List.fold_left fill_hole1 term
