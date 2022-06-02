@@ -1,4 +1,15 @@
-inductive list (a : □0) : □0 =
-| nil : list a
-| cons : a -> list a -> list a
+inductive bool : Type0 = 
+| false : bool 
+| true : bool
 ;;
+
+inductive list (a : Type0) : Type0 =
+| nil : list a
+| cons (hd : a) (tl : list a) : list a
+;;
+
+def tl (a : Type0) (ls : list a) : list a = 
+match@list ls as z return list a with 
+| nil => nil a
+| cons x xs => xs 
+end;;

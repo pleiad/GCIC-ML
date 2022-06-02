@@ -146,13 +146,14 @@ let rec elaborate reduce ctx (term : Kernel.Ast.term)
 and check_elab_branch reduce ctx z pred params level br =
   let open Ast in
   let ctor_info = Declarations.Ctor.find br.ctor in
-  let all_tys = List.append ctor_info.params ctor_info.args in
-  let vars = List.map (fun x -> Var x) br.ids in
-  let all_terms = List.append params vars in
-  let arg_tys = subst_tele all_terms all_tys |> List.drop (List.length params) in
+  let branch_vars = List.map (fun x -> Var x) br.ids in
+  let arg_tys =
+    subst_tele (params @ branch_vars) (ctor_info.params @ ctor_info.args)
+    |> List.drop (List.length params)
+  in
   let args_ctx = List.combine br.ids arg_tys |> List.to_seq in
   let branch_ctx = Name.Map.add_seq args_ctx ctx in
-  let ctor = Constructor { ctor = br.ctor; level; params; args = vars } in
+  let ctor = Constructor { ctor = br.ctor; level; params; args = branch_vars } in
   let ty = subst1 z ctor pred in
   let* term = check_elab reduce branch_ctx br.term ty in
   Ok { ctor = br.ctor; ids = br.ids; term }
