@@ -104,10 +104,11 @@ let rec elaborate reduce ctx (term : Kernel.Ast.term)
   | Constructor (ctor, pargs) ->
     let cinfo = Declarations.Ctor.find ctor in
     let* elab_pargs =
-      check_elab_params reduce ctx (List.append cinfo.params cinfo.args) pargs
+      check_elab_params reduce ctx (cinfo.params @ cinfo.args) pargs
     in
     let elab_params, elab_args = List.split_at (List.length cinfo.params) elab_pargs in
-    let level = 0 (* TODO *) in
+    (* FIXME: Get proper level (probably from inductive declaration) *)
+    let level = 0 in
     let elab_ctor =
       Ast.Constructor { ctor; level; params = elab_params; args = elab_args }
     in

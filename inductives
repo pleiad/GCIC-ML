@@ -3,6 +3,17 @@ inductive bool : Type0 =
 | true : bool
 ;;
 
+def if (a : Type1) (b : bool) (tb fb : a) : a =
+match@bool b as z return a with 
+| false => fb 
+| true => tb 
+end;;
+
+inductive nat : Type0 =
+| zero : nat 
+| succ (n : nat) : nat
+;;
+
 inductive list (a : Type0) : Type0 =
 | nil : list a
 | cons (hd : a) (tl : list a) : list a
@@ -12,4 +23,16 @@ def tl (a : Type0) (ls : list a) : list a =
 match@list ls as z return list a with 
 | nil => nil a
 | cons x xs => xs 
+end;;
+
+def is_empty (a : Type0) (ls : list a) : bool = 
+match@list ls as z return bool with 
+| nil => true 
+| cons x xs => false 
+end;;
+
+def almost_safe_head (a : Type0) (ls : list a) : if Type0 (is_empty a ls) nat a = 
+  match@list ls as z return if Type0 (is_empty a ls) nat a with 
+  | nil => zero 
+  | cons x xs => x 
 end;;

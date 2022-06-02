@@ -75,6 +75,7 @@ let rec infer_type (ctx : typing_context) (t : term) : (term, [> type_error ]) r
     let* _ = map_results (fun (t, ty) -> check_type ctx t ty) params_with_ty in
     Ok (Inductive (ctor_info.ind, level, params))
   | Match { discr; z; pred; f; branches; _ } ->
+    (* TODO: Missing exhaustiveness check *)
     let* ind, level, params = infer_ind ctx discr in
     let indt = Inductive (ind, level, params) in
     let pred_ctx = Name.Map.add z indt ctx in
@@ -83,15 +84,7 @@ let rec infer_type (ctx : typing_context) (t : term) : (term, [> type_error ]) r
     let* _ = map_results (check_branch branch_ctx z pred params level) branches in
     Ok (subst1 z discr pred)
 
-and check_branch
-    (ctx : typing_context)
-    (z : Name.t)
-    (pred : term)
-    (params : term list)
-    (level : int)
-    (br : branch)
-    : (unit, [> type_error ]) result
-  =
+and check_branch ctx z pred params level br =
   let ctor_info = Declarations.Ctor.find br.ctor in
   let all_tys = List.append ctor_info.params ctor_info.args in
   let vars = List.map (fun x -> Var x) br.ids in

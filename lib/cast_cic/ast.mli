@@ -27,7 +27,7 @@ type term =
       ; args : term list
       }
   | Match of
-      { ind : Name.t (* TODO REMOVE *)
+      { ind : Name.t
       ; discr : term
       ; z : Name.t
       ; pred : term

@@ -1,7 +1,5 @@
 (** This module specifies the elaboration from GCIC to CastCIC *)
 
-(* TODO: This module should go somewhere else, but idk where *)
-
 open Common.Id
 
 (** An error originating from elaboration  *)

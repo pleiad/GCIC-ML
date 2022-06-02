@@ -205,7 +205,7 @@ let rec alpha_equal t1 t2 =
     && List.equal alpha_equal c1.args c2.args
     && List.equal alpha_equal c1.params c2.params
   | Match m1, Match m2 ->
-    let alpha_equal_branch b1 b2 = b1.ctor = b2.ctor && true (* TODO *) in
+    let alpha_equal_branch b1 b2 = b1.ctor = b2.ctor && true (* TODO : Check body *) in
     m1.ind = m2.ind
     && alpha_equal m1.discr m2.discr
     && m1.z = m2.z
@@ -247,7 +247,7 @@ let rec alpha_consistent t1 t2 : bool =
     alpha_consistent m1.discr m2.discr
     && m1.ind = m2.ind
     && alpha_consistent m1.pred m2.pred
-    && true (* TODO *)
+    && true (* TODO: Check branches' bodies *)
   | _ -> false
 
 let rec subst_tele ?(acc = []) ts params =
