@@ -27,8 +27,8 @@
 */
 %token <int> INT
 %token <string> ID
-// %token <string> FILENAME
-%token COLON DOT COMMA ARROW EQUAL DOUBLE_QUOTE
+%token <string> FILENAME
+%token COLON DOT COMMA ARROW EQUAL // DOUBLE_QUOTE
 %token LPAREN RPAREN
 %token KWD_UNIVERSE KWD_LAMBDA KWD_UNKNOWN KWD_UNKNOWN_T KWD_FORALL
 %token KWD_LET KWD_IN
@@ -81,7 +81,8 @@ command :
 | VERNAC_DEFINITION; id=id; args=list(arg); COLON; ty=term; EQUAL ; body=top  
  { mk_definition id (List.flatten args) ty body }
 // load "filename"
-| VERNAC_LOAD; DOUBLE_QUOTE; filename=ID; DOUBLE_QUOTE  { Load filename }
+| VERNAC_LOAD; filename=FILENAME  { Load filename }
+(* | VERNAC_LOAD; DOUBLE_QUOTE; filename=ID; DOUBLE_QUOTE  { Load filename } *)
 
 flag :
 | VERNAC_FLAG_VARIANT; var=variant { Variant var }

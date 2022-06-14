@@ -22,6 +22,12 @@ let unknown = [%sedlex.regexp? '?']
 let unknownT = [%sedlex.regexp? "?T"]
 let arrow = [%sedlex.regexp? "->" | 0x2192]
 
+let filebuf = Buffer.create 64
+let get_and_flush_filename () =
+  let filename = Buffer.contents filebuf in
+  Buffer.clear filebuf ;
+  filename
+
 let rec token lexbuf =
   match%sedlex lexbuf with
   | universe -> KWD_UNIVERSE
@@ -53,11 +59,21 @@ let rec token lexbuf =
   | ':' -> COLON
   | '.' -> DOT
   | ',' -> COMMA
-  | '"' -> DOUBLE_QUOTE
+  (* | '"' -> DOUBLE_QUOTE *)
+  | '"' -> FILENAME (filename lexbuf)
   | whitespace -> token lexbuf
   | newline ->
     Sedlexing.new_line lexbuf;
     token lexbuf
   | eof -> EOF
   | any -> raise (SyntaxError ("Unexpected char: " ^ lexeme lexbuf))
+  | _ -> assert false
+
+and filename lexbuf =
+  match%sedlex lexbuf with
+  | '"' | eof -> get_and_flush_filename ()
+  | newline ->
+    Sedlexing.new_line lexbuf;
+    filename lexbuf
+  | any -> Buffer.add_string filebuf (lexeme lexbuf) ; filename lexbuf
   | _ -> assert false
