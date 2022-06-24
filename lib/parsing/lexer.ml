@@ -21,12 +21,12 @@ let forall = [%sedlex.regexp? "forall" | 0x2200]
 let unknown = [%sedlex.regexp? '?']
 let unknownT = [%sedlex.regexp? "?T"]
 let arrow = [%sedlex.regexp? "->" | 0x2192]
+let stringbuf = Buffer.create 64
 
-let filebuf = Buffer.create 64
-let get_and_flush_filename () =
-  let filename = Buffer.contents filebuf in
-  Buffer.clear filebuf ;
-  filename
+let get_and_flush buffer =
+  let s = Buffer.contents buffer in
+  Buffer.clear buffer;
+  s
 
 let rec token lexbuf =
   match%sedlex lexbuf with
@@ -50,7 +50,6 @@ let rec token lexbuf =
   | "N" -> VERNAC_VARIANT_N
   | "S" -> VERNAC_VARIANT_S
   | id -> ID (lexeme lexbuf)
-  (* | filename -> FILENAME (lexeme lexbuf) *)
   | number -> INT (int_of_string (lexeme lexbuf))
   | arrow -> ARROW
   | '(' -> LPAREN
@@ -59,8 +58,7 @@ let rec token lexbuf =
   | ':' -> COLON
   | '.' -> DOT
   | ',' -> COMMA
-  (* | '"' -> DOUBLE_QUOTE *)
-  | '"' -> FILENAME (filename lexbuf)
+  | '"' -> FILENAME (string lexbuf stringbuf)
   | whitespace -> token lexbuf
   | newline ->
     Sedlexing.new_line lexbuf;
@@ -69,11 +67,13 @@ let rec token lexbuf =
   | any -> raise (SyntaxError ("Unexpected char: " ^ lexeme lexbuf))
   | _ -> assert false
 
-and filename lexbuf =
+and string lexbuf stringbuf =
   match%sedlex lexbuf with
-  | '"' | eof -> get_and_flush_filename ()
+  | '"' | eof -> get_and_flush stringbuf
   | newline ->
     Sedlexing.new_line lexbuf;
-    filename lexbuf
-  | any -> Buffer.add_string filebuf (lexeme lexbuf) ; filename lexbuf
+    string lexbuf stringbuf
+  | any ->
+    Buffer.add_string stringbuf (lexeme lexbuf);
+    string lexbuf stringbuf
   | _ -> assert false
