@@ -32,7 +32,7 @@ match@list ls as z return bool with
 end;;
 
 def almost_safe_head (a : Type0) (ls : list a) : if Type0 (is_empty a ls) nat a = 
-  match@list ls as z return if Type0 (is_empty a ls) nat a with 
-  | nil nat => zero 
+  match@list ls as z return if Type0 (is_empty a z) nat a with 
+  | nil a => zero 
   | cons a x xs => x 
 end;;

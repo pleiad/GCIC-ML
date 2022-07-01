@@ -84,15 +84,19 @@ let rec infer_type (ctx : typing_context) (t : term) : (term, [> type_error ]) r
     let* _ = map_results (check_branch branch_ctx z pred params level) branches in
     Ok (subst1 z discr pred)
 
+(*
+    This function assumes that the constructor in the branch includes all 
+    parameters and arguments EXPLICITLY.
+*)
 and check_branch ctx z pred params level br =
   let ctor_info = Declarations.Ctor.find br.ctor in
-  let all_tys = ctor_info.params @ ctor_info.args in
-  let vars = List.map (fun x -> Var x) br.ids in
-  let all_terms = vars in
-  let arg_tys = subst_tele all_terms all_tys in
+  let branch_vars = List.map (fun x -> Var x) br.ids in
+  let arg_tys = subst_tele branch_vars (ctor_info.params @ ctor_info.args) in
   let args_ctx = List.combine br.ids arg_tys |> List.to_seq in
   let branch_ctx = Name.Map.add_seq args_ctx ctx in
-  let ctor = Constructor { ctor = br.ctor; level; params; args = vars } in
+  (* we need to extract the args separate from the params *)
+  let br_args = List.drop (List.length params) branch_vars in
+  let ctor = Constructor { ctor = br.ctor; level; params; args = br_args } in
   let ty = subst1 z ctor pred in
   check_type branch_ctx br.term ty
 

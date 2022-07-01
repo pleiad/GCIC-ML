@@ -101,6 +101,7 @@ let rec elaborate reduce ctx (term : Kernel.Ast.term)
     let params_ty = (Declarations.Ind.find ind).params in
     let* elab_params = check_elab_params reduce ctx params_ty params in
     Ok Ast.(Inductive (ind, i, elab_params), Universe i)
+  (* CONS *)
   | Constructor (ctor, pargs) ->
     let cinfo = Declarations.Ctor.find ctor in
     let* elab_pargs = check_elab_params reduce ctx (cinfo.params @ cinfo.args) pargs in
@@ -111,18 +112,19 @@ let rec elaborate reduce ctx (term : Kernel.Ast.term)
       Ast.Constructor { ctor; level; params = elab_params; args = elab_args }
     in
     Ok (elab_ctor, Ast.Inductive (cinfo.ind, level, elab_params))
+  (* FIX *)
   | Match { ind; discr; z; pred; f; branches } ->
     let* elab_discr, ind', level, params = elab_ind reduce ctx ind discr in
     (* TODO Check that ind matches the one elaborated by elab_ind *)
     assert (ind = ind');
-    let indt = Ast.Inductive (ind, level, params) in
-    let pred_ctx = Name.Map.add z indt ctx in
+    let elab_ind = Ast.Inductive (ind, level, params) in
+    let pred_ctx = Name.Map.add z elab_ind ctx in
     let* elab_pred, _ = elab_univ reduce pred_ctx pred in
-    let branch_ctx =
-      Name.Map.add f (Ast.Prod { id = z; dom = indt; body = elab_pred }) ctx
+    let ctx_w_f =
+      Name.Map.add f (Ast.Prod { id = z; dom = elab_ind; body = elab_pred }) ctx
     in
     let* elab_branches =
-      map_results (check_elab_branch reduce branch_ctx z elab_pred params level) branches
+      map_results (check_elab_branch reduce ctx_w_f z elab_pred params level) branches
     in
     let elab_match =
       Ast.Match
@@ -153,8 +155,11 @@ and check_elab_branch reduce ctx z pred params level br =
   let arg_tys = subst_tele branch_vars (ctor_info.params @ ctor_info.args) in
   let args_ctx = List.combine br.ids arg_tys |> List.to_seq in
   let branch_ctx_w_f = Name.Map.add_seq args_ctx ctx in
-  let ctor = Constructor { ctor = br.ctor; level; params; args = branch_vars } in
+  (* we need to extract the args separate from the params *)
+  let br_args = List.drop (List.length params) branch_vars in
+  let ctor = Constructor { ctor = br.ctor; level; params; args = br_args } in
   let ty = subst1 z ctor pred in
+  (* let ty = subst1  z ctor (Name.Map.add z ctor ctx) pred in *)
   let* term = check_elab reduce branch_ctx_w_f br.term ty in
   Ok { ctor = br.ctor; ids = br.ids; term }
 
