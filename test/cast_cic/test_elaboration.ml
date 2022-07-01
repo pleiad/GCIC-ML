@@ -46,10 +46,7 @@ let tests_base_elaborations () =
     (elaborate empty_ctx (Prod { id; dom = Unknown 1; body = Var id }) |> Result.get_ok);
   Alcotest.(check (pair Testable.term Testable.term))
     "app without unknown"
-    ( App
-        ( Lambda { id; dom = Universe 1; body = Var id }
-        , Universe 0)
-    , Universe 1 )
+    (App (Lambda { id; dom = Universe 1; body = Var id }, Universe 0), Universe 1)
     (elaborate empty_ctx (App (idf, Universe 0)) |> Result.get_ok);
   Alcotest.(check (pair Testable.term Testable.term))
     "app with unknown"
