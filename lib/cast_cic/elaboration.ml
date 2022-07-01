@@ -103,9 +103,7 @@ let rec elaborate reduce ctx (term : Kernel.Ast.term)
     Ok Ast.(Inductive (ind, i, elab_params), Universe i)
   | Constructor (ctor, pargs) ->
     let cinfo = Declarations.Ctor.find ctor in
-    let* elab_pargs =
-      check_elab_params reduce ctx (cinfo.params @ cinfo.args) pargs
-    in
+    let* elab_pargs = check_elab_params reduce ctx (cinfo.params @ cinfo.args) pargs in
     let elab_params, elab_args = List.split_at (List.length cinfo.params) elab_pargs in
     (* FIXME: Get proper level (probably from inductive declaration) *)
     let level = 0 in
@@ -144,19 +142,20 @@ let rec elaborate reduce ctx (term : Kernel.Ast.term)
     in
     Ok (Ast.Const x, ty)
 
+(*
+    This function assumes that the constructor in the branch includes all 
+    parameters and arguments EXPLICITLY.
+*)
 and check_elab_branch reduce ctx z pred params level br =
   let open Ast in
   let ctor_info = Declarations.Ctor.find br.ctor in
   let branch_vars = List.map (fun x -> Var x) br.ids in
-  let arg_tys =
-    subst_tele (params @ branch_vars) (ctor_info.params @ ctor_info.args)
-    |> List.drop (List.length params)
-  in
+  let arg_tys = subst_tele branch_vars (ctor_info.params @ ctor_info.args) in
   let args_ctx = List.combine br.ids arg_tys |> List.to_seq in
-  let branch_ctx = Name.Map.add_seq args_ctx ctx in
+  let branch_ctx_w_f = Name.Map.add_seq args_ctx ctx in
   let ctor = Constructor { ctor = br.ctor; level; params; args = branch_vars } in
   let ty = subst1 z ctor pred in
-  let* term = check_elab reduce branch_ctx br.term ty in
+  let* term = check_elab reduce branch_ctx_w_f br.term ty in
   Ok { ctor = br.ctor; ids = br.ids; term }
 
 and check_elab_params reduce ctx params_ty params =
@@ -167,9 +166,7 @@ and check_elab_params reduce ctx params_ty params =
   fold_results (check_elab_param reduce ctx) (Ok ([], params_ty)) params
   |> Result.map (fun (l, _) -> List.rev l)
 
-and check_elab reduce ctx term (s_ty : Ast.term)
-    : (Ast.term, [> elaboration_error ]) result
-  =
+and check_elab reduce ctx term (s_ty : Ast.term) =
   let* t', ty = elaborate reduce ctx term in
   if are_consistent reduce ty s_ty
   then
@@ -215,6 +212,10 @@ and elab_prod reduce ctx term
     | _ -> assert false)
   | _ -> Error (`Err_constrained_product term)
 
+(* Similarly to elab_univ and elab_prod, instead of returning the complete 
+  inductive type, we only return the constituents of it.
+   Otherwise, we need to repeat the pattern-matching/extraction wherever this
+   is called *)
 and elab_ind reduce ctx ind term
     : (Ast.term * Name.t * int * Ast.term list, [> elaboration_error ]) result
   =

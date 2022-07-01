@@ -21,18 +21,18 @@ inductive list (a : Type0) : Type0 =
 
 def tl (a : Type0) (ls : list a) : list a = 
 match@list ls as z return list a with 
-| nil => nil a
-| cons x xs => xs 
+| nil a => nil a
+| cons a x xs => xs 
 end;;
 
 def is_empty (a : Type0) (ls : list a) : bool = 
 match@list ls as z return bool with 
-| nil => true 
-| cons x xs => false 
+| nil bool => true 
+| cons bool x xs => false 
 end;;
 
 def almost_safe_head (a : Type0) (ls : list a) : if Type0 (is_empty a ls) nat a = 
   match@list ls as z return if Type0 (is_empty a ls) nat a with 
-  | nil => zero 
-  | cons x xs => x 
+  | nil nat => zero 
+  | cons a x xs => x 
 end;;

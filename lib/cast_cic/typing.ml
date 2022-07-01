@@ -86,10 +86,10 @@ let rec infer_type (ctx : typing_context) (t : term) : (term, [> type_error ]) r
 
 and check_branch ctx z pred params level br =
   let ctor_info = Declarations.Ctor.find br.ctor in
-  let all_tys = List.append ctor_info.params ctor_info.args in
+  let all_tys = ctor_info.params @ ctor_info.args in
   let vars = List.map (fun x -> Var x) br.ids in
-  let all_terms = List.append params vars in
-  let arg_tys = subst_tele all_terms all_tys |> List.drop (List.length params) in
+  let all_terms = vars in
+  let arg_tys = subst_tele all_terms all_tys in
   let args_ctx = List.combine br.ids arg_tys |> List.to_seq in
   let branch_ctx = Name.Map.add_seq args_ctx ctx in
   let ctor = Constructor { ctor = br.ctor; level; params; args = vars } in

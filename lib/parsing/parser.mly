@@ -21,14 +21,15 @@
     let const_def = { name; ty; term } in
     Define const_def
 
+  (* The inductive's parameters are included immediately in the constructors during parsing *)
   let mk_ind_decl ind params' sort ctors =
     let open Vernac.Command in
     let open Kernel.Declarations in
+    (* Sets anonymous ids to a default value *)
     let fix_name (x, t) = Option.value ~default:Name.default x, t in
     let params = List.map fix_name params' in
     let mk_ctor_decl ( name, args', ty') =
-      let ty_args = List.append params' args' in
-      let ty = Prod (ty_args, ty') in
+      let ty = Prod (params' @ args', ty') in
       let args = List.map fix_name args' in
       { name; ind; params; args; ty }
     in

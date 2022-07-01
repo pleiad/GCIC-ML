@@ -36,6 +36,14 @@ let rec of_parsed_term (t : parsed_term) : term =
     let discr = of_parsed_term mi.discr in
     let pred = of_parsed_term mi.pred in
     let of_parsed_branch (branch : Parsing.Ast.branch) : Kernel.Ast.branch =
+      (* FIXME: These IDs can possibly not include the inductive's parameters, 
+      which results in an elaboration error. For instance:
+      | nil -> <term> 
+      will store no params nor args, and then at elaboration it will try to 
+      check that the parameters and args match the expected one.
+      The fix for now is to be explicit in the branches as well, e.g. 
+      | nil bool -> true
+      *)
       { ctor = branch.ctor; ids = branch.ids; term = of_parsed_term branch.body }
     in
     let branches = List.map of_parsed_branch mi.branches in
