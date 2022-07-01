@@ -129,7 +129,7 @@ module Context = Name.Map
 (** Performs substitution inside a term *)
 let rec subst ctx = function
   | Var x ->
-    (try Context.find x ctx |> Option.fold ~none:(Var x) ~some:(fun v -> v) with
+    (try Context.find x ctx with
     | Not_found -> Var x)
   | Universe i -> Universe i
   | App (t, u) -> App (subst ctx t, subst ctx u)
@@ -137,13 +137,13 @@ let rec subst ctx = function
     Lambda
       { fi with
         dom = subst ctx fi.dom
-      ; body = subst (Context.add fi.id None ctx) fi.body
+      ; body = subst (Context.add fi.id (Var fi.id) ctx) fi.body
       }
   | Prod fi ->
     Prod
       { fi with
         dom = subst ctx fi.dom
-      ; body = subst (Context.add fi.id None ctx) fi.body
+      ; body = subst (Context.add fi.id (Var fi.id) ctx) fi.body
       }
   | Unknown t -> Unknown (subst ctx t)
   | Err t -> Err (subst ctx t)
@@ -161,16 +161,16 @@ let rec subst ctx = function
     Match
       { mi with
         discr = subst ctx mi.discr
-      ; pred = subst (Context.add mi.z None ctx) mi.pred
+      ; pred = subst (Context.add mi.z (Var mi.z) ctx) mi.pred
       ; branches = List.map (subst_branch ctx) mi.branches
       }
 
 and subst_branch ctx br =
-  let ids_ctx = List.map (fun x -> x, None) br.ids |> List.to_seq in
+  let ids_ctx = List.map (fun x -> x, Var x) br.ids |> List.to_seq in
   let ext_ctx = Context.add_seq ids_ctx ctx in
   { br with term = subst ext_ctx br.term }
 
-let subst1 x v = subst (Context.add x (Some v) Context.empty)
+let subst1 x v = subst (Context.add x v Context.empty)
 
 (** Checks if two terms are identifiable up to alpha-renaming *)
 let rec alpha_equal t1 t2 =

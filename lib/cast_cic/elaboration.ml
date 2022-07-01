@@ -159,7 +159,6 @@ and check_elab_branch reduce ctx z pred params level br =
   let br_args = List.drop (List.length params) branch_vars in
   let ctor = Constructor { ctor = br.ctor; level; params; args = br_args } in
   let ty = subst1 z ctor pred in
-  (* let ty = subst1  z ctor (Name.Map.add z ctor ctx) pred in *)
   let* term = check_elab reduce branch_ctx_w_f br.term ty in
   Ok { ctor = br.ctor; ids = br.ids; term }
 

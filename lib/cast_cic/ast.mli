@@ -57,7 +57,7 @@ val to_string : term -> string
 val print : term -> unit
 
 (** Performs substitution inside a term *)
-val subst : term option Name.Map.t -> term -> term
+val subst : term Name.Map.t -> term -> term
 
 (** Performs substitution inside a term *)
 val subst1 : Name.t -> term -> term -> term
