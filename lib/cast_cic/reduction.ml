@@ -153,7 +153,9 @@ let rec reduce1 (term, cont) : state =
         }
     in
     let body_w_f = subst1 f f_subst branch.term in
-    let zipped_args = List.combine branch.ids ci.args in
+    (* This assumes that the constructor in the branch was created with all params 
+    and args explicit *)
+    let zipped_args = List.combine branch.ids (ci.params @ ci.args) in
     let body_w_args =
       List.fold_left (fun acc (id, arg) -> subst1 id arg acc) body_w_f zipped_args
     in
