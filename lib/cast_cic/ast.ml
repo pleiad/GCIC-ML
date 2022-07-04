@@ -172,6 +172,23 @@ and subst_branch ctx br =
 
 let subst1 x v = subst (Context.add x v Context.empty)
 
+(** Just an auxiliary function to do alpha-some_predicate over the branches, 
+    where we need to substitute the ids in the bodies. This is the same both 
+    for equal and consistent. *)
+let alpha_pred_branch pred b1 b2 =
+  if List.compare_lengths b1.ids b2.ids = 0
+  then (
+    let new_ids = List.map (fun _ -> Var (new_identifier ())) b1.ids in
+    let ids1 = List.combine b1.ids new_ids in
+    let ids2 = List.combine b1.ids new_ids in
+    let subst_body body ids =
+      List.fold_left (fun body (old_id, new_id) -> subst1 old_id new_id body) body ids
+    in
+    let subst_body1 = subst_body b1.term ids1 in
+    let subst_body2 = subst_body b2.term ids2 in
+    b1.ctor = b2.ctor && pred subst_body1 subst_body2)
+  else false
+
 (** Checks if two terms are identifiable up to alpha-renaming *)
 let rec alpha_equal t1 t2 =
   match t1, t2 with
@@ -205,7 +222,7 @@ let rec alpha_equal t1 t2 =
     && List.equal alpha_equal c1.args c2.args
     && List.equal alpha_equal c1.params c2.params
   | Match m1, Match m2 ->
-    let alpha_equal_branch b1 b2 = b1.ctor = b2.ctor && true (* TODO : Check body *) in
+    let alpha_equal_branch = alpha_pred_branch alpha_equal in
     m1.ind = m2.ind
     && alpha_equal m1.discr m2.discr
     && m1.z = m2.z
@@ -244,10 +261,11 @@ let rec alpha_consistent t1 t2 : bool =
     && List.for_all2 alpha_consistent c1.args c2.args
     && List.for_all2 alpha_consistent c1.params c2.params
   | Match m1, Match m2 ->
+    let alpha_consistent_branch = alpha_pred_branch alpha_consistent in
     alpha_consistent m1.discr m2.discr
     && m1.ind = m2.ind
     && alpha_consistent m1.pred m2.pred
-    && true (* TODO: Check branches' bodies *)
+    && List.equal alpha_consistent_branch m1.branches m2.branches
   | _ -> false
 
 let rec subst_tele ?(acc = []) ts params =
