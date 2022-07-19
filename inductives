@@ -1,38 +1,46 @@
-inductive bool : Type0 = 
+inductive bool : Type0 =
 | false : bool 
-| true : bool
-;;
+| true : bool;;
 
-def if (a : Type1) (b : bool) (tb fb : a) : a =
-match@bool b as z return a with 
+def rec2 (c : Type1) (fb tb : c) (b : bool) : c =
+match@bool b as z return c with 
 | false => fb 
 | true => tb 
 end;;
 
-inductive nat : Type0 =
-| zero : nat 
-| succ (n : nat) : nat
-;;
+inductive void : Type0 =;;
+
+def rec0 : forall (c : Type1) (f : void), c = 
+  fun (c : Type1) (f : void). 
+    (?0 : c);;
+
+inductive unit : Type0 = | tt : unit ;;
 
 inductive list (a : Type0) : Type0 =
-| nil : list a
-| cons (hd : a) (tl : list a) : list a
+| nil : list a 
+| cons (hd : a) (tl : list a) : list a ;;
+
+inductive w (a : Type0) (b : a -> Type0) : Type1 =
+| sup (x : a) (f : b x -> w a b) : w a b
 ;;
 
-def tl (a : Type0) (ls : list a) : list a = 
-match@list ls as z return list a with 
-| nil a => nil a
-| cons a x xs => xs 
-end;;
 
-def is_empty (a : Type0) (ls : list a) : bool = 
-match@list ls as z return bool with 
-| nil bool => true 
-| cons bool x xs => false 
-end;;
+def natarity : bool -> Type0 = rec2 Type0 void unit ;;
 
-def almost_safe_head (a : Type0) (ls : list a) : if Type0 (is_empty a ls) nat a = 
-  match@list ls as z return if Type0 (is_empty a z) nat a with 
-  | nil a => zero 
-  | cons a x xs => x 
+def natw : Type1 = w bool natarity;;
+
+def zero : natw = sup bool natarity false (fun (x : void). rec0 natw x);;
+
+def one : natw = sup bool natarity true (fun (x : unit). zero);;
+
+def succ (n : natw) : natw = sup bool natarity true (fun (x : unit). n);;
+
+inductive sum (a b : Type0): Type0 =
+| inl (x : a) : sum a b 
+| inr (x : b) : sum a b;;
+
+def recsum (c a b : Type0) (l : a -> c) (r : b -> c) (s : sum a b) : c =
+match@sum s as z return c with 
+| inl a b x => l x 
+| inr a b x => r x 
 end;;

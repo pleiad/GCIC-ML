@@ -89,9 +89,9 @@ let execute_inductive ind ctors : (cmd_result, execute_error) result =
     Ok (List.rev elab_params, elab_ctx)
   in
   let execute_ind_decl (ind : Ind.t) =
-    let* elab_sort, _ = elab_univ reduce empty_ctx ind.sort in
+    let* elab_sort, level = elab_univ reduce empty_ctx ind.sort in
     let* elab_params, _ = elab_univ_params empty_ctx ind.params in
-    let cached_ind = { ind with sort = elab_sort; params = elab_params } in
+    let cached_ind = { ind with sort = elab_sort; level = level - 1; params = elab_params } in
     (* TODO: Missing uniqueness of name (no more than one inductive with a given name) *)
     Ind.add ind.name ind;
     Ind.add_cache ind.name cached_ind;

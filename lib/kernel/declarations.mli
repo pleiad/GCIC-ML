@@ -20,6 +20,7 @@ type 'a ind_decl =
   { name : Name.t
   ; params : (Name.t * 'a) list
   ; sort : 'a
+  ; level : int
   ; ctors : Name.t list
   }
 

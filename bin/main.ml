@@ -1,4 +1,3 @@
-open Gcic
 open Stdio
 
 let get_input () =
@@ -9,7 +8,7 @@ let get_input () =
 let rec eval = function
   | None -> ()
   | Some x ->
-    print_endline (Compile.compile x);
+    print_endline (Gcic.Main.run x);
     eval (get_input ())
 
 let () = eval (get_input ())

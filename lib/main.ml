@@ -6,7 +6,7 @@ open Kernel.Declarations
 type parsed_term = Parsing.Ast.term
 type term = Kernel.Ast.term
 
-let defined_ids : [ `Const | `Ind | `Ctor ] Name.Map.t ref = ref Name.Map.empty
+let defined_ids : [ `Const | `Ind of int | `Ctor ] Name.Map.t ref = ref Name.Map.empty
 let from_opt_name id = Option.value id ~default:Name.default
 
 (* For simplicity, any free identifier is treated as a Const (an identifier refering to a global declaration).
@@ -17,7 +17,7 @@ let rec of_parsed_term (t : parsed_term) : term =
     (try
        match Name.Map.find x !defined_ids with
        | `Const -> Const x
-       | `Ind -> Inductive (x, 0, [])
+       | `Ind lvl -> Inductive (x, lvl, [])
        | `Ctor -> Constructor (x, [])
      with
     | Not_found -> Var x)
@@ -76,19 +76,17 @@ let of_parsed_const_decl (d : parsed_term const_decl) =
   { d with ty = of_parsed_term d.ty; term = of_parsed_term d.term }
 
 let of_parsed_ind_decl (d : parsed_term ind_decl) =
-  defined_ids := Name.Map.add d.name `Ind !defined_ids;
-  { d with
-    params = List.map (map_snd of_parsed_term) d.params
-  ; sort = of_parsed_term d.sort
-  }
+  let params = List.map (map_snd of_parsed_term) d.params in
+  let lvl = of_parsed_term d.sort |> Kernel.Ast.get_sort_lvl in 
+  defined_ids := Name.Map.add d.name (`Ind lvl) !defined_ids;
+  { d with params; sort = of_parsed_term d.sort }
 
 let of_parsed_ctor_decl (d : parsed_term ctor_decl) =
+  let params = List.map (map_snd of_parsed_term) d.params in
+  let args = List.map (map_snd of_parsed_term) d.args in
+  let ty = of_parsed_term d.ty in
   defined_ids := Name.Map.add d.name `Ctor !defined_ids;
-  { d with
-    params = List.map (map_snd of_parsed_term) d.params
-  ; args = List.map (map_snd of_parsed_term) d.args
-  ; ty = of_parsed_term d.ty
-  }
+  { d with params; args; ty }
 
 let of_parsed_command : parsed_term Command.t -> term Command.t = function
   | Eval t -> Eval (of_parsed_term t)
@@ -109,12 +107,12 @@ let parse_file_content str =
     print_endline e;
     []
 
+let execute cmd = of_parsed_command cmd |> Vernac.Exec.execute parse_file_content
+
 (** Compiles a string and returns the stringified version of the AST *)
-let compile (line : string) =
-  let open Vernac.Exec in
+let run (line : string) =
+  let open Vernac in
   match Parsing.Lex_and_parse.parse_command line with
   | Ok cmd ->
-    of_parsed_command cmd
-    |> execute parse_file_content
-    |> Result.fold ~ok:string_of_cmd_result ~error:string_of_error
+    execute cmd |> Result.fold ~ok:Exec.string_of_cmd_result ~error:Exec.string_of_error
   | Error e -> e

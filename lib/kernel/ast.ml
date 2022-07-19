@@ -115,3 +115,37 @@ let to_string = Pretty.to_string
 
 (** Prints the prettified version of a term *)
 let print = Pretty.print
+
+let rec eq t1 t2 =
+  match t1, t2 with
+  | Var x, Var y -> x = y
+  | Universe i, Universe j -> i = j
+  | App (t1, u1), App (t2, u2) -> eq t1 t2 && eq u1 u2
+  | Lambda fi1, Lambda fi2 ->
+    fi1.id = fi2.id && eq fi1.dom fi2.dom && eq fi1.body fi2.body
+  | Prod fi1, Prod fi2 -> fi1.id = fi2.id && eq fi1.dom fi2.dom && eq fi1.body fi2.body
+  | Unknown i, Unknown j -> i = j
+  | Inductive (n1, lvl1, ctors1), Inductive (n2, lvl2, ctors2) ->
+    n1 = n2 && lvl1 = lvl2 && List.equal eq ctors1 ctors2
+  | Constructor (n1, args1), Constructor (n2, args2) ->
+    n1 = n2 && List.equal eq args1 args2
+  | Match mi1, Match mi2 ->
+    mi1.ind = mi2.ind
+    && eq mi1.discr mi2.discr
+    && mi1.z = mi2.z
+    && eq mi1.pred mi2.pred
+    && mi1.f = mi2.f
+    && List.equal branch_eq mi1.branches mi2.branches
+  | Ascription (t1, ty1), Ascription (t2, ty2) -> eq t1 t2 && eq ty1 ty2
+  | UnknownT i, UnknownT j -> i = j
+  | Const c1, Const c2 -> c1 = c2
+  | _ -> false
+
+and branch_eq b1 b2 =
+  b1.ctor = b2.ctor && List.equal ( = ) b1.ids b2.ids && eq b1.term b2.term
+
+  let rec get_sort_lvl (t : term) =
+    match t with
+  | Universe lvl -> lvl 
+  | Prod fi -> get_sort_lvl fi.body 
+  | _ -> failwith "type of inductive definition must be a universe"

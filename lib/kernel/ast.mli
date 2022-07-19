@@ -45,3 +45,8 @@ val to_string : term -> string
 
 (** Prints the prettified version of a term *)
 val print : term -> unit
+
+(** Equality predicate between terms *)
+val eq : term -> term -> bool
+
+val get_sort_lvl : term -> int 

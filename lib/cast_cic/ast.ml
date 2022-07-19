@@ -231,7 +231,10 @@ let rec alpha_equal t1 t2 =
   | _ -> false
 
 (** Checks if two terms are alpha consistent *)
-let rec alpha_consistent t1 t2 : bool =
+(* let rec alpha_consistent t1 t2 : bool =
+  print_endline "ALPHA_CONSISTENT";
+  print_endline (Format.asprintf "%a\n" pp_term t1);
+  print_endline (Format.asprintf "%a\n" pp_term t2);
   match t1, t2 with
   | Var x, Var y -> x = y
   | Universe i, Universe j -> i = j
@@ -266,7 +269,7 @@ let rec alpha_consistent t1 t2 : bool =
     && m1.ind = m2.ind
     && alpha_consistent m1.pred m2.pred
     && List.equal alpha_consistent_branch m1.branches m2.branches
-  | _ -> false
+  | _ -> false *)
 
 let rec subst_tele ?(acc = []) ts params =
   match ts, params with

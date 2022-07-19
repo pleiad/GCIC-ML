@@ -34,7 +34,8 @@
       { name; ind; params; args; ty }
     in
     let ctor_decls = List.map mk_ctor_decl ctors in
-    let ind_decl = { name = ind; params; sort; ctors=(List.map (fun c -> c.name) ctor_decls)} in
+    (* sort level is a placeholder *)
+    let ind_decl = { name = ind; params; sort; level = 9999; ctors=(List.map (fun c -> c.name) ctor_decls)} in
     Inductive (ind_decl, ctor_decls)
 %}
 
