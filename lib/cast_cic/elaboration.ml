@@ -72,6 +72,7 @@ let alpha_pred_branch pred b1 b2 =
     b1.ctor = b2.ctor && pred subst_body1 subst_body2)
   else false
 
+(** Checks if two terms are alpha consistent *)
 let rec alpha_consistent reduce t1 t2 : bool =
   let open Ast in
   let t1_red = reduce t1 |> Result.get_ok in
@@ -219,7 +220,7 @@ and check_elab_branch reduce ctx z pred params level br =
 and check_elab_params reduce ctx params_ty params =
   let check_elab_param reduce ctx (elab_params, params_ty) param =
     let* elab_param = check_elab reduce ctx param (List.hd params_ty |> snd) in
-    Ok (elab_param :: elab_params, Ast.subst1_tele params_ty elab_param)
+    Ok (elab_param :: elab_params, Ast.subst1_tele elab_param params_ty)
   in
   fold_results (check_elab_param reduce ctx) (Ok ([], params_ty)) params
   |> Result.map (fun (l, _) -> List.rev l)

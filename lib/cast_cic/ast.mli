@@ -65,10 +65,18 @@ val subst1 : Name.t -> term -> term -> term
 (** Checks if two terms are identifiable up to alpha-renaming *)
 val alpha_equal : term -> term -> bool
 
-(** Checks if two terms are alpha consistent *)
-(* val alpha_consistent : term -> term -> bool *)
-
-(** Substitute arguments in a telescope *)
+(** Telescopic substitution of values for free variables in a list of terms. 
+    For instance, the values of an inductive or a constructor and the declared
+    parameter and argument types, such as in `cons Bool ...`:
+    - cons types: (A : Type) (hd : A) (tl : list A)
+    - values : Bool ... 
+    - result : [Type, Bool, list Bool]
+    Raises an error if the values and the list of terms have different sizes.
+*)
 val subst_tele : ?acc:term list -> term list -> (Name.t * term) list -> term list
 
-val subst1_tele : (Name.t * term) list -> term -> (Name.t * term) list
+(** Telescopic substitution of a single value for the first free variable in a
+    list of terms. Similar to `subst_tele` but just the first identifier in the 
+    rest of the list. 
+*)
+val subst1_tele : term -> (Name.t * term) list -> (Name.t * term) list

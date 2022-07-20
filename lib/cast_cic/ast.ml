@@ -230,56 +230,16 @@ let rec alpha_equal t1 t2 =
     && List.equal alpha_equal_branch m1.branches m2.branches
   | _ -> false
 
-(** Checks if two terms are alpha consistent *)
-(* let rec alpha_consistent t1 t2 : bool =
-  print_endline "ALPHA_CONSISTENT";
-  print_endline (Format.asprintf "%a\n" pp_term t1);
-  print_endline (Format.asprintf "%a\n" pp_term t2);
-  match t1, t2 with
-  | Var x, Var y -> x = y
-  | Universe i, Universe j -> i = j
-  | App (t1, u1), App (t2, u2) -> alpha_consistent t1 t2 && alpha_consistent u1 u2
-  | Lambda fi1, Lambda fi2 ->
-    let x_id = new_identifier () in
-    let x = Var x_id in
-    let body1 = subst1 fi1.id x fi1.body in
-    let body2 = subst1 fi2.id x fi2.body in
-    alpha_consistent fi1.dom fi2.dom && alpha_consistent body1 body2
-  | Prod fi1, Prod fi2 ->
-    let x_id = new_identifier () in
-    let x = Var x_id in
-    let body1 = subst1 fi1.id x fi1.body in
-    let body2 = subst1 fi2.id x fi2.body in
-    alpha_consistent fi1.dom fi2.dom && alpha_consistent body1 body2
-  | _, Cast ci2 -> alpha_consistent t1 ci2.term
-  | Cast ci1, _ -> alpha_consistent ci1.term t2
-  | _, Unknown _ -> true
-  | Unknown _, _ -> true
-  | Const x, Const y -> x = y
-  | Inductive (ind1, i1, params1), Inductive (ind2, i2, params2) ->
-    ind1 = ind2 && i1 = i2 && List.for_all2 alpha_consistent params1 params2
-  | Constructor c1, Constructor c2 ->
-    c1.ctor = c2.ctor
-    && c1.level = c2.level
-    && List.for_all2 alpha_consistent c1.args c2.args
-    && List.for_all2 alpha_consistent c1.params c2.params
-  | Match m1, Match m2 ->
-    let alpha_consistent_branch = alpha_pred_branch alpha_consistent in
-    alpha_consistent m1.discr m2.discr
-    && m1.ind = m2.ind
-    && alpha_consistent m1.pred m2.pred
-    && List.equal alpha_consistent_branch m1.branches m2.branches
-  | _ -> false *)
-
 let rec subst_tele ?(acc = []) ts params =
   match ts, params with
   | [], [] -> List.rev acc
   | t :: ts, (x, ty) :: params ->
     let params' = List.map (fun (y, ty) -> y, subst1 x t ty) params in
     subst_tele ~acc:(ty :: acc) ts params'
-  | _ -> assert false (* Fails on partial application of inductives or constructors *)
+  (* Fails on partial application of inductives or constructors *)
+  | _ -> failwith "telescopic substitution over lists of different size"
 
-let subst1_tele params t =
+let subst1_tele t params =
   match params with
   | [] -> []
   | (x, _) :: params -> List.map (fun (y, ty) -> y, subst1 x t ty) params

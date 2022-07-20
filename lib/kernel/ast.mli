@@ -49,4 +49,6 @@ val print : term -> unit
 (** Equality predicate between terms *)
 val eq : term -> term -> bool
 
-val get_sort_lvl : term -> int
+(** Gets the level of a universe or a product.
+    Raises an error if applied on something else. *)
+val get_universe_lvl : term -> int

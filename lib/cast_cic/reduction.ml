@@ -242,7 +242,7 @@ let rec reduce1 (term, cont) : state =
     let cast_arg (casted_args, tys) (source, term) =
       let target = List.hd tys |> snd in
       let casted_arg = Cast { source; term; target } in
-      casted_arg :: casted_args, subst1_tele tys casted_arg
+      casted_arg :: casted_args, subst1_tele casted_arg tys
     in
     let casted_args, _ =
       List.fold_left cast_arg ([], target_args) (List.combine source_args ci.args)
