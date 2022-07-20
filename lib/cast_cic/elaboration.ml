@@ -58,7 +58,7 @@ let string_of_error err =
 type elaboration = Ast.term * Ast.term
 
 let alpha_pred_branch pred b1 b2 =
-  let open Ast in 
+  let open Ast in
   if List.compare_lengths b1.ids b2.ids = 0
   then (
     let new_ids = List.map (fun _ -> Var (new_identifier ())) b1.ids in
@@ -79,7 +79,8 @@ let rec alpha_consistent reduce t1 t2 : bool =
   match t1_red, t2_red with
   | Var x, Var y -> x = y
   | Universe i, Universe j -> i = j
-  | App (t1, u1), App (t2, u2) -> alpha_consistent reduce t1 t2 && alpha_consistent reduce u1 u2
+  | App (t1, u1), App (t2, u2) ->
+    alpha_consistent reduce t1 t2 && alpha_consistent reduce u1 u2
   | Lambda fi1, Lambda fi2 ->
     let x_id = new_identifier () in
     let x = Var x_id in
@@ -112,9 +113,8 @@ let rec alpha_consistent reduce t1 t2 : bool =
     && List.equal alpha_consistent_branch m1.branches m2.branches
   | _ -> false
 
-let are_consistent reduce t1 t2 : bool =
-  alpha_consistent reduce t1 t2
-  (* let res =
+let are_consistent reduce t1 t2 : bool = alpha_consistent reduce t1 t2
+(* let res =
   in
   Result.fold ~ok:(fun x -> x) ~error:(fun _ -> false) res *)
 
@@ -157,7 +157,7 @@ let rec elaborate reduce ctx (term : Kernel.Ast.term)
   (* CONS *)
   | Constructor (ctor, pargs) ->
     let cinfo = Declarations.Ctor.find ctor in
-    let ind = Declarations.Ind.find cinfo.ind in 
+    let ind = Declarations.Ind.find cinfo.ind in
     let* elab_pargs = check_elab_params reduce ctx (cinfo.params @ cinfo.args) pargs in
     let elab_params, elab_args = List.split_at (List.length cinfo.params) elab_pargs in
     (* FIXME: Get proper level (probably from inductive declaration) *)

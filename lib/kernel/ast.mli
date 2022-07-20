@@ -49,4 +49,4 @@ val print : term -> unit
 (** Equality predicate between terms *)
 val eq : term -> term -> bool
 
-val get_sort_lvl : term -> int 
+val get_sort_lvl : term -> int

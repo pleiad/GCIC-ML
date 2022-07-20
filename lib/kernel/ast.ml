@@ -144,8 +144,8 @@ let rec eq t1 t2 =
 and branch_eq b1 b2 =
   b1.ctor = b2.ctor && List.equal ( = ) b1.ids b2.ids && eq b1.term b2.term
 
-  let rec get_sort_lvl (t : term) =
-    match t with
-  | Universe lvl -> lvl 
-  | Prod fi -> get_sort_lvl fi.body 
+let rec get_sort_lvl (t : term) =
+  match t with
+  | Universe lvl -> lvl
+  | Prod fi -> get_sort_lvl fi.body
   | _ -> failwith "type of inductive definition must be a universe"

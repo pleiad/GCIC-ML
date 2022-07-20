@@ -77,7 +77,7 @@ let of_parsed_const_decl (d : parsed_term const_decl) =
 
 let of_parsed_ind_decl (d : parsed_term ind_decl) =
   let params = List.map (map_snd of_parsed_term) d.params in
-  let lvl = of_parsed_term d.sort |> Kernel.Ast.get_sort_lvl in 
+  let lvl = of_parsed_term d.sort |> Kernel.Ast.get_sort_lvl in
   defined_ids := Name.Map.add d.name (`Ind lvl) !defined_ids;
   { d with params; sort = of_parsed_term d.sort }
 
