@@ -1,7 +1,7 @@
 open Vernac
 open Common.Id
 open Common.Std
-open Kernel.Declarations
+open Common.Declarations
 
 type parsed_term = Parsing.Ast.term
 type term = Kernel.Ast.term

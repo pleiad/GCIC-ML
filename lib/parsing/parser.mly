@@ -15,7 +15,7 @@
   *)
   let mk_definition name args ty' body =
     let open Vernac.Command in
-    let open Kernel.Declarations in
+    let open Common.Declarations in
     let term = Lambda (args, Ascription (body, ty')) in
     let ty  = Prod (args, ty') in
     let const_def = { name; ty; term } in
@@ -24,7 +24,7 @@
   (* The inductive's parameters are included immediately in the constructors during parsing *)
   let mk_ind_decl ind params' sort ctors =
     let open Vernac.Command in
-    let open Kernel.Declarations in
+    let open Common.Declarations in
     (* Sets anonymous ids to a default value *)
     let fix_name (x, t) = Option.value ~default:Name.default x, t in
     let params = List.map fix_name params' in

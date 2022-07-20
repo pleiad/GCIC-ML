@@ -1,5 +1,5 @@
 (** This module specifies the AST for commands *)
-open Kernel.Declarations
+open Common.Declarations
 
 (** The AST for the commands *)
 type 'a t =

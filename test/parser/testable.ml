@@ -6,7 +6,7 @@ let term =
 
 let command =
   let open Vernac in
-  let open Kernel.Declarations in
+  let open Common.Declarations in
   let def_to_string ({ name; _ } : term const_decl) = Common.Id.Name.to_string name in
   let eq_definition (d1 : term const_decl) (d2 : term const_decl) =
     d1.name = d2.name && eq_term d1.ty d2.ty && eq_term d1.term d2.term

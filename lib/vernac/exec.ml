@@ -64,7 +64,7 @@ let execute_definition gdef : (cmd_result, execute_error) result =
   let open Elaboration in
   let open Typing in
   let open Reduction in
-  let open Kernel.Declarations in
+  let open Common.Declarations in
   let empty_ctx = Name.Map.empty in
   match gdef with
   | { name; ty; term } ->

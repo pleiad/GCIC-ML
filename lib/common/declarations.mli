@@ -4,7 +4,7 @@
     The global declarations are parameterized in order to maintain both the 
     pre-elaborated form of a term, as well as it's "cached" elaborated form.
 *)
-open Common.Id
+open Id
 
 (** Global declaration of constants *)
 type 'a const_decl =

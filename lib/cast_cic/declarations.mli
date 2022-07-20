@@ -1,4 +1,4 @@
-open Kernel.Declarations
+open Common.Declarations
 
 (** Global declaration of constants *)
 module Const :

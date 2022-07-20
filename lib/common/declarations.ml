@@ -1,4 +1,4 @@
-open Common.Id
+open Id
 
 type 'a const_decl =
   { name : Name.t

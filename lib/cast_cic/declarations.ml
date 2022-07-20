@@ -1,4 +1,4 @@
-include Kernel.Declarations
+include Common.Declarations
 
 module Const = Make_Store (struct
   type t = Kernel.Ast.term const_decl
