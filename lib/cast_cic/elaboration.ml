@@ -153,28 +153,26 @@ let rec elaborate reduce ctx (term : Kernel.Ast.term)
   (* Inductives *)
   | Inductive (ind, i, params) ->
     let params_ty = (Declarations.Ind.find ind).params in
-    let* elab_params = check_elab_params reduce ctx params_ty params in
+    let* elab_params = check_elab_params reduce ctx params params_ty in
     Ok Ast.(Inductive (ind, i, elab_params), Universe i)
   (* CONS *)
   | Constructor (ctor, pargs) ->
     let cinfo = Declarations.Ctor.find ctor in
     let ind = Declarations.Ind.find cinfo.ind in
-    let* elab_pargs = check_elab_params reduce ctx (cinfo.params @ cinfo.args) pargs in
+    let* elab_pargs = check_elab_params reduce ctx pargs (cinfo.params @ cinfo.args) in
     let elab_params, elab_args = List.split_at (List.length cinfo.params) elab_pargs in
-    (* FIXME: Get proper level (probably from inductive declaration) *)
-    let level = ind.level in
     let elab_ctor =
-      Ast.Constructor { ctor; level; params = elab_params; args = elab_args }
+      Ast.Constructor { ctor; level = ind.level; params = elab_params; args = elab_args }
     in
-    Ok (elab_ctor, Ast.Inductive (cinfo.ind, level, elab_params))
+    Ok (elab_ctor, Ast.Inductive (cinfo.ind, ind.level, elab_params))
   (* FIX *)
   | Match { ind; discr; z; pred; f; branches } ->
     let* elab_discr, ind', level, params = elab_ind reduce ctx ind discr in
     (* TODO Check that ind matches the one elaborated by elab_ind *)
     assert (ind = ind');
     let elab_ind = Ast.Inductive (ind, level, params) in
-    let pred_ctx = Name.Map.add z elab_ind ctx in
-    let* elab_pred, _ = elab_univ reduce pred_ctx pred in
+    let ctx_w_z = Name.Map.add z elab_ind ctx in
+    let* elab_pred, _ = elab_univ reduce ctx_w_z pred in
     let ctx_w_f =
       Name.Map.add f (Ast.Prod { id = z; dom = elab_ind; body = elab_pred }) ctx
     in
@@ -199,32 +197,7 @@ let rec elaborate reduce ctx (term : Kernel.Ast.term)
     in
     Ok (Ast.Const x, ty)
 
-(*
-    This function assumes that the constructor in the branch includes all 
-    parameters and arguments EXPLICITLY.
-*)
-and check_elab_branch reduce ctx z pred params level br =
-  let open Ast in
-  let ctor_info = Declarations.Ctor.find br.ctor in
-  let branch_vars = List.map (fun x -> Var x) br.ids in
-  let arg_tys = subst_tele branch_vars (ctor_info.params @ ctor_info.args) in
-  let args_ctx = List.combine br.ids arg_tys |> List.to_seq in
-  let branch_ctx_w_f = Name.Map.add_seq args_ctx ctx in
-  (* we need to extract the args separate from the params *)
-  let br_args = List.drop (List.length params) branch_vars in
-  let ctor = Constructor { ctor = br.ctor; level; params; args = br_args } in
-  let ty = subst1 z ctor pred in
-  let* term = check_elab reduce branch_ctx_w_f br.term ty in
-  Ok { ctor = br.ctor; ids = br.ids; term }
-
-and check_elab_params reduce ctx params_ty params =
-  let check_elab_param reduce ctx (elab_params, params_ty) param =
-    let* elab_param = check_elab reduce ctx param (List.hd params_ty |> snd) in
-    Ok (elab_param :: elab_params, Ast.subst1_tele elab_param params_ty)
-  in
-  fold_results (check_elab_param reduce ctx) (Ok ([], params_ty)) params
-  |> Result.map (fun (l, _) -> List.rev l)
-
+(* CHECK rule from the original paper *)
 and check_elab reduce ctx term (s_ty : Ast.term) =
   let* t', ty = elaborate reduce ctx term in
   if are_consistent reduce ty s_ty
@@ -291,3 +264,36 @@ and elab_ind reduce ctx ind term
       Ok (Ast.Cast { source = ty; target = ind_germ; term = t }, ind, i, params)
     | _ -> assert false)
   | _ -> Error (`Err_constrained_inductive term)
+
+(*
+    Auxiliary function to check each branch during elaboration of a match.
+    It assumes that the constructor in the branch includes all 
+    parameters and arguments EXPLICITLY.
+*)
+and check_elab_branch reduce ctx z pred params level br =
+  let open Ast in
+  let ctor_info = Declarations.Ctor.find br.ctor in
+  let branch_vars = List.map (fun x -> Var x) br.ids in
+  (* Substitute all params and args from the branch in the expected types, to obtain all types instantiated to 
+     the correct values. *)
+  let arg_tys = subst_tele branch_vars (ctor_info.params @ ctor_info.args) in
+  let args_ctx = List.combine br.ids arg_tys |> List.to_seq in
+  let branch_ctx_w_vars = Name.Map.add_seq args_ctx ctx in
+  (* we need to extract the args separate from the params *)
+  let branch_args = List.drop (List.length params) branch_vars in
+  let ctor = Constructor { ctor = br.ctor; level; params; args = branch_args } in
+  let expected_type = subst1 z ctor pred in
+  let* term = check_elab reduce branch_ctx_w_vars br.term expected_type in
+  Ok { ctor = br.ctor; ids = br.ids; term }
+
+(* Checks whether the pre-elaborated params of an inductive or constructor 
+   have the expected types from the elaborated ones (which we obtain at the moment of definition) *)
+and check_elab_params reduce ctx params params_ty =
+  (* We check one param at a time, and then substitute in the rest, before proceeding with them as well *)
+  let check_elab_param reduce ctx (elab_params, params_ty) param =
+    let expected_type = List.hd params_ty |> snd in
+    let* elab_param = check_elab reduce ctx param expected_type in
+    Ok (elab_param :: elab_params, Ast.subst1_tele elab_param params_ty)
+  in
+  fold_results (check_elab_param reduce ctx) (Ok ([], params_ty)) params
+  |> Result.map (fun (l, _) -> List.rev l)
