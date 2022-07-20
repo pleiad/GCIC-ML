@@ -84,22 +84,6 @@ let rec infer_type (ctx : typing_context) (t : term) : (term, [> type_error ]) r
     let* _ = map_results (check_branch branch_ctx z pred params level) branches in
     Ok (subst1 z discr pred)
 
-(*
-    This function assumes that the constructor in the branch includes all 
-    parameters and arguments EXPLICITLY.
-*)
-and check_branch ctx z pred params level br =
-  let ctor_info = Declarations.Ctor.find br.ctor in
-  let branch_vars = List.map (fun x -> Var x) br.ids in
-  let arg_tys = subst_tele branch_vars (ctor_info.params @ ctor_info.args) in
-  let args_ctx = List.combine br.ids arg_tys |> List.to_seq in
-  let branch_ctx = Name.Map.add_seq args_ctx ctx in
-  (* we need to extract the args separate from the params *)
-  let br_args = List.drop (List.length params) branch_vars in
-  let ctor = Constructor { ctor = br.ctor; level; params; args = br_args } in
-  let ty = subst1 z ctor pred in
-  check_type branch_ctx br.term ty
-
 and check_type (ctx : typing_context) (t : term) (ty : term)
     : (unit, [> type_error ]) result
   =
@@ -130,3 +114,19 @@ and infer_ind (ctx : typing_context) (t : term)
   match v with
   | Inductive (ind, i, params) -> Ok (ind, i, params)
   | _ -> Error (`Err_not_inductive (t, ty))
+
+(*
+    This function assumes that the constructor in the branch includes all 
+    parameters and arguments EXPLICITLY.
+*)
+and check_branch ctx z pred params level br =
+  let ctor_info = Declarations.Ctor.find br.ctor in
+  let branch_vars = List.map (fun x -> Var x) br.ids in
+  let var_tys = subst_tele branch_vars (ctor_info.params @ ctor_info.args) in
+  let vars_w_types = List.combine br.ids var_tys |> List.to_seq in
+  let ctx_w_var_types = Name.Map.add_seq vars_w_types ctx in
+  (* we need to extract the args separate from the params *)
+  let branch_args = List.drop (List.length params) branch_vars in
+  let ctor = Constructor { ctor = br.ctor; level; params; args = branch_args } in
+  let expected_type = subst1 z ctor pred in
+  check_type ctx_w_var_types br.term expected_type

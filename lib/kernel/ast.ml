@@ -43,7 +43,7 @@ and branch =
 module Pretty = struct
   open Fmt
 
-  (** Returns if a term requires a parenthesis for unambiguation *)
+  (** Returns if a term requires a parenthesis for disambiguation *)
   let need_parens = function
     | Lambda _ | Prod _ | Ascription _ | Inductive _ | Constructor _ | Match _ -> true
     | _ -> false
