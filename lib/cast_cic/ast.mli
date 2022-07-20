@@ -27,7 +27,9 @@ type term =
       ; args : term list
       }
   | Match of
-      { ind : Name.t
+      { (* We keep track of the inductive to be used in the reduction of a match 
+      expression. The match is turned into a lambda with the inductive as domain. *)
+        ind : Name.t
       ; discr : term
       ; z : Name.t
       ; pred : term

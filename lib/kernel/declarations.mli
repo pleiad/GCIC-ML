@@ -1,10 +1,8 @@
 (** This module specifies global declarations. 
     It follows Coq's example a bit (https://github.com/coq/coq/blob/master/kernel/declarations.ml)    
 
-    For now we are considering a global declaration to be simply a term and its
-    type. 
-    We are going for the simplest solution for the moment, but global declarations 
-    could have their own type, etc.
+    The global declarations are parameterized in order to maintain both the 
+    pre-elaborated form of a term, as well as it's "cached" elaborated form.
 *)
 open Common.Id
 
@@ -33,14 +31,15 @@ type 'a ctor_decl =
   ; ty : 'a
   }
 
-(** Type of global declaration *)
+(** Module specifying a store of global declarations *)
 module type Store = sig
   (** Type of global declaration *)
   type t
 
+  (** Type of cached global declaration *)
   type cached_t
 
-  (** Find a global declaration. *)
+  (** Find a cached global declaration. *)
   val find : Name.t -> cached_t
 
   (** Add a global declaration. *)
@@ -49,10 +48,11 @@ module type Store = sig
   (** Checks if the declaration exists. *)
   val exists : Name.t -> bool
 
-  (** Cache the declaratoin using the current variant *)
+  (** Cache the declaration using the current variant *)
   val add_cache : Name.t -> cached_t -> unit
 end
 
+(** Module specifying a store factory *)
 module Make_Store (D : sig
   type t
   type cached_t

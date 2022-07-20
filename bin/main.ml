@@ -1,6 +1,5 @@
-open Stdio
-
 let get_input () =
+  let open Stdio in
   print_string "> ";
   flush Out_channel.stdout;
   In_channel.input_line In_channel.stdin

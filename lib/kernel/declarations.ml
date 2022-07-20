@@ -1,9 +1,5 @@
 open Common.Id
 
-(* Using a mutable map for now, as the simplest solution. 
-We are processing commands sequentially, so the telescope is built naturally, and 
-there should be no issue with dependencies between new definitions and previous ones.  *)
-
 type 'a const_decl =
   { name : Name.t
   ; ty : 'a
@@ -36,6 +32,7 @@ module type Store = sig
   val add_cache : Name.t -> cached_t -> unit
 end
 
+(* Storing the data in mutable maps *)
 module Make_Store (D : sig
   type t
   type cached_t
