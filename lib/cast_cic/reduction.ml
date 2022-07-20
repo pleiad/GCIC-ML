@@ -124,7 +124,8 @@ type continuation =
   | KCast_target of (term * term)
   (* Reducing the term of a cast. The source and target are stored in the state *)
   | KCast_term of (term * term)
-  (* Reducing the discriminee of a match. *)
+  (* Reducing the discriminee of a match. The inductive's name, the z variable, 
+     the predicate and the f variable are stored in the state. *)
   | KMatch_discr of (Name.t * Name.t * term * Name.t * branch list)
 
 (* Type alias *)
