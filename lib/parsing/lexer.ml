@@ -13,7 +13,7 @@ let upper = [%sedlex.regexp? 'A' .. 'Z']
 let alpha = [%sedlex.regexp? lower | upper]
 let id0 = [%sedlex.regexp? alpha | '_']
 let id = [%sedlex.regexp? id0, Star (alpha | digit | '_')]
-let universe = [%sedlex.regexp? ("Type" | 0x25a1)]
+let universe = [%sedlex.regexp? "Type" | 0x25a1]
 let whitespace = [%sedlex.regexp? Plus ('\t' | ' ')]
 let newline = [%sedlex.regexp? '\r' | '\n' | "\r\n"]
 let lambda = [%sedlex.regexp? "fun" | 0x03bb]
@@ -21,6 +21,7 @@ let forall = [%sedlex.regexp? "forall" | 0x2200]
 let unknown = [%sedlex.regexp? '?']
 let unknownT = [%sedlex.regexp? "?T"]
 let arrow = [%sedlex.regexp? "->" | 0x2192]
+let big_arrow = [%sedlex.regexp? "=>" | 0x21D2]
 let stringbuf = Buffer.create 64
 
 let get_and_flush buffer =
@@ -58,7 +59,7 @@ let rec token lexbuf =
   | id -> ID (lexeme lexbuf)
   | number -> INT (int_of_string (lexeme lexbuf))
   | arrow -> ARROW
-  | "=>" -> BIG_ARROW
+  | big_arrow -> BIG_ARROW
   | '(' -> LPAREN
   | ')' -> RPAREN
   | ":=" -> ASSIGN
