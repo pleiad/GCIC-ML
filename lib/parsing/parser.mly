@@ -44,8 +44,7 @@
     These are the output of the lexer rules
 */
 %token <int> INT
-%token <string> ID
-%token <string> FILENAME
+%token <string> ID FILENAME
 %token COLON COMMA ARROW BIG_ARROW VBAR AT ASSIGN
 %token LPAREN RPAREN
 %token KWD_UNIVERSE KWD_LAMBDA KWD_UNKNOWN KWD_UNKNOWN_T KWD_FORALL
@@ -166,7 +165,8 @@ fact :
 atom : 
 | LPAREN; t=top; RPAREN                                { t }
 | id=id                                                { Var id }
-| KWD_UNIVERSE; i=INT                                  { Universe i }
+| KWD_UNIVERSE; AT; i=INT                              { Universe i }
+| KWD_UNIVERSE                                         { Universe 0 }
 | KWD_UNKNOWN; i=INT                                   { Unknown i }
 | KWD_UNKNOWN_T; i=INT                                 { UnknownT i }
 

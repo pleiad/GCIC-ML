@@ -1,42 +1,42 @@
-Inductive bool : Type0 :=
+Inductive bool : Type :=
 | false : bool 
 | true : bool.
 
-Definition rec2 (c : Type1) (fb tb : c) (b : bool) : c :=
+Definition rec2 (c : Type@1) (fb tb : c) (b : bool) : c :=
 match@bool b as z return c with 
 | false => fb 
 | true => tb 
 end.
 
-Inductive void : Type0 :=.
+Inductive void : Type :=.
 
-Definition rec0 (c : Type1) (f : void) : c := ?0.
+Definition rec0 (c : Type@1) (f : void) : c := ?0.
 
-Inductive unit : Type0 := | tt : unit.
+Inductive unit : Type := | tt : unit.
 
-Inductive list (a : Type0) : Type0 :=
+Inductive list (a : Type) : Type :=
 | nil : list a 
 | cons (hd : a) (tl : list a) : list a.
 
-Inductive w (a : Type0) (b : a -> Type0) : Type1 :=
-| sup (x : a) (f : b x -> w a b) : w a b.
+Inductive W (a : Type) (b : a -> Type) : Type@1 :=
+| sup (x : a) (f : b x -> W a b) : W a b.
 
 
-Definition natarity : bool -> Type0 := rec2 Type0 void unit.
+Definition natarity : bool -> Type := rec2 Type void unit.
 
-Definition natw : Type1 := w bool natarity.
+Definition natW : Type@1 := W bool natarity.
 
-Definition zero : natw := sup bool natarity false (fun (x : void) => rec0 natw x).
+Definition zero : natW := sup bool natarity false (fun (x : void) => rec0 natW x).
 
-Definition one : natw := sup bool natarity true (fun (x : unit) => zero).
+Definition one : natW := sup bool natarity true (fun (x : unit) => zero).
 
-Definition succ (n : natw) : natw := sup bool natarity true (fun (x : unit) => n).
+Definition succ (n : natW) : natW := sup bool natarity true (fun (x : unit) => n).
 
-Inductive sum (a b : Type0): Type0 :=
+Inductive sum (a b : Type): Type :=
 | inl (x : a) : sum a b 
 | inr (x : b) : sum a b.
 
-Definition recsum (c a b : Type0) (l : a -> c) (r : b -> c) (s : sum a b) : c :=
+Definition recsum (c a b : Type) (l : a -> c) (r : b -> c) (s : sum a b) : c :=
 match@sum s as z return c with 
 | inl a b x => l x 
 | inr a b x => r x 

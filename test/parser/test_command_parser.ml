@@ -8,7 +8,7 @@ let tests_eval () =
     pcommand
     "Succeds"
     (Ok (Eval (Universe 0)))
-    (parse_command "Eval Type 0.");
+    (parse_command "Eval Type@0.");
   Alcotest.(check bool)
     "Fails if no expression"
     true
@@ -23,7 +23,7 @@ let tests_check () =
     pcommand
     "Check command"
     (Ok (Check (Universe 0)))
-    (parse_command "Check Type0.");
+    (parse_command "Check Type@0.");
   Alcotest.(check bool)
     "Fails if no expression"
     true
@@ -38,7 +38,7 @@ let tests_Elaborate () =
     pcommand
     "Elab command"
     (Ok (Elab (Universe 0)))
-    (parse_command "Elab Type 0.");
+    (parse_command "Elab Type@0.");
   Alcotest.(check bool)
     "Fails if no expression"
     true
