@@ -48,7 +48,7 @@ let tests_let () =
     pterm
     "let binding"
     (Ok (LetIn (name "x", Universe 0, Unknown 0, var "x")))
-    (parse_term "let x : Type0 = ?0 in x");
+    (parse_term "let x : Type0 := ?0 in x");
   Alcotest.(check bool) "let is reserved" true (parse_term "let" |> Result.is_error);
   Alcotest.(check bool) "in is reserved" true (parse_term "in" |> Result.is_error)
 
@@ -67,7 +67,7 @@ let tests_ascription () =
   Alcotest.(check bool)
     "ascription in lambda arg fails"
     true
-    (parse_term "fun (x : ?0 : ?1). x" |> Result.is_error);
+    (parse_term "fun (x : ?0 : ?1) => x" |> Result.is_error);
   Alcotest.(check bool)
     "ascription in pi arg fails"
     true
@@ -75,7 +75,7 @@ let tests_ascription () =
   Alcotest.(check bool)
     "ascription in let binding type fails"
     true
-    (parse_term "let x : ?0 : ?1 = Type0 in x" |> Result.is_error);
+    (parse_term "let x : ?0 : ?1 := Type0 in x" |> Result.is_error);
   Alcotest.(check bool)
     "ascription in let binding body fails"
     true
@@ -87,7 +87,7 @@ let tests_unicode () =
     pterm
     "lambda"
     (Ok (Lambda ([ arg "x", var "a" ], var "x")))
-    (parse_term "λ(x:a).x");
+    (parse_term "λ(x:a)=>x");
   Alcotest.check
     pterm
     "forall"

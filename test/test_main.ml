@@ -23,19 +23,19 @@ let run line =
   Result.bind cmd (fun c ->
       Main.execute c |> Result.map_error Vernac.Exec.string_of_error)
 
-let false_ind = "inductive false : Type0 =;;"
-let bool_ind = "inductive bool : Type0 = | false : bool | true : bool;;"
+let false_ind = "Inductive false : Type0 :=."
+let bool_ind = "Inductive bool : Type0 := | false : bool | true : bool."
 
 let list_ind =
-  "inductive list (a : Type0) : Type0 =\n\
+  "Inductive list (a : Type0) : Type0 :=\n\
   \  | nil : list a\n\
   \  | cons (hd : a) (tl : list a) : list a\n\
-  \  ;;"
+  \  ."
 
 let w_ind =
-  "inductive w (a : Type0) (b : a -> Type0) : Type0 =\n\
+  "Inductive w (a : Type0) (b : a -> Type0) : Type0 :=\n\
   \  | sup (x : a) (f : b x -> w a b) : w a b\n\
-  \  ;;\n\
+  \  .\n\
   \  "
 
 let test_inductive_defs () =

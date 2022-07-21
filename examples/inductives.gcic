@@ -1,46 +1,43 @@
-inductive bool : Type0 =
+Inductive bool : Type0 :=
 | false : bool 
-| true : bool;;
+| true : bool.
 
-def rec2 (c : Type1) (fb tb : c) (b : bool) : c =
+Definition rec2 (c : Type1) (fb tb : c) (b : bool) : c :=
 match@bool b as z return c with 
 | false => fb 
 | true => tb 
-end;;
+end.
 
-inductive void : Type0 =;;
+Inductive void : Type0 :=.
 
-def rec0 : forall (c : Type1) (f : void), c = 
-  fun (c : Type1) (f : void). 
-    (?0 : c);;
+Definition rec0 (c : Type1) (f : void) : c := ?0.
 
-inductive unit : Type0 = | tt : unit ;;
+Inductive unit : Type0 := | tt : unit.
 
-inductive list (a : Type0) : Type0 =
+Inductive list (a : Type0) : Type0 :=
 | nil : list a 
-| cons (hd : a) (tl : list a) : list a ;;
+| cons (hd : a) (tl : list a) : list a.
 
-inductive w (a : Type0) (b : a -> Type0) : Type1 =
-| sup (x : a) (f : b x -> w a b) : w a b
-;;
+Inductive w (a : Type0) (b : a -> Type0) : Type1 :=
+| sup (x : a) (f : b x -> w a b) : w a b.
 
 
-def natarity : bool -> Type0 = rec2 Type0 void unit ;;
+Definition natarity : bool -> Type0 := rec2 Type0 void unit.
 
-def natw : Type1 = w bool natarity;;
+Definition natw : Type1 := w bool natarity.
 
-def zero : natw = sup bool natarity false (fun (x : void). rec0 natw x);;
+Definition zero : natw := sup bool natarity false (fun (x : void) => rec0 natw x).
 
-def one : natw = sup bool natarity true (fun (x : unit). zero);;
+Definition one : natw := sup bool natarity true (fun (x : unit) => zero).
 
-def succ (n : natw) : natw = sup bool natarity true (fun (x : unit). n);;
+Definition succ (n : natw) : natw := sup bool natarity true (fun (x : unit) => n).
 
-inductive sum (a b : Type0): Type0 =
+Inductive sum (a b : Type0): Type0 :=
 | inl (x : a) : sum a b 
-| inr (x : b) : sum a b;;
+| inr (x : b) : sum a b.
 
-def recsum (c a b : Type0) (l : a -> c) (r : b -> c) (s : sum a b) : c =
+Definition recsum (c a b : Type0) (l : a -> c) (r : b -> c) (s : sum a b) : c :=
 match@sum s as z return c with 
 | inl a b x => l x 
 | inr a b x => r x 
-end;;
+end.

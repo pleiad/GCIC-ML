@@ -41,16 +41,16 @@ let rec token lexbuf =
   | "return" -> KWD_RETURN
   | "with" -> KWD_WITH
   | "end" -> KWD_END
-  | "check" -> VERNAC_CHECK
-  | "eval" -> VERNAC_EVAL
-  | "elab" -> VERNAC_ELABORATE
-  | "def" -> VERNAC_DEFINITION
-  | "inductive" -> VERNAC_INDUCTIVE
-  | "set" -> VERNAC_SET
-  | "variant" -> VERNAC_FLAG_VARIANT
-  | "fuel" -> VERNAC_FLAG_FUEL
-  | "load" -> VERNAC_LOAD
-  | ";;" -> VERNAC_SEPARATOR
+  | "Check" -> VERNAC_CHECK
+  | "Eval" -> VERNAC_EVAL
+  | "Elab" -> VERNAC_ELABORATE
+  | "Definition" -> VERNAC_DEFINITION
+  | "Inductive" -> VERNAC_INDUCTIVE
+  | "Set" -> VERNAC_SET
+  | "Variant" -> VERNAC_FLAG_VARIANT
+  | "Fuel" -> VERNAC_FLAG_FUEL
+  | "Load" -> VERNAC_LOAD
+  | "." -> VERNAC_SEPARATOR
   | "G" -> VERNAC_VARIANT_G
   | "N" -> VERNAC_VARIANT_N
   | "S" -> VERNAC_VARIANT_S
@@ -60,9 +60,8 @@ let rec token lexbuf =
   | "=>" -> BIG_ARROW
   | '(' -> LPAREN
   | ')' -> RPAREN
-  | '=' -> EQUAL
+  | ":=" -> ASSIGN
   | ':' -> COLON
-  | '.' -> DOT
   | ',' -> COMMA
   | '"' -> FILENAME (string lexbuf stringbuf)
   | '|' -> VBAR
