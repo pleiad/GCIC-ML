@@ -9,6 +9,17 @@ type term =
   | Lambda of fun_info
   | Prod of fun_info
   | Unknown of int
+  (* Inductives *)
+  | Inductive of Name.t * int * term list
+  | Constructor of Name.t * term list
+  | Match of
+      { ind : Name.t
+      ; discr : term
+      ; z : Name.t
+      ; pred : term
+      ; f : Name.t
+      ; branches : branch list
+      }
   (* Extras *)
   | Ascription of term * term
   | UnknownT of int
@@ -20,6 +31,12 @@ and fun_info =
   ; body : term
   }
 
+and branch =
+  { ctor : Name.t
+  ; ids : Name.t list
+  ; term : term
+  }
+
 (** Pretty printers *)
 val pp_term : Format.formatter -> term -> unit
 
@@ -28,3 +45,10 @@ val to_string : term -> string
 
 (** Prints the prettified version of a term *)
 val print : term -> unit
+
+(** Equality predicate between terms *)
+val eq : term -> term -> bool
+
+(** Gets the level of a universe or a product.
+    Raises an error if applied on something else. *)
+val get_universe_lvl : term -> int

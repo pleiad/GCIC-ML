@@ -15,10 +15,28 @@
   *)
   let mk_definition name args ty' body =
     let open Vernac.Command in
+    let open Common.Declarations in
     let term = Lambda (args, Ascription (body, ty')) in
     let ty  = Prod (args, ty') in
-    let const_def = Constant_def { name; ty; term } in
+    let const_def = { name; ty; term } in
     Define const_def
+
+  (* The inductive's parameters are included immediately in the constructors during parsing *)
+  let mk_ind_decl ind params' sort ctors =
+    let open Vernac.Command in
+    let open Common.Declarations in
+    (* Sets anonymous ids to a default value *)
+    let fix_name (x, t) = Option.value ~default:Name.default x, t in
+    let params = List.map fix_name params' in
+    let mk_ctor_decl ( name, args', ty') =
+      let ty = Prod (params' @ args', ty') in
+      let args = List.map fix_name args' in
+      { name; ind; params; args; ty }
+    in
+    let ctor_decls = List.map mk_ctor_decl ctors in
+    (* sort level is a placeholder *)
+    let ind_decl = { name = ind; params; sort; level = 9999; ctors=(List.map (fun c -> c.name) ctor_decls)} in
+    Inductive (ind_decl, ctor_decls)
 %}
 
 /* Token definitions 
@@ -28,14 +46,16 @@
 %token <int> INT
 %token <string> ID
 // %token <string> FILENAME
-%token COLON DOT COMMA ARROW EQUAL DOUBLE_QUOTE
+%token COLON DOT COMMA ARROW BIG_ARROW EQUAL DOUBLE_QUOTE VBAR AT
 %token LPAREN RPAREN
 %token KWD_UNIVERSE KWD_LAMBDA KWD_UNKNOWN KWD_UNKNOWN_T KWD_FORALL
 %token KWD_LET KWD_IN
-%token VERNAC_CHECK VERNAC_EVAL VERNAC_ELABORATE VERNAC_DEFINITION VERNAC_SET 
-%token VERNAC_FLAG_VARIANT VERNAC_FLAG_FUEL 
+%token KWD_MATCH KWD_AS KWD_RETURN KWD_WITH KWD_END
+%token VERNAC_CHECK VERNAC_EVAL VERNAC_ELABORATE VERNAC_LOAD
+%token VERNAC_DEFINITION VERNAC_INDUCTIVE  
+%token VERNAC_SET VERNAC_FLAG_VARIANT VERNAC_FLAG_FUEL 
 %token VERNAC_VARIANT_G VERNAC_VARIANT_S VERNAC_VARIANT_N
-%token VERNAC_LOAD VERNAC_SEPARATOR
+%token VERNAC_SEPARATOR
 %token EOF
 
 /* This reduces the number of error states.
@@ -52,7 +72,16 @@
 %type <Ast.term Vernac.Command.t> command_parser
 %type <Config.Flag.t> flag_parser
 
-%% /* Start grammar productions */
+/* Dummy starts. Only used to reduce number of error messages. */
+%start ctor_decl_parser
+%type <unit> ctor_decl_parser
+
+%%
+/* Dummy parsers. Only used to reduce number of error messages. */
+ctor_decl_parser :
+  ctor_decl; EOF {} 
+
+ /* Start grammar productions */
 program_parser :
   cmds=list(sequenced_command); EOF   { cmds }
 
@@ -63,7 +92,7 @@ command_parser :
   cmd=sequenced_command; EOF    { cmd }
   
 sequenced_command :
-| cmd=command ; VERNAC_SEPARATOR   { cmd }
+  cmd=command ; VERNAC_SEPARATOR   { cmd }
 
 flag_parser : 
   flag=flag; EOF    { flag }
@@ -78,10 +107,16 @@ command :
 // set <flag>
 | VERNAC_SET; flag=flag                    { Set flag }
 // def foo (x : Type1) : Type1 = ...
-| VERNAC_DEFINITION; id=id; args=list(arg); COLON; ty=term; EQUAL ; body=top  
- { mk_definition id (List.flatten args) ty body }
+| VERNAC_DEFINITION; id=id; args=args0; COLON; ty=term; EQUAL ; body=top  
+ { mk_definition id args ty body }
 // load "filename"
 | VERNAC_LOAD; DOUBLE_QUOTE; filename=ID; DOUBLE_QUOTE  { Load filename }
+// inductive list (a : Type0) : Type0 = <ctor_decls>
+| VERNAC_INDUCTIVE; id=id; params=args0; COLON; ty=term; EQUAL; ctors=list(ctor_decl)
+ { mk_ind_decl id params ty ctors }
+
+ctor_decl :
+| VBAR; id=id; args=args0; COLON; ty=term { (id, args, ty) }
 
 flag :
 | VERNAC_FLAG_VARIANT; var=variant { Variant var }
@@ -99,8 +134,11 @@ arg :
 (* (x y z : A) *)
 | LPAREN; ids=nonempty_list(id); COLON; dom=term; RPAREN  { List.map (fun id -> (Some id, dom)) ids }
 
+
 %inline args :
 | args=nonempty_list(arg) { List.flatten(args) }
+%inline args0 :
+| args=list(arg) { List.flatten(args) }
 
 top :
 | t=top; COLON; ty=term                                           { Ascription (t, ty) }
@@ -111,7 +149,15 @@ term :
 | KWD_FORALL; args=args; COMMA; body=term                         { Prod (args, body) }
 | dom=fact; ARROW; body=term                                      { Prod ([(None, dom)], body) }
 | KWD_LET; id=id; COLON; ty=term; EQUAL; t1=term; KWD_IN; t2=term { LetIn (id, ty, t1, t2) }
-| t=fact                                                          { t } 
+// match@list nil as z return P with <branch_decls>
+| KWD_MATCH; AT; ind=id; discr=top; KWD_AS; z=id; 
+  KWD_RETURN; pred=top; KWD_WITH; branches=list(branch_decl); KWD_END
+  { Match {ind; discr; z; pred; branches} }
+| t=fact  
+                                                        { t } 
+
+branch_decl : 
+| VBAR; ctor=id; ids=list(id); BIG_ARROW; body=top { { ctor; ids; body} }
 
 fact :
 | t=fact; u=atom                                       { App (t, u) }

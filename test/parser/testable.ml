@@ -6,16 +6,10 @@ let term =
 
 let command =
   let open Vernac in
-  let def_to_string : term Command.global_definition -> string = function
-    | Constant_def def -> Common.Id.Name.to_string def.name
-  in
-  let eq_definition
-      (def1 : term Command.global_definition)
-      (def2 : term Command.global_definition)
-    =
-    match def1, def2 with
-    | Constant_def d1, Constant_def d2 ->
-      d1.name = d2.name && eq_term d1.ty d2.ty && eq_term d1.term d2.term
+  let open Common.Declarations in
+  let def_to_string ({ name; _ } : term const_decl) = Common.Id.Name.to_string name in
+  let eq_definition (d1 : term const_decl) (d2 : term const_decl) =
+    d1.name = d2.name && eq_term d1.ty d2.ty && eq_term d1.term d2.term
   in
   let cmd_to_string : term Command.t -> string = function
     | Eval t -> "eval " ^ to_string t
@@ -24,6 +18,8 @@ let command =
     | Set flag -> "set " ^ Config.Flag.to_string flag
     | Define gdef -> "definition " ^ def_to_string gdef
     | Load filename -> Format.asprintf "import \"%s\"" filename
+    | Inductive (ind, _ctors) ->
+      Format.asprintf "inductive %s" (Common.Id.Name.to_string ind.name)
   in
   let eq_command (cmd1 : term Command.t) (cmd2 : term Command.t) =
     match cmd1, cmd2 with

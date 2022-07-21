@@ -3,4 +3,4 @@
  (libraries parsing kernel cast_cic vernac config)
  (preprocess
   (pps bisect_ppx))
- (modules compile))
+ (modules main))

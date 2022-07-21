@@ -1,16 +1,13 @@
-(** This module specifies global declarations. 
-    It follows Coq's example a bit (https://github.com/coq/coq/blob/master/kernel/declarations.ml)    
+open Common.Declarations
 
-    For now we are considering a global declaration to be simply a term and its
-    type. 
-    We are going for the simplest solution for the moment, but global declarations 
-    could have their own type, etc.
-*)
-open Common.Id
+(** Global declaration of constants *)
+module Const :
+  Store with type t = Kernel.Ast.term const_decl with type cached_t = Ast.term const_decl
 
-(** Find a global declaration.
-    Raises [Not_found] if no binding for the name exists. *)
-val find : Name.t -> Kernel.Ast.term * Kernel.Ast.term
+(** Global declaration of inductives *)
+module Ind :
+  Store with type t = Kernel.Ast.term ind_decl with type cached_t = Ast.term ind_decl
 
-(** Add a global declaration *)
-val add : Name.t -> Kernel.Ast.term * Kernel.Ast.term -> unit
+(** Global declaration of constructors *)
+module Ctor :
+  Store with type t = Kernel.Ast.term ctor_decl with type cached_t = Ast.term ctor_decl
