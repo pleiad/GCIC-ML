@@ -20,6 +20,12 @@ let forall = [%sedlex.regexp? "forall" | 0x2200]
 let unknown = [%sedlex.regexp? '?']
 let unknownT = [%sedlex.regexp? "?T"]
 let arrow = [%sedlex.regexp? "->" | 0x2192]
+let stringbuf = Buffer.create 64
+
+let get_and_flush buffer =
+  let s = Buffer.contents buffer in
+  Buffer.clear buffer;
+  s
 
 let rec token lexbuf =
   match%sedlex lexbuf with
@@ -58,8 +64,8 @@ let rec token lexbuf =
   | ':' -> COLON
   | '.' -> DOT
   | ',' -> COMMA
+  | '"' -> FILENAME (string lexbuf stringbuf)
   | '|' -> VBAR
-  | '"' -> DOUBLE_QUOTE
   | '@' -> AT
   | whitespace -> token lexbuf
   | newline ->
@@ -69,4 +75,15 @@ let rec token lexbuf =
   | any -> raise (SyntaxError ("Unexpected char: " ^ lexeme lexbuf))
   (* It complains if there isn't a failsafe case, but it's redundant with "any".
   We are adding it just so it doesn't complain *)
+  | _ -> assert false
+
+and string lexbuf stringbuf =
+  match%sedlex lexbuf with
+  | '"' | eof -> get_and_flush stringbuf
+  | newline ->
+    Sedlexing.new_line lexbuf;
+    string lexbuf stringbuf
+  | any ->
+    Buffer.add_string stringbuf (lexeme lexbuf);
+    string lexbuf stringbuf
   | _ -> assert false

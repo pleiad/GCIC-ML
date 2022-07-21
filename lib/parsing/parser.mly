@@ -45,8 +45,8 @@
 */
 %token <int> INT
 %token <string> ID
-// %token <string> FILENAME
-%token COLON DOT COMMA ARROW BIG_ARROW EQUAL DOUBLE_QUOTE VBAR AT
+%token <string> FILENAME
+%token COLON DOT COMMA ARROW BIG_ARROW EQUAL VBAR AT
 %token LPAREN RPAREN
 %token KWD_UNIVERSE KWD_LAMBDA KWD_UNKNOWN KWD_UNKNOWN_T KWD_FORALL
 %token KWD_LET KWD_IN
@@ -110,7 +110,7 @@ command :
 | VERNAC_DEFINITION; id=id; args=args0; COLON; ty=term; EQUAL ; body=top  
  { mk_definition id args ty body }
 // load "filename"
-| VERNAC_LOAD; DOUBLE_QUOTE; filename=ID; DOUBLE_QUOTE  { Load filename }
+| VERNAC_LOAD; filename=FILENAME  { Load filename }
 // inductive list (a : Type0) : Type0 = <ctor_decls>
 | VERNAC_INDUCTIVE; id=id; params=args0; COLON; ty=term; EQUAL; ctors=list(ctor_decl)
  { mk_ind_decl id params ty ctors }
