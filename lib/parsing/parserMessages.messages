@@ -10,7 +10,7 @@ term_parser: ID ARROW RPAREN
 
 After an `$0` (arrow), a term is expected.
 For example:
-> $1 $0 Type0
+> $1 $0 Type
 
 term_parser: ID RPAREN
 ##
@@ -46,7 +46,30 @@ term_parser: KWD_FORALL LPAREN ID COLON ID RPAREN COMMA RPAREN
 I'm currently parsing a pi type.
 After the `,` (comma), the body of the pi type is expected.
 For example:
-> $2 $1 $0 Type0
+> $2 $1 $0 Type
+
+term_parser: KWD_FORALL LPAREN ID COLON ID RPAREN BIG_ARROW
+##
+## Ends in an error in state: 36.
+##
+## term -> KWD_FORALL nonempty_list(arg) . COMMA term [ VERNAC_SEPARATOR VBAR RPAREN KWD_WITH KWD_IN KWD_END KWD_AS EOF COLON ASSIGN ]
+##
+## The known suffix of the stack is as follows:
+## KWD_FORALL nonempty_list(arg)
+##
+## WARNING: This example involves spurious reductions.
+## This implies that, although the LR(1) items shown above provide an
+## accurate view of the past (what has been recognized so far), they
+## may provide an INCOMPLETE view of the future (what was expected next).
+## In state 45, spurious reduction of production nonempty_list(arg) -> arg
+##
+
+I'm currently parsing a pi type.
+After the list of arguments, a `,` (comma) is expected followed by the body of the product type.
+For example:
+> $1 $0 , <term>
+
+
 
 term_parser: KWD_FORALL RPAREN
 ##
@@ -61,7 +84,7 @@ term_parser: KWD_FORALL RPAREN
 I'm currently parsing the arguments of a pi type.
 After the `$0`, an argument of the form `(id ... id : term)` is expected.
 For example:
-> $0 (a b : Type0), ...
+> $0 (a b : Type), ...
 > $0, ...
 
 term_parser: KWD_LAMBDA LPAREN ID COLON ID KWD_LET
@@ -83,6 +106,21 @@ term_parser: KWD_LAMBDA LPAREN ID COLON ID KWD_LET
 I'm currently parsing arguments to a pi type or lambda expression.
 After the `$0`, a closing parenthesis is expected `)`.
 
+term_parser: KWD_LAMBDA LPAREN ID COLON ID RPAREN BIG_ARROW VERNAC_VARIANT_S
+##
+## Ends in an error in state: 34.
+##
+## term -> KWD_LAMBDA nonempty_list(arg) BIG_ARROW . term [ VERNAC_SEPARATOR VBAR RPAREN KWD_WITH KWD_IN KWD_END KWD_AS EOF COLON ASSIGN ]
+##
+## The known suffix of the stack is as follows:
+## KWD_LAMBDA nonempty_list(arg) BIG_ARROW
+##
+
+I'm currently parsing the body of a lambda expression.
+After `=>` (big arrow), a term is expected.
+For example:
+> $2 $1 $0 Type
+
 term_parser: KWD_LAMBDA LPAREN ID COLON ID RPAREN RPAREN
 ##
 ## Ends in an error in state: 45.
@@ -95,11 +133,11 @@ term_parser: KWD_LAMBDA LPAREN ID COLON ID RPAREN RPAREN
 ##
 
 I'm currently parsing the arguments of a lambda expression.
-I expect more arguments of the form `(id ... id : type)` or a `.` (dot) followed
+I expect more arguments of the form `(id ... id : type)` or a `=>` (big arrow) followed
 by the body of the lambda.
 For example:
 > $0, ...
-> $0 (id1 id2 : Type0), ...
+> $0 (id1 id2 : Type), ...
 
 term_parser: KWD_LAMBDA LPAREN ID COLON RPAREN
 ##
@@ -114,7 +152,7 @@ term_parser: KWD_LAMBDA LPAREN ID COLON RPAREN
 I'm currently parsing the type of the arguments of a lambda expression.
 After the `:` (colon), a term is expected.
 For example:
-> $2 $1 $0 Type0), ...
+> $2 $1 $0 Type), ...
 
 term_parser: KWD_LAMBDA LPAREN ID RPAREN
 ##
@@ -148,7 +186,7 @@ I expect a nonempty list of identifiers.
 For example:
 > (x : ?0), ...
 > (x y z : ?0), ...
-> (x : ?0) (y z : Type1), ...
+> (x : ?0) (y z : Type), ...
 
 term_parser: KWD_LAMBDA RPAREN
 ##
@@ -166,8 +204,53 @@ For example:
 > $0 (x : a)
 > $0 (x y z : a)
 
+term_parser: KWD_LET RPAREN
+##
+## Ends in an error in state: 29.
+##
+## term -> KWD_LET . id COLON term ASSIGN term KWD_IN term [ VERNAC_SEPARATOR VBAR RPAREN KWD_WITH KWD_IN KWD_END KWD_AS EOF COLON ASSIGN ]
+##
+## The known suffix of the stack is as follows:
+## KWD_LET
+##
 
+I'm currently parsing the binder of a let expression.
+After the `let`, an identifier is expected followed by `:`.
+For example:
+> $0 x : ?0 := <term>
+> $0 f : foo Type ?1 := <term>
 
+term_parser: KWD_LET ID RPAREN
+##
+## Ends in an error in state: 30.
+##
+## term -> KWD_LET id . COLON term ASSIGN term KWD_IN term [ VERNAC_SEPARATOR VBAR RPAREN KWD_WITH KWD_IN KWD_END KWD_AS EOF COLON ASSIGN ]
+##
+## The known suffix of the stack is as follows:
+## KWD_LET id
+##
+
+I'm currently parsing a let expression.
+After the identifier, a `:` (colon) is expected followed by a type.
+For example:
+> $1 $0 : ?0 := <term>
+> $1 $0 : foo Type ?1 := <term>
+
+term_parser: KWD_LET ID COLON RPAREN
+##
+## Ends in an error in state: 31.
+##
+## term -> KWD_LET id COLON . term ASSIGN term KWD_IN term [ VERNAC_SEPARATOR VBAR RPAREN KWD_WITH KWD_IN KWD_END KWD_AS EOF COLON ASSIGN ]
+##
+## The known suffix of the stack is as follows:
+## KWD_LET id COLON
+##
+
+I'm currently parsing the binder's type of a let expression.
+After the `:`, an expression is expected followed by `:=`.
+For example:
+> $2 $1 $0 ?0 := <term>
+> $2 $1 $0 foo Type ?1 := <term>
 
 term_parser: KWD_LET ID COLON ID RPAREN
 ##
@@ -186,84 +269,58 @@ term_parser: KWD_LET ID COLON ID RPAREN
 ##
 
 I'm currently parsing the bounded term's type of a let expression.
-After the `:`, an expression is expected followed by `=`.
+After the `:`, an expression is expected followed by `:=`.
 For example:
-> $3 $2 $1 $0 = ...
-> $3 $2 $1 $0 x = ...
+> $3 $2 $1 $0 := <term>
+> $3 $2 $1 $0 x := <term>
 
-term_parser: KWD_LET ID COLON RPAREN
+term_parser: KWD_LET ID COLON ID ASSIGN VERNAC_VARIANT_S
 ##
-## Ends in an error in state: 31.
+## Ends in an error in state: 49.
 ##
-## term -> KWD_LET id COLON . term ASSIGN term KWD_IN term [ VERNAC_SEPARATOR VBAR RPAREN KWD_WITH KWD_IN KWD_END KWD_AS EOF COLON ASSIGN ]
+## term -> KWD_LET id COLON term ASSIGN . term KWD_IN term [ VERNAC_SEPARATOR VBAR RPAREN KWD_WITH KWD_IN KWD_END KWD_AS EOF COLON ASSIGN ]
 ##
 ## The known suffix of the stack is as follows:
-## KWD_LET id COLON
+## KWD_LET id COLON term ASSIGN
 ##
 
-I'm currently parsing the binder's type of a let expression.
-After the `:`, an expression is expected followed by `=`.
+I'm currently parsing the bounded term of a let expression.
+After the `:=`, an expression is expected followed by `in`.
 For example:
-> $2 $1 $0 ?0 = ...
-> $2 $1 $0 foo Type0 ?1 = ...
+> $4 $3 $2 $1 $0 Type in <term>
 
-term_parser: KWD_LET ID RPAREN
+term_parser: KWD_LET ID COLON ID ASSIGN ID VERNAC_SEPARATOR
 ##
-## Ends in an error in state: 30.
+## Ends in an error in state: 50.
 ##
-## term -> KWD_LET id . COLON term ASSIGN term KWD_IN term [ VERNAC_SEPARATOR VBAR RPAREN KWD_WITH KWD_IN KWD_END KWD_AS EOF COLON ASSIGN ]
+## term -> KWD_LET id COLON term ASSIGN term . KWD_IN term [ VERNAC_SEPARATOR VBAR RPAREN KWD_WITH KWD_IN KWD_END KWD_AS EOF COLON ASSIGN ]
 ##
 ## The known suffix of the stack is as follows:
-## KWD_LET id
-##
-
-I'm currently parsing a let expression.
-After the identifier, a `:` (colon) is expected followed by a type.
-For example:
-> $1 $0 : ?0 = ...
-> $1 $0 : foo Type0 ?1 = ...
-
-term_parser: KWD_LET RPAREN
-##
-## Ends in an error in state: 29.
-##
-## term -> KWD_LET . id COLON term ASSIGN term KWD_IN term [ VERNAC_SEPARATOR VBAR RPAREN KWD_WITH KWD_IN KWD_END KWD_AS EOF COLON ASSIGN ]
-##
-## The known suffix of the stack is as follows:
-## KWD_LET
-##
-
-I'm currently parsing the binder of a let expression.
-After the `let`, an identifier is expected followed by `:`.
-For example:
-> $0 x : ?0 = ...
-> $0 f : foo Type0 ?1 = ...
-
-##term_parser: KWD_UNIVERSE RPAREN
-##
-## Ends in an error in state: 126.
-##
-## term_parser -> top . EOF [ # ]
-## top -> top . COLON term [ EOF COLON ]
-##
-## The known suffix of the stack is as follows:
-## top
+## KWD_LET id COLON term ASSIGN term
 ##
 ## WARNING: This example involves spurious reductions.
 ## This implies that, although the LR(1) items shown above provide an
 ## accurate view of the past (what has been recognized so far), they
 ## may provide an INCOMPLETE view of the future (what was expected next).
-## In state 23, spurious reduction of production atom -> KWD_UNIVERSE
-## In state 43, spurious reduction of production fact -> atom
 ## In state 40, spurious reduction of production term -> fact
-## In state 66, spurious reduction of production top -> term
 ##
-##I'm currently parsing the level of a universe.
-##After the `$0`, a non-negative integer is expected.
-##For example:
-##> $0 0
-##> Type1
-##> □1
+
+Missing `in` keyword, in let expression.
+
+term_parser: KWD_LET ID COLON ID ASSIGN ID KWD_IN VERNAC_VARIANT_S
+##
+## Ends in an error in state: 51.
+##
+## term -> KWD_LET id COLON term ASSIGN term KWD_IN . term [ VERNAC_SEPARATOR VBAR RPAREN KWD_WITH KWD_IN KWD_END KWD_AS EOF COLON ASSIGN ]
+##
+## The known suffix of the stack is as follows:
+## KWD_LET id COLON term ASSIGN term KWD_IN
+##
+
+I'm currently parsing the body of a let expression.
+After the `in`, an expression is expected.
+For example:
+> $6 $5 $4 $3 $2 $1 $0 Type
 
 term_parser: KWD_UNKNOWN RPAREN
 ##
@@ -312,7 +369,7 @@ After the `(` a term is expected followed by a closing parenthesis `)`.
 For example:
 > (f x y)
 > (foo ?0 y)
-> (fun (x : Type0). x)
+> (fun (x : Type) => x)
 
 term_parser: RPAREN
 ##
@@ -327,8 +384,8 @@ term_parser: RPAREN
 I'm currently parsing a term.
 At the top level, a term is expected.
 For example:
-> let f : ?0 = Type0 in f
-> fun (x : Type0). x
+> let f : ?0 := Type in f
+> fun (x : Type) => x
 
 program_parser: RPAREN
 ##
@@ -343,8 +400,8 @@ program_parser: RPAREN
 I'm currently parsing a program.
 At the top level, a command is expected.
 For example:
-> eval let f : ?0 = Type0 in f;;
-> check (fun (x : Type0). x) As ?0 -> ?0;;
+> Eval let f : ?0 := Type in f.
+> Check (fun (x : Type) => x).
 
 
 program_parser: VERNAC_EVAL VERNAC_SEPARATOR
@@ -359,7 +416,7 @@ program_parser: VERNAC_EVAL VERNAC_SEPARATOR
 
 A term is expected after the `$0` command.
 For example:
-> $0 let f : ?0 = Type0 in f;;
+> $0 let f : ?0 := Type in f.
 
 
 term_parser: KWD_LAMBDA LPAREN ID COLON ID RPAREN COMMA
@@ -379,11 +436,11 @@ term_parser: KWD_LAMBDA LPAREN ID COLON ID RPAREN COMMA
 ##
 
 I'm currently parsing the arguments of a lambda expression.
-I expect more arguments of the form (x y z : t) or a `.` (dot) followed
+I expect more arguments of the form (x y z : t) or a `=>` (big arrow) followed
 by the body of the lambda.
 For example:
-> $1 $0. ...
-> $1 $0 (id1 id2 : Type0). ...
+> $1 $0 => ...
+> $1 $0 (id1 id2 : Type) => ...
 
 
 program_parser: VERNAC_ELABORATE VERNAC_SEPARATOR
@@ -398,7 +455,7 @@ program_parser: VERNAC_ELABORATE VERNAC_SEPARATOR
 
 A term is expected after the `$0` command.
 For example:
-> $0 let f : ?0 = Type0 in f;;
+> $0 let f : ?0 := Type in f.
 
 program_parser: VERNAC_CHECK VERNAC_SEPARATOR
 ##
@@ -412,7 +469,7 @@ program_parser: VERNAC_CHECK VERNAC_SEPARATOR
 
 A term is expected after the `$0` command.
 For example:
-> $0 Type0 : Type1;;
+> $0 Type : Type@1.
 
 program_parser: VERNAC_ELABORATE ID VERNAC_SEPARATOR VERNAC_SEPARATOR
 ##
@@ -438,8 +495,8 @@ program_parser: VERNAC_SET VERNAC_VARIANT_S
 
 The command `$0` should be followed by a configuration option.
 For example:
-> $0 variant G;;
-> $0 fuel 0;;
+> $0 Variant G.
+> $0 Fuel 0.
 
 
 term_parser: LPAREN ID VERNAC_SEPARATOR
@@ -494,11 +551,6 @@ program_parser: VERNAC_CHECK ID RPAREN
 ## In state 40, spurious reduction of production term -> fact
 ## In state 66, spurious reduction of production top -> term
 ##
-
-Missing a `;;` after $0, to close the command. 
-For example:
-> $1 $0;;
-
 program_parser: VERNAC_ELABORATE ID VERNAC_VARIANT_S
 ##
 ## Ends in an error in state: 96.
@@ -516,11 +568,6 @@ program_parser: VERNAC_ELABORATE ID VERNAC_VARIANT_S
 ## In state 40, spurious reduction of production term -> fact
 ## In state 66, spurious reduction of production top -> term
 ##
-
-Missing a `;;` after $0, to close the command. 
-For example:
-> $1 $0;;
-
 program_parser: VERNAC_EVAL ID VERNAC_VARIANT_S
 ##
 ## Ends in an error in state: 94.
@@ -539,9 +586,9 @@ program_parser: VERNAC_EVAL ID VERNAC_VARIANT_S
 ## In state 66, spurious reduction of production top -> term
 ##
 
-Missing a `;;` after $0, to close the command. 
+Missing a `.` after $0, to close the command. 
 For example:
-> $1 $0;;
+> $1 $0.
 
 
 program_parser: VERNAC_DEFINITION VERNAC_VARIANT_S
@@ -556,7 +603,7 @@ program_parser: VERNAC_DEFINITION VERNAC_VARIANT_S
 
 An identifier must come after `$0`.
 For example:
-> $0 my_function_name (x : Type0) : Type1 = x;;
+> $0 my_function_name (x : Type) : Type@1 := x.
 
 program_parser: VERNAC_DEFINITION ID VERNAC_VARIANT_S
 ##
@@ -571,9 +618,24 @@ program_parser: VERNAC_DEFINITION ID VERNAC_VARIANT_S
 I expect arguments of the form `(id ... id : type)` or a `:` (colon) followed
 by the type of the definition.
 For example:
-> $1 $0 (a b : Type0) : Type1 = ...;;
-> $1 $0 : Type1 = ...;;
+> $1 $0 (a b : Type) : Type@1 := <body>.
+> $1 $0 : Type@1 := <body>.
 
+command_parser: VERNAC_DEFINITION ID LPAREN ID COLON ID RPAREN VERNAC_VARIANT_S
+##
+## Ends in an error in state: 88.
+##
+## list(arg) -> arg . list(arg) [ COLON ]
+##
+## The known suffix of the stack is as follows:
+## arg
+##
+
+I expect arguments of the form `(id ... id : type)` or a `:` (colon) followed
+by the type of the definition.
+For example:
+> $0 (a b : Type) : Type@1 := <body>.
+> $0 : Type@1 := <body>.
 
 
 program_parser: VERNAC_DEFINITION ID COLON VERNAC_VARIANT_S
@@ -588,7 +650,7 @@ program_parser: VERNAC_DEFINITION ID COLON VERNAC_VARIANT_S
 
 The type of the definition must follow the `:` (colon).
 For example:
-> $3 $2 $1 $0 Type1 = ...;;
+> $3 $2 $1 $0 Type@1 := <body>.
 
 program_parser: VERNAC_DEFINITION ID COLON ID VERNAC_VARIANT_S
 ##
@@ -606,13 +668,45 @@ program_parser: VERNAC_DEFINITION ID COLON ID VERNAC_VARIANT_S
 ## In state 40, spurious reduction of production term -> fact
 ##
 
-I expect an `=` (equal) followed by the body of the definition.
+I expect an `:=` (assign) followed by the body of the definition.
 For example:
-> $4 $3 $2 $1 $0 = ...;;
+> $4 $3 $2 $1 $0 := <body>.
 
+command_parser: VERNAC_DEFINITION ID COLON ID ASSIGN VERNAC_VARIANT_S
+##
+## Ends in an error in state: 102.
+##
+## command -> VERNAC_DEFINITION id list(arg) COLON term ASSIGN . top [ VERNAC_SEPARATOR ]
+##
+## The known suffix of the stack is as follows:
+## VERNAC_DEFINITION id list(arg) COLON term ASSIGN
+##
 
+The body of the definition must follow the `:=` (assign).
+For example:
+> $5 $4 $3 $2 $1 $0 Type.
 
+command_parser: VERNAC_DEFINITION ID COLON ID ASSIGN ID VBAR
+##
+## Ends in an error in state: 103.
+##
+## command -> VERNAC_DEFINITION id list(arg) COLON term ASSIGN top . [ VERNAC_SEPARATOR ]
+## top -> top . COLON term [ VERNAC_SEPARATOR COLON ]
+##
+## The known suffix of the stack is as follows:
+## VERNAC_DEFINITION id list(arg) COLON term ASSIGN top
+##
+## WARNING: This example involves spurious reductions.
+## This implies that, although the LR(1) items shown above provide an
+## accurate view of the past (what has been recognized so far), they
+## may provide an INCOMPLETE view of the future (what was expected next).
+## In state 40, spurious reduction of production term -> fact
+## In state 66, spurious reduction of production top -> term
+##
 
+Missing a `.`, to close the definition. 
+For example:
+> ... $1 $0.
 
 program_parser: VERNAC_LOAD VERNAC_VARIANT_S
 ##
@@ -624,9 +718,9 @@ program_parser: VERNAC_LOAD VERNAC_VARIANT_S
 ## VERNAC_LOAD
 ##
 
-I expect a filename wrapped in double-quotes after `load`.
+I expect a filename wrapped in double-quotes after `Load`.
 For example:
-> load "my_file";;
+> Load "my_file".
 
 command_parser: VERNAC_VARIANT_S
 ##
@@ -641,8 +735,8 @@ command_parser: VERNAC_VARIANT_S
 I'm currently parsing a program.
 At the top level, a command is expected.
 For example:
-> eval let f : ?0 = Type0 in f;;
-> check (fun (x : Type0). x) As ?0 -> ?0;;
+> Eval let f : ?0 := Type in f.
+> Check (fun (x : Type) => x).
 
 command_parser: VERNAC_CHECK ID VERNAC_SEPARATOR VERNAC_VARIANT_S
 ##
@@ -699,9 +793,9 @@ command_parser: VERNAC_SET VERNAC_FLAG_FUEL INT VERNAC_VARIANT_S
 ## command
 ##
 
-Missing a `;;` after $0, to close the command. 
+Missing a `.` after $0, to close the command. 
 For example:
-> $0;;
+> $0.
 
 flag_parser: VERNAC_VARIANT_S
 ##
@@ -715,8 +809,8 @@ flag_parser: VERNAC_VARIANT_S
 
 A flag is expected.
 For example:
-> fuel 1000
-> variant G
+> Fuel 1000
+> Variant G
 
 flag_parser: VERNAC_FLAG_FUEL INT VERNAC_VARIANT_S
 ##
@@ -743,7 +837,7 @@ command_parser: VERNAC_INDUCTIVE VERNAC_VARIANT_S
 
 An identifier must come after `$0`.
 For example:
-> $0 my_inductive_name (x : Type0) : Type1 = <ctor-declarations>;;
+> $0 my_inductive_name (x : Type) : Type@1 := <ctor-declarations>.
 
 command_parser: VERNAC_INDUCTIVE ID VERNAC_VARIANT_S
 ##
@@ -758,8 +852,8 @@ command_parser: VERNAC_INDUCTIVE ID VERNAC_VARIANT_S
 I expect arguments of the form `(id ... id : type)` or a `:` (colon) followed
 by the sort of the inductive.
 For example:
-> $1 $0 (a b : Type0) : Type1 = ...;;
-> $1 $0 : Type1 = ...;;
+> $1 $0 (a b : Type) : Type@1 := <ctor-declarations>.
+> $1 $0 : Type@1 := <ctor-declarations>.
 
 command_parser: VERNAC_INDUCTIVE ID COLON VERNAC_VARIANT_S
 ##
@@ -773,7 +867,7 @@ command_parser: VERNAC_INDUCTIVE ID COLON VERNAC_VARIANT_S
 
 The sort of the inductive declaration must follow the `:` (colon).
 For example:
-> $3 $2 $1 $0 Type1 = ...;;
+> $3 $2 $1 $0 Type := <ctor-declarations>.
 
 command_parser: VERNAC_INDUCTIVE ID COLON ID VERNAC_VARIANT_S
 ##
@@ -791,9 +885,9 @@ command_parser: VERNAC_INDUCTIVE ID COLON ID VERNAC_VARIANT_S
 ## In state 40, spurious reduction of production term -> fact
 ##
 
-I expect an `=` (equal) followed by the body of the definition.
+I expect an `:=` (assign) followed by the body of the definition.
 For example:
-> $4 $3 $2 $1 $0 = ...;;
+> $4 $3 $2 $1 $0 := <ctor-declarations>.
 
 
 ctor_decl_parser: VBAR VERNAC_VARIANT_S
@@ -808,7 +902,7 @@ ctor_decl_parser: VBAR VERNAC_VARIANT_S
 
 An identifier must come after `$0`.
 For example:
-> $0 my_constructor_name (x : Type0) ...
+> $0 my_constructor_name (x : Type) ...
 
 ctor_decl_parser: VBAR ID VERNAC_VARIANT_S
 ##
@@ -823,8 +917,8 @@ ctor_decl_parser: VBAR ID VERNAC_VARIANT_S
 I expect arguments of the form `(id ... id : type)` or a `:` (colon) followed
 by the type of the constructor.
 For example:
-> $1 $0 (a b : Type0) : some_ind
-> $1 $0 : some_ind
+> $1 $0 (a b : Type) : <type>
+> $1 $0 : <type>
 
 ctor_decl_parser: VBAR ID COLON VERNAC_VARIANT_S
 ##
@@ -838,7 +932,7 @@ ctor_decl_parser: VBAR ID COLON VERNAC_VARIANT_S
 
 The type of the constructor must follow the `:` (colon).
 For example:
-> $3 $2 $1 $0 some_ind
+> $3 $2 $1 $0 <type>
 
 
 ctor_decl_parser: VERNAC_VARIANT_S
@@ -873,53 +967,6 @@ ctor_decl_parser: VBAR ID COLON ID VERNAC_VARIANT_S
 I'm currently parsing a single constructor declaration.
 After `$0`, the end of file is expected.
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 term_parser: KWD_UNIVERSE VERNAC_VARIANT_S
 ##
 ## Ends in an error in state: 23.
@@ -931,7 +978,10 @@ term_parser: KWD_UNIVERSE VERNAC_VARIANT_S
 ## KWD_UNIVERSE
 ##
 
-<YOUR SYNTAX ERROR MESSAGE HERE>
+I'm currently parsing a universe.
+For example:
+> $0
+> $0 @ 1
 
 term_parser: KWD_UNIVERSE AT VERNAC_VARIANT_S
 ##
@@ -943,7 +993,10 @@ term_parser: KWD_UNIVERSE AT VERNAC_VARIANT_S
 ## KWD_UNIVERSE AT
 ##
 
-<YOUR SYNTAX ERROR MESSAGE HERE>
+I'm currently parsing the level of a universe.
+After the `$0`, a non-negative integer is expected.
+For example:
+> $1 $0 1
 
 term_parser: KWD_MATCH VERNAC_VARIANT_S
 ##
@@ -977,78 +1030,6 @@ term_parser: KWD_MATCH AT ID VERNAC_VARIANT_S
 ##
 ## The known suffix of the stack is as follows:
 ## KWD_MATCH AT id
-##
-
-<YOUR SYNTAX ERROR MESSAGE HERE>
-
-term_parser: KWD_LAMBDA LPAREN ID COLON ID RPAREN BIG_ARROW VERNAC_VARIANT_S
-##
-## Ends in an error in state: 34.
-##
-## term -> KWD_LAMBDA nonempty_list(arg) BIG_ARROW . term [ VERNAC_SEPARATOR VBAR RPAREN KWD_WITH KWD_IN KWD_END KWD_AS EOF COLON ASSIGN ]
-##
-## The known suffix of the stack is as follows:
-## KWD_LAMBDA nonempty_list(arg) BIG_ARROW
-##
-
-<YOUR SYNTAX ERROR MESSAGE HERE>
-
-term_parser: KWD_FORALL LPAREN ID COLON ID RPAREN BIG_ARROW
-##
-## Ends in an error in state: 36.
-##
-## term -> KWD_FORALL nonempty_list(arg) . COMMA term [ VERNAC_SEPARATOR VBAR RPAREN KWD_WITH KWD_IN KWD_END KWD_AS EOF COLON ASSIGN ]
-##
-## The known suffix of the stack is as follows:
-## KWD_FORALL nonempty_list(arg)
-##
-## WARNING: This example involves spurious reductions.
-## This implies that, although the LR(1) items shown above provide an
-## accurate view of the past (what has been recognized so far), they
-## may provide an INCOMPLETE view of the future (what was expected next).
-## In state 45, spurious reduction of production nonempty_list(arg) -> arg
-##
-
-<YOUR SYNTAX ERROR MESSAGE HERE>
-
-term_parser: KWD_LET ID COLON ID ASSIGN VERNAC_VARIANT_S
-##
-## Ends in an error in state: 49.
-##
-## term -> KWD_LET id COLON term ASSIGN . term KWD_IN term [ VERNAC_SEPARATOR VBAR RPAREN KWD_WITH KWD_IN KWD_END KWD_AS EOF COLON ASSIGN ]
-##
-## The known suffix of the stack is as follows:
-## KWD_LET id COLON term ASSIGN
-##
-
-<YOUR SYNTAX ERROR MESSAGE HERE>
-
-term_parser: KWD_LET ID COLON ID ASSIGN ID VERNAC_SEPARATOR
-##
-## Ends in an error in state: 50.
-##
-## term -> KWD_LET id COLON term ASSIGN term . KWD_IN term [ VERNAC_SEPARATOR VBAR RPAREN KWD_WITH KWD_IN KWD_END KWD_AS EOF COLON ASSIGN ]
-##
-## The known suffix of the stack is as follows:
-## KWD_LET id COLON term ASSIGN term
-##
-## WARNING: This example involves spurious reductions.
-## This implies that, although the LR(1) items shown above provide an
-## accurate view of the past (what has been recognized so far), they
-## may provide an INCOMPLETE view of the future (what was expected next).
-## In state 40, spurious reduction of production term -> fact
-##
-
-<YOUR SYNTAX ERROR MESSAGE HERE>
-
-term_parser: KWD_LET ID COLON ID ASSIGN ID KWD_IN VERNAC_VARIANT_S
-##
-## Ends in an error in state: 51.
-##
-## term -> KWD_LET id COLON term ASSIGN term KWD_IN . term [ VERNAC_SEPARATOR VBAR RPAREN KWD_WITH KWD_IN KWD_END KWD_AS EOF COLON ASSIGN ]
-##
-## The known suffix of the stack is as follows:
-## KWD_LET id COLON term ASSIGN term KWD_IN
 ##
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
@@ -1221,18 +1202,6 @@ command_parser: VERNAC_INDUCTIVE ID COLON ID ASSIGN VERNAC_VARIANT_S
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-command_parser: VERNAC_DEFINITION ID LPAREN ID COLON ID RPAREN VERNAC_VARIANT_S
-##
-## Ends in an error in state: 88.
-##
-## list(arg) -> arg . list(arg) [ COLON ]
-##
-## The known suffix of the stack is as follows:
-## arg
-##
-
-<YOUR SYNTAX ERROR MESSAGE HERE>
-
 command_parser: VERNAC_INDUCTIVE ID COLON ID ASSIGN VBAR ID COLON ID RPAREN
 ##
 ## Ends in an error in state: 91.
@@ -1248,38 +1217,6 @@ command_parser: VERNAC_INDUCTIVE ID COLON ID ASSIGN VBAR ID COLON ID RPAREN
 ## may provide an INCOMPLETE view of the future (what was expected next).
 ## In state 40, spurious reduction of production term -> fact
 ## In state 87, spurious reduction of production ctor_decl -> VBAR id list(arg) COLON term
-##
-
-<YOUR SYNTAX ERROR MESSAGE HERE>
-
-command_parser: VERNAC_DEFINITION ID COLON ID ASSIGN VERNAC_VARIANT_S
-##
-## Ends in an error in state: 102.
-##
-## command -> VERNAC_DEFINITION id list(arg) COLON term ASSIGN . top [ VERNAC_SEPARATOR ]
-##
-## The known suffix of the stack is as follows:
-## VERNAC_DEFINITION id list(arg) COLON term ASSIGN
-##
-
-<YOUR SYNTAX ERROR MESSAGE HERE>
-
-command_parser: VERNAC_DEFINITION ID COLON ID ASSIGN ID VBAR
-##
-## Ends in an error in state: 103.
-##
-## command -> VERNAC_DEFINITION id list(arg) COLON term ASSIGN top . [ VERNAC_SEPARATOR ]
-## top -> top . COLON term [ VERNAC_SEPARATOR COLON ]
-##
-## The known suffix of the stack is as follows:
-## VERNAC_DEFINITION id list(arg) COLON term ASSIGN top
-##
-## WARNING: This example involves spurious reductions.
-## This implies that, although the LR(1) items shown above provide an
-## accurate view of the past (what has been recognized so far), they
-## may provide an INCOMPLETE view of the future (what was expected next).
-## In state 40, spurious reduction of production term -> fact
-## In state 66, spurious reduction of production top -> term
 ##
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
