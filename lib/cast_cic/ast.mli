@@ -18,11 +18,35 @@ type term =
       ; term : term
       }
   | Const of Name.t
+  (* Inductives *)
+  | Inductive of Name.t * int * term list
+  | Constructor of
+      { ctor : Name.t
+      ; level : int
+      ; params : term list
+      ; args : term list
+      }
+  | Match of
+      { (* We keep track of the inductive to be used in the reduction of a match 
+      expression. The match is turned into a lambda with the inductive as domain. *)
+        ind : Name.t
+      ; discr : term
+      ; z : Name.t
+      ; pred : term
+      ; f : Name.t
+      ; branches : branch list
+      }
 
 and fun_info =
   { id : Name.t
   ; dom : term
   ; body : term
+  }
+
+and branch =
+  { ctor : Name.t
+  ; ids : Name.t list
+  ; term : term
   }
 
 (** Pretty printers *)
@@ -34,32 +58,8 @@ val to_string : term -> string
 (** Prints the prettified version of a term *)
 val print : term -> unit
 
-(** Head constructors *)
-type head =
-  | HProd
-  | HUniverse of int
-
-(** Returns the head constructor of a type *)
-val head : term -> (head, string) result
-
-(** Returns the least precise type for the given head constructor, 
-    at the provided level *)
-val germ : int -> head -> term
-
-(** Checks if a term corresponds to a germ at the provided universe level *)
-val is_germ : int -> term -> bool
-
-(** Checks if a term corresponds to a germ for a level >= to the provided universe level *)
-val is_germ_for_gte_level : int -> term -> bool
-
-(** Checks if a term is in neutral form *)
-val is_neutral : term -> bool
-
-(** Checks if a term is in canonical form *)
-val is_canonical : term -> bool
-
 (** Performs substitution inside a term *)
-val subst : term option Name.Map.t -> term -> term
+val subst : term Name.Map.t -> term -> term
 
 (** Performs substitution inside a term *)
 val subst1 : Name.t -> term -> term -> term
@@ -67,5 +67,18 @@ val subst1 : Name.t -> term -> term -> term
 (** Checks if two terms are identifiable up to alpha-renaming *)
 val alpha_equal : term -> term -> bool
 
-(** Checks if two terms are alpha consistent *)
-val alpha_consistent : term -> term -> bool
+(** Telescopic substitution of values for free variables in a list of terms. 
+    For instance, the values of an inductive or a constructor and the declared
+    parameter and argument types, such as in `cons Bool ...`:
+    - cons types: (A : Type) (hd : A) (tl : list A)
+    - values : Bool ... 
+    - result : [Type, Bool, list Bool]
+    Raises an error if the values and the list of terms have different sizes.
+*)
+val subst_tele : ?acc:term list -> term list -> (Name.t * term) list -> term list
+
+(** Telescopic substitution of a single value for the first free variable in a
+    list of terms. Similar to `subst_tele` but just the first identifier in the 
+    rest of the list. 
+*)
+val subst1_tele : term -> (Name.t * term) list -> (Name.t * term) list

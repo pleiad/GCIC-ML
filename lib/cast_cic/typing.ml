@@ -12,13 +12,16 @@ type type_error =
   | `Err_free_identifier of Name.t
   | `Err_not_product of term * term
   | `Err_not_universe of term * term
+  | `Err_not_inductive of term * term
   ]
 
 let string_of_error = function
-  | `Err_not_convertible (_t1, _t2) -> "not convertible"
+  | `Err_not_convertible (t1, t2) ->
+    Fmt.str "not convertible: %a, %a" Ast.pp_term t1 Ast.pp_term t2
   | `Err_free_identifier _x -> "free identifier"
   | `Err_not_product (_t1, _t2) -> "not a product"
   | `Err_not_universe (_t1, _t2) -> "not a universe"
+  | `Err_not_inductive (_t1, _t2) -> "not an inductive"
 
 let are_convertible t1 t2 : (unit, [> type_error ]) result =
   let* v1 = reduce t1 in
@@ -55,12 +58,31 @@ let rec infer_type (ctx : typing_context) (t : term) : (term, [> type_error ]) r
     let* () = check_type ctx term source in
     Ok target
   | Const x ->
-    let* ty =
-      try Ok (Declarations.find x |> snd) with
-      | Not_found -> Error (`Err_free_identifier x)
-    in
-    let* elab_ty, _ = Elaboration.elab_univ Reduction.reduce Name.Map.empty ty in
-    Ok elab_ty
+    (try Ok (Declarations.Const.find x).ty with
+    | Not_found -> Error (`Err_free_identifier x))
+  | Inductive (ind, i, params) ->
+    let params_ty = (Declarations.Ind.find ind).params |> subst_tele params in
+    let params_with_ty = List.combine params params_ty in
+    let* _ = map_results (fun (t, ty) -> check_type ctx t ty) params_with_ty in
+    Ok (Universe i)
+  | Constructor { ctor; level; args; params } ->
+    let ctor_info = Declarations.Ctor.find ctor in
+    let pargs_ty = subst_tele (params @ args) (ctor_info.params @ ctor_info.args) in
+    let params_ty, args_ty = List.split_at (List.length params) pargs_ty in
+    let args_with_ty = List.combine args args_ty in
+    let params_with_ty = List.combine params params_ty in
+    let* _ = map_results (fun (t, ty) -> check_type ctx t ty) args_with_ty in
+    let* _ = map_results (fun (t, ty) -> check_type ctx t ty) params_with_ty in
+    Ok (Inductive (ctor_info.ind, level, params))
+  | Match { discr; z; pred; f; branches; _ } ->
+    (* TODO: Missing exhaustiveness check *)
+    let* ind, level, params = infer_ind ctx discr in
+    let indt = Inductive (ind, level, params) in
+    let pred_ctx = Name.Map.add z indt ctx in
+    let* _ = infer_univ pred_ctx pred in
+    let branch_ctx = Name.Map.add f (Prod { id = z; dom = indt; body = pred }) ctx in
+    let* _ = map_results (check_branch branch_ctx z pred params level) branches in
+    Ok (subst1 z discr pred)
 
 and check_type (ctx : typing_context) (t : term) (ty : term)
     : (unit, [> type_error ]) result
@@ -83,3 +105,28 @@ and infer_univ (ctx : typing_context) (t : term) : (int, [> type_error ]) result
   match v with
   | Universe i -> Ok i
   | _ -> Error (`Err_not_universe (t, ty))
+
+and infer_ind (ctx : typing_context) (t : term)
+    : (Name.t * int * term list, [> type_error ]) result
+  =
+  let* ty = infer_type ctx t in
+  let* v = reduce ty in
+  match v with
+  | Inductive (ind, i, params) -> Ok (ind, i, params)
+  | _ -> Error (`Err_not_inductive (t, ty))
+
+(*
+    This function assumes that the constructor in the branch includes all 
+    parameters and arguments EXPLICITLY.
+*)
+and check_branch ctx z pred params level br =
+  let ctor_info = Declarations.Ctor.find br.ctor in
+  let branch_vars = List.map (fun x -> Var x) br.ids in
+  let var_tys = subst_tele branch_vars (ctor_info.params @ ctor_info.args) in
+  let vars_w_types = List.combine br.ids var_tys |> List.to_seq in
+  let ctx_w_var_types = Name.Map.add_seq vars_w_types ctx in
+  (* we need to extract the args separate from the params *)
+  let branch_args = List.drop (List.length params) branch_vars in
+  let ctor = Constructor { ctor = br.ctor; level; params; args = branch_args } in
+  let expected_type = subst1 z ctor pred in
+  check_type ctx_w_var_types br.term expected_type

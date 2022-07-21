@@ -1,0 +1,11 @@
+(test
+ (name test_gcic)
+ (libraries
+  gcic
+  common
+  parsing
+  vernac
+  cast_cic
+  alcotest
+  qcheck
+  qcheck-alcotest))

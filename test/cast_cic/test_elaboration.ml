@@ -46,16 +46,16 @@ let tests_base_elaborations () =
     (elaborate empty_ctx (Prod { id; dom = Unknown 1; body = Var id }) |> Result.get_ok);
   Alcotest.(check (pair Testable.term Testable.term))
     "app without unknown"
-    ( App
-        ( Lambda { id; dom = Universe 1; body = Var id }
-        , Cast { source = Universe 1; target = Universe 1; term = Universe 0 } )
-    , Universe 1 )
+    (App (Lambda { id; dom = Universe 1; body = Var id }, Universe 0), Universe 1)
     (elaborate empty_ctx (App (idf, Universe 0)) |> Result.get_ok);
   Alcotest.(check (pair Testable.term Testable.term))
     "app with unknown"
     ( App
         ( Cast
-            { source = unknown 1; target = Ast.germ 1 HProd; term = Unknown (unknown 1) }
+            { source = unknown 1
+            ; target = Reduction.(germ 1 HProd)
+            ; term = Unknown (unknown 1)
+            }
         , Cast { source = Universe 1; target = unknown 0; term = Universe 0 } )
     , unknown 0 )
     (elaborate empty_ctx (App (Unknown 1, Universe 0)) |> Result.get_ok)

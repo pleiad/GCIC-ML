@@ -1,7 +1,5 @@
 (** This module specifies the elaboration from GCIC to CastCIC *)
 
-(* TODO: This module should go somewhere else, but idk where *)
-
 open Common.Id
 
 (** An error originating from elaboration  *)
@@ -10,7 +8,7 @@ type elaboration_error =
   | `Err_inconsistent of Kernel.Ast.term * Ast.term * Ast.term
   | `Err_constrained_universe of Kernel.Ast.term
   | `Err_constrained_product of Kernel.Ast.term
-  | `Err_impossible of Kernel.Ast.term
+  | `Err_constrained_inductive of Kernel.Ast.term
   ]
 
 (** Returns a string representation of the error *)

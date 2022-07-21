@@ -1,4 +1,5 @@
 (** This module specifies the AST for commands *)
+open Common.Declarations
 
 (** The AST for the commands *)
 type 'a t =
@@ -6,12 +7,6 @@ type 'a t =
   | Check of 'a
   | Elab of 'a
   | Set of Config.Flag.t
-  | Define of 'a global_definition
+  | Define of 'a const_decl
   | Load of string
-
-and 'a global_definition =
-  | Constant_def of
-      { name : Common.Id.Name.t
-      ; ty : 'a
-      ; term : 'a
-      }
+  | Inductive of 'a ind_decl * 'a ctor_decl list

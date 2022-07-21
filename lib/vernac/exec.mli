@@ -1,7 +1,12 @@
 (** This module specifies the execution of commands *)
 
 (** The type of succesfully executing commands *)
-type cmd_result
+type cmd_result =
+  | Reduction of Cast_cic.Ast.term
+  | Unit
+  | Elaboration of Cast_cic.Ast.term
+  | Inference of Cast_cic.Ast.term
+  | Definition of Common.Id.Name.t * Kernel.Ast.term
 
 (** Returns the stringified version of the command's result *)
 val string_of_cmd_result : cmd_result -> string

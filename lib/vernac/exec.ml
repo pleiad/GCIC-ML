@@ -64,15 +64,62 @@ let execute_definition gdef : (cmd_result, execute_error) result =
   let open Elaboration in
   let open Typing in
   let open Reduction in
-  let open Command in
+  let open Common.Declarations in
   let empty_ctx = Name.Map.empty in
   match gdef with
-  | Constant_def { name; ty; term } ->
+  | { name; ty; term } ->
     let* elab_ty, _ = elab_univ reduce empty_ctx ty in
     let* elab_term = check_elab reduce empty_ctx term elab_ty in
     let* _ = check_type empty_ctx elab_term elab_ty in
-    Declarations.add name (term, ty);
+    Declarations.Const.add name { name; ty; term };
+    Declarations.Const.add_cache name { name; ty = elab_ty; term = elab_term };
     Ok (Definition (name, ty))
+
+let execute_inductive ind ctors : (cmd_result, execute_error) result =
+  let open Declarations in
+  let open Elaboration in
+  let open Reduction in
+  let empty_ctx = Name.Map.empty in
+  let elab_univ_param (elab_params, ctx) (id, param) =
+    let* elab_param, _ = elab_univ reduce ctx param in
+    Ok ((id, elab_param) :: elab_params, Name.Map.add id elab_param ctx)
+  in
+  let elab_univ_params ctx params =
+    let* elab_params, elab_ctx = fold_results elab_univ_param (Ok ([], ctx)) params in
+    Ok (List.rev elab_params, elab_ctx)
+  in
+  let execute_ind_decl (ind : Ind.t) =
+    let* elab_sort, level = elab_univ reduce empty_ctx ind.sort in
+    let* elab_params, _ = elab_univ_params empty_ctx ind.params in
+    let cached_ind =
+      { ind with sort = elab_sort; level = level - 1; params = elab_params }
+    in
+    (* TODO: Missing uniqueness of name (no more than one inductive with a given name) *)
+    Ind.add ind.name ind;
+    Ind.add_cache ind.name cached_ind;
+    string_of_cmd_result (Definition (ind.name, ind.sort)) |> print_endline;
+    Ok Unit
+  in
+  let execute_ctor_decl (ctor : Ctor.t) =
+    let* elab_params, elab_ctx = elab_univ_params empty_ctx ctor.params in
+    let* elab_args, _ = elab_univ_params elab_ctx ctor.args in
+    let* elab_ty, _ = elab_univ reduce empty_ctx ctor.ty in
+    (* FIXME: Check whether the type of the constructor matches the inductive's.
+       e.g. You can define "cons : a -> list a -> bool" and it will be ok   
+    *)
+    let cached_ctor =
+      { ctor with args = elab_args; params = elab_params; ty = elab_ty }
+    in
+    (* TODO: Missing uniqueness of constructor in inductive (no more than one constructor with a given name) *)
+    Ctor.add ctor.name ctor;
+    Ctor.add_cache ctor.name cached_ctor;
+    string_of_cmd_result (Definition (ctor.name, ctor.ty)) |> print_endline;
+    Ok Unit
+  in
+  (* FIXME: Not transactional *)
+  let* _ = execute_ind_decl ind in
+  let* _ = map_results execute_ctor_decl ctors in
+  Ok Unit
 
 exception LoadFail of execute_error
 
@@ -85,16 +132,18 @@ let rec execute file_parser cmd : (cmd_result, execute_error) result =
   | Set f -> execute_set_flag f
   | Define gdef -> execute_definition gdef
   | Load filename -> execute_load file_parser filename
+  | Inductive (ind, ctors) -> execute_inductive ind ctors
 
 and execute_load file_parser filename =
   try
     let src = Stdio.In_channel.read_all filename in
     let cmds = file_parser src in
-    List.iter
-      (fun cmd ->
+    List.fold_left
+      (fun _ cmd ->
         match execute file_parser cmd with
         | Ok res -> string_of_cmd_result res |> print_endline
         | Error e -> raise (LoadFail e))
+      ()
       cmds;
     Ok Unit
   with

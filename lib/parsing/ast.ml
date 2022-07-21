@@ -11,10 +11,23 @@ type term =
   | Lambda of (Name.t option * term) list * term
   | Prod of (Name.t option * term) list * term
   | Unknown of int
-  | LetIn of (Name.t * term * term * term)
+  | Match of
+      { ind : Name.t
+      ; discr : term
+      ; z : Name.t
+      ; pred : term
+      ; branches : branch list
+      }
   (* Extras *)
+  | LetIn of (Name.t * term * term * term)
   | Ascription of term * term
   | UnknownT of int
+
+and branch =
+  { ctor : Name.t
+  ; ids : Name.t list
+  ; body : term
+  }
 
 (** Returns the stringified version of a term *)
 let rec to_string = function
@@ -24,6 +37,12 @@ let rec to_string = function
   | Lambda (args, b) -> asprintf "fun %s. %s" (string_of_args args) (to_string b)
   | Prod (args, b) -> asprintf "Π %s. %s" (string_of_args args) (to_string b)
   | Unknown i -> asprintf "?_%i" i
+  | Match { discr; z; pred; _ } ->
+    asprintf
+      "match %s as %s return %s with"
+      (to_string discr)
+      (Name.to_string z)
+      (to_string pred)
   | LetIn (id, ty, t1, t2) ->
     asprintf
       "let %s : %s = %s in %s"
