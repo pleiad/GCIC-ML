@@ -44,9 +44,8 @@
     These are the output of the lexer rules
 */
 %token <int> INT
-%token <string> ID
-%token <string> FILENAME
-%token COLON DOT COMMA ARROW BIG_ARROW EQUAL VBAR AT
+%token <string> ID FILENAME
+%token COLON COMMA ARROW BIG_ARROW VBAR AT ASSIGN
 %token LPAREN RPAREN
 %token KWD_UNIVERSE KWD_LAMBDA KWD_UNKNOWN KWD_UNKNOWN_T KWD_FORALL
 %token KWD_LET KWD_IN
@@ -73,13 +72,17 @@
 %type <Config.Flag.t> flag_parser
 
 /* Dummy starts. Only used to reduce number of error messages. */
-%start ctor_decl_parser
+%start ctor_decl_parser branch_parser
 %type <unit> ctor_decl_parser
+%type <unit> branch_parser
 
 %%
 /* Dummy parsers. Only used to reduce number of error messages. */
 ctor_decl_parser :
   ctor_decl; EOF {} 
+
+branch_parser : 
+  branch_decl; EOF {}
 
  /* Start grammar productions */
 program_parser :
@@ -98,21 +101,21 @@ flag_parser :
   flag=flag; EOF    { flag }
 
 command :
-// eval <top>
+// Eval <top>
 | VERNAC_EVAL; t=top                       { Eval t }
-// check <top>
+// Check <top>
 | VERNAC_CHECK; t=top                      { Check t }
-// elab <top>
+// Elab <top>
 | VERNAC_ELABORATE; t=top                  { Elab t }
-// set <flag>
+// Set <flag>
 | VERNAC_SET; flag=flag                    { Set flag }
-// def foo (x : Type1) : Type1 = ...
-| VERNAC_DEFINITION; id=id; args=args0; COLON; ty=term; EQUAL ; body=top  
+// Definition foo (x : Type1) : Type1 := ...
+| VERNAC_DEFINITION; id=id; args=args0; COLON; ty=term; ASSIGN ; body=top  
  { mk_definition id args ty body }
-// load "filename"
+// Load "filename"
 | VERNAC_LOAD; filename=FILENAME  { Load filename }
-// inductive list (a : Type0) : Type0 = <ctor_decls>
-| VERNAC_INDUCTIVE; id=id; params=args0; COLON; ty=term; EQUAL; ctors=list(ctor_decl)
+// Inductive list (a : Type0) : Type0 := <ctor_decls>
+| VERNAC_INDUCTIVE; id=id; params=args0; COLON; ty=term; ASSIGN; ctors=list(ctor_decl)
  { mk_ind_decl id params ty ctors }
 
 ctor_decl :
@@ -145,10 +148,10 @@ top :
 | t=term                                                          { t }
 
 term :
-| KWD_LAMBDA; args=args; DOT; body=term                           { Lambda (args, body) }
-| KWD_FORALL; args=args; COMMA; body=term                         { Prod (args, body) }
-| dom=fact; ARROW; body=term                                      { Prod ([(None, dom)], body) }
-| KWD_LET; id=id; COLON; ty=term; EQUAL; t1=term; KWD_IN; t2=term { LetIn (id, ty, t1, t2) }
+| KWD_LAMBDA; args=args; BIG_ARROW; body=term                      { Lambda (args, body) }
+| KWD_FORALL; args=args; COMMA; body=term                          { Prod (args, body) }
+| dom=fact; ARROW; body=term                                       { Prod ([(None, dom)], body) }
+| KWD_LET; id=id; COLON; ty=term; ASSIGN; t1=term; KWD_IN; t2=term { LetIn (id, ty, t1, t2) }
 // match@list nil as z return P with <branch_decls>
 | KWD_MATCH; AT; ind=id; discr=top; KWD_AS; z=id; 
   KWD_RETURN; pred=top; KWD_WITH; branches=list(branch_decl); KWD_END
@@ -166,7 +169,8 @@ fact :
 atom : 
 | LPAREN; t=top; RPAREN                                { t }
 | id=id                                                { Var id }
-| KWD_UNIVERSE; i=INT                                  { Universe i }
+| KWD_UNIVERSE; AT; i=INT                              { Universe i }
+| KWD_UNIVERSE                                         { Universe 0 }
 | KWD_UNKNOWN; i=INT                                   { Unknown i }
 | KWD_UNKNOWN_T; i=INT                                 { UnknownT i }
 

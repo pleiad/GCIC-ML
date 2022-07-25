@@ -61,6 +61,7 @@ module Pretty = struct
   (** Pretty printer for term *)
   let rec pp ppf = function
     | Var x -> pf ppf "%a" Name.pp x
+    | Universe 0 -> pf ppf "▢"
     | Universe i -> pf ppf "▢%i" i
     | App (t, t') -> pf ppf "@[%a@ %a@]" maybe_parens t maybe_parens t'
     | Lambda _ as t -> group_lambda_args [] t |> pp_lambda ppf
@@ -71,10 +72,10 @@ module Pretty = struct
     | Unknown i -> pf ppf "?%i" i
     | Inductive (ind, _, []) -> pf ppf "%a" Name.pp ind
     | Inductive (ind, _, params) ->
-      pf ppf "@[%a@ %a@]" Name.pp ind (list maybe_parens) params
+      pf ppf "@[%a@ %a@]" Name.pp ind (list ~sep:sp maybe_parens) params
     | Constructor (ctor, []) -> pf ppf "%a" Name.pp ctor
     | Constructor (ctor, args) ->
-      pf ppf "@[%a@ %a@]" Name.pp ctor (list maybe_parens) args
+      pf ppf "@[%a@ %a@]" Name.pp ctor (list ~sep:sp maybe_parens) args
     | Match { discr; z; pred; _ } ->
       pf
         ppf
@@ -94,11 +95,11 @@ module Pretty = struct
 
   (** Pretty-prints a lambda *)
   and pp_lambda ppf (args, body) =
-    pf ppf "@[<hov 1>λ%a.@ %a@]" (list ~sep:sp pp_arg) args pp body
+    pf ppf "@[<hov 1>λ%a ⇒@ %a@]" (list ~sep:sp pp_arg) args pp body
 
   (** Pretty-prints a prod *)
   and pp_prod ppf (args, body) =
-    pf ppf "@[<hov 1>Π%a.@ %a@]" (list ~sep:sp pp_arg) args pp body
+    pf ppf "@[<hov 1>∀%a,@ %a@]" (list ~sep:sp pp_arg) args pp body
 
   (** Adds parenthesis around a term if needed *)
   and maybe_parens ppf t = if need_parens t then parens pp ppf t else pp ppf t

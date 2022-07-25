@@ -11,7 +11,8 @@ let number = [%sedlex.regexp? Plus digit]
 let lower = [%sedlex.regexp? 'a' .. 'z']
 let upper = [%sedlex.regexp? 'A' .. 'Z']
 let alpha = [%sedlex.regexp? lower | upper]
-let id = [%sedlex.regexp? lower, Star (alpha | digit | '_')]
+let id0 = [%sedlex.regexp? alpha | '_']
+let id = [%sedlex.regexp? id0, Star (alpha | digit | '_')]
 let universe = [%sedlex.regexp? "Type" | 0x25a1]
 let whitespace = [%sedlex.regexp? Plus ('\t' | ' ')]
 let newline = [%sedlex.regexp? '\r' | '\n' | "\r\n"]
@@ -20,6 +21,7 @@ let forall = [%sedlex.regexp? "forall" | 0x2200]
 let unknown = [%sedlex.regexp? '?']
 let unknownT = [%sedlex.regexp? "?T"]
 let arrow = [%sedlex.regexp? "->" | 0x2192]
+let big_arrow = [%sedlex.regexp? "=>" | 0x21D2]
 let stringbuf = Buffer.create 64
 
 let get_and_flush buffer =
@@ -41,28 +43,27 @@ let rec token lexbuf =
   | "return" -> KWD_RETURN
   | "with" -> KWD_WITH
   | "end" -> KWD_END
-  | "check" -> VERNAC_CHECK
-  | "eval" -> VERNAC_EVAL
-  | "elab" -> VERNAC_ELABORATE
-  | "def" -> VERNAC_DEFINITION
-  | "inductive" -> VERNAC_INDUCTIVE
-  | "set" -> VERNAC_SET
-  | "variant" -> VERNAC_FLAG_VARIANT
-  | "fuel" -> VERNAC_FLAG_FUEL
-  | "load" -> VERNAC_LOAD
-  | ";;" -> VERNAC_SEPARATOR
+  | "Check" -> VERNAC_CHECK
+  | "Eval" -> VERNAC_EVAL
+  | "Elab" -> VERNAC_ELABORATE
+  | "Definition" -> VERNAC_DEFINITION
+  | "Inductive" -> VERNAC_INDUCTIVE
+  | "Set" -> VERNAC_SET
+  | "Variant" -> VERNAC_FLAG_VARIANT
+  | "Fuel" -> VERNAC_FLAG_FUEL
+  | "Load" -> VERNAC_LOAD
+  | "." -> VERNAC_SEPARATOR
   | "G" -> VERNAC_VARIANT_G
   | "N" -> VERNAC_VARIANT_N
   | "S" -> VERNAC_VARIANT_S
   | id -> ID (lexeme lexbuf)
   | number -> INT (int_of_string (lexeme lexbuf))
   | arrow -> ARROW
-  | "=>" -> BIG_ARROW
+  | big_arrow -> BIG_ARROW
   | '(' -> LPAREN
   | ')' -> RPAREN
-  | '=' -> EQUAL
+  | ":=" -> ASSIGN
   | ':' -> COLON
-  | '.' -> DOT
   | ',' -> COMMA
   | '"' -> FILENAME (string lexbuf stringbuf)
   | '|' -> VBAR

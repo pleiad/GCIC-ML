@@ -23,25 +23,25 @@ let run line =
   Result.bind cmd (fun c ->
       Main.execute c |> Result.map_error Vernac.Exec.string_of_error)
 
-let false_ind = "inductive false : Type0 =;;"
-let bool_ind = "inductive bool : Type0 = | false : bool | true : bool;;"
+let false_ind = "Inductive false : Type@0 :=."
+let bool_ind = "Inductive bool : Type := | false : bool | true : bool."
 
 let list_ind =
-  "inductive list (a : Type0) : Type0 =\n\
+  "Inductive list (a : Type) : Type :=\n\
   \  | nil : list a\n\
   \  | cons (hd : a) (tl : list a) : list a\n\
-  \  ;;"
+  \  ."
 
 let w_ind =
-  "inductive w (a : Type0) (b : a -> Type0) : Type0 =\n\
-  \  | sup (x : a) (f : b x -> w a b) : w a b\n\
-  \  ;;\n\
+  "Inductive W (a : Type) (b : a -> Type) : Type :=\n\
+  \  | sup (x : a) (f : b x -> W a b) : W a b\n\
+  \  .\n\
   \  "
 
 let test_inductive_defs () =
   Alcotest.(check (result cmd_result string)) "false ind" (Ok Unit) (run false_ind);
   Alcotest.(check (result cmd_result string)) "bool ind" (Ok Unit) (run bool_ind);
   Alcotest.(check (result cmd_result string)) "list ind" (Ok Unit) (run list_ind);
-  Alcotest.(check (result cmd_result string)) "w ind" (Ok Unit) (run w_ind)
+  Alcotest.(check (result cmd_result string)) "W ind" (Ok Unit) (run w_ind)
 
 let tests = [ "inductive defs", `Quick, test_inductive_defs ]
