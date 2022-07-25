@@ -1,6 +1,6 @@
 term_parser: ID ARROW RPAREN
 ##
-## Ends in an error in state: 41.
+## Ends in an error in state: 30.
 ##
 ## term -> fact ARROW . term [ VERNAC_SEPARATOR VBAR RPAREN KWD_WITH KWD_IN KWD_END KWD_AS EOF COLON ASSIGN ]
 ##
@@ -14,7 +14,7 @@ For example:
 
 term_parser: ID RPAREN
 ##
-## Ends in an error in state: 126.
+## Ends in an error in state: 130.
 ##
 ## term_parser -> top . EOF [ # ]
 ## top -> top . COLON term [ EOF COLON ]
@@ -26,8 +26,8 @@ term_parser: ID RPAREN
 ## This implies that, although the LR(1) items shown above provide an
 ## accurate view of the past (what has been recognized so far), they
 ## may provide an INCOMPLETE view of the future (what was expected next).
-## In state 40, spurious reduction of production term -> fact
-## In state 66, spurious reduction of production top -> term
+## In state 29, spurious reduction of production term -> fact
+## In state 60, spurious reduction of production top -> term
 ##
 
 I'm currently parsing a term.
@@ -35,7 +35,7 @@ After `$0`, the end of file is expected.
 
 term_parser: KWD_FORALL LPAREN ID COLON ID RPAREN COMMA RPAREN
 ##
-## Ends in an error in state: 37.
+## Ends in an error in state: 26.
 ##
 ## term -> KWD_FORALL nonempty_list(arg) COMMA . term [ VERNAC_SEPARATOR VBAR RPAREN KWD_WITH KWD_IN KWD_END KWD_AS EOF COLON ASSIGN ]
 ##
@@ -50,7 +50,7 @@ For example:
 
 term_parser: KWD_FORALL LPAREN ID COLON ID RPAREN BIG_ARROW
 ##
-## Ends in an error in state: 36.
+## Ends in an error in state: 25.
 ##
 ## term -> KWD_FORALL nonempty_list(arg) . COMMA term [ VERNAC_SEPARATOR VBAR RPAREN KWD_WITH KWD_IN KWD_END KWD_AS EOF COLON ASSIGN ]
 ##
@@ -61,7 +61,7 @@ term_parser: KWD_FORALL LPAREN ID COLON ID RPAREN BIG_ARROW
 ## This implies that, although the LR(1) items shown above provide an
 ## accurate view of the past (what has been recognized so far), they
 ## may provide an INCOMPLETE view of the future (what was expected next).
-## In state 45, spurious reduction of production nonempty_list(arg) -> arg
+## In state 34, spurious reduction of production nonempty_list(arg) -> arg
 ##
 
 I'm currently parsing a pi type.
@@ -73,7 +73,7 @@ For example:
 
 term_parser: KWD_FORALL RPAREN
 ##
-## Ends in an error in state: 35.
+## Ends in an error in state: 24.
 ##
 ## term -> KWD_FORALL . nonempty_list(arg) COMMA term [ VERNAC_SEPARATOR VBAR RPAREN KWD_WITH KWD_IN KWD_END KWD_AS EOF COLON ASSIGN ]
 ##
@@ -89,7 +89,7 @@ For example:
 
 term_parser: KWD_LAMBDA LPAREN ID COLON ID KWD_LET
 ##
-## Ends in an error in state: 75.
+## Ends in an error in state: 36.
 ##
 ## arg -> LPAREN nonempty_list(id) COLON term . RPAREN [ LPAREN COMMA COLON BIG_ARROW ]
 ##
@@ -100,7 +100,7 @@ term_parser: KWD_LAMBDA LPAREN ID COLON ID KWD_LET
 ## This implies that, although the LR(1) items shown above provide an
 ## accurate view of the past (what has been recognized so far), they
 ## may provide an INCOMPLETE view of the future (what was expected next).
-## In state 40, spurious reduction of production term -> fact
+## In state 29, spurious reduction of production term -> fact
 ##
 
 I'm currently parsing arguments to a pi type or lambda expression.
@@ -108,7 +108,7 @@ After the `$0`, a closing parenthesis is expected `)`.
 
 term_parser: KWD_LAMBDA LPAREN ID COLON ID RPAREN BIG_ARROW VERNAC_VARIANT_S
 ##
-## Ends in an error in state: 34.
+## Ends in an error in state: 41.
 ##
 ## term -> KWD_LAMBDA nonempty_list(arg) BIG_ARROW . term [ VERNAC_SEPARATOR VBAR RPAREN KWD_WITH KWD_IN KWD_END KWD_AS EOF COLON ASSIGN ]
 ##
@@ -123,7 +123,7 @@ For example:
 
 term_parser: KWD_LAMBDA LPAREN ID COLON ID RPAREN RPAREN
 ##
-## Ends in an error in state: 45.
+## Ends in an error in state: 34.
 ##
 ## nonempty_list(arg) -> arg . [ COMMA BIG_ARROW ]
 ## nonempty_list(arg) -> arg . nonempty_list(arg) [ COMMA BIG_ARROW ]
@@ -141,7 +141,7 @@ For example:
 
 term_parser: KWD_LAMBDA LPAREN ID COLON RPAREN
 ##
-## Ends in an error in state: 17.
+## Ends in an error in state: 23.
 ##
 ## arg -> LPAREN nonempty_list(id) COLON . term RPAREN [ LPAREN COMMA COLON BIG_ARROW ]
 ##
@@ -156,7 +156,7 @@ For example:
 
 term_parser: KWD_LAMBDA LPAREN ID RPAREN
 ##
-## Ends in an error in state: 77.
+## Ends in an error in state: 38.
 ##
 ## nonempty_list(id) -> id . [ COLON ]
 ## nonempty_list(id) -> id . nonempty_list(id) [ COLON ]
@@ -173,7 +173,7 @@ For example:
 
 term_parser: KWD_LAMBDA LPAREN RPAREN
 ##
-## Ends in an error in state: 15.
+## Ends in an error in state: 21.
 ##
 ## arg -> LPAREN . nonempty_list(id) COLON term RPAREN [ LPAREN COMMA COLON BIG_ARROW ]
 ##
@@ -190,7 +190,7 @@ For example:
 
 term_parser: KWD_LAMBDA RPAREN
 ##
-## Ends in an error in state: 32.
+## Ends in an error in state: 20.
 ##
 ## term -> KWD_LAMBDA . nonempty_list(arg) BIG_ARROW term [ VERNAC_SEPARATOR VBAR RPAREN KWD_WITH KWD_IN KWD_END KWD_AS EOF COLON ASSIGN ]
 ##
@@ -206,7 +206,7 @@ For example:
 
 term_parser: KWD_LET RPAREN
 ##
-## Ends in an error in state: 29.
+## Ends in an error in state: 17.
 ##
 ## term -> KWD_LET . id COLON term ASSIGN term KWD_IN term [ VERNAC_SEPARATOR VBAR RPAREN KWD_WITH KWD_IN KWD_END KWD_AS EOF COLON ASSIGN ]
 ##
@@ -222,7 +222,7 @@ For example:
 
 term_parser: KWD_LET ID RPAREN
 ##
-## Ends in an error in state: 30.
+## Ends in an error in state: 18.
 ##
 ## term -> KWD_LET id . COLON term ASSIGN term KWD_IN term [ VERNAC_SEPARATOR VBAR RPAREN KWD_WITH KWD_IN KWD_END KWD_AS EOF COLON ASSIGN ]
 ##
@@ -238,7 +238,7 @@ For example:
 
 term_parser: KWD_LET ID COLON RPAREN
 ##
-## Ends in an error in state: 31.
+## Ends in an error in state: 19.
 ##
 ## term -> KWD_LET id COLON . term ASSIGN term KWD_IN term [ VERNAC_SEPARATOR VBAR RPAREN KWD_WITH KWD_IN KWD_END KWD_AS EOF COLON ASSIGN ]
 ##
@@ -254,7 +254,7 @@ For example:
 
 term_parser: KWD_LET ID COLON ID RPAREN
 ##
-## Ends in an error in state: 48.
+## Ends in an error in state: 43.
 ##
 ## term -> KWD_LET id COLON term . ASSIGN term KWD_IN term [ VERNAC_SEPARATOR VBAR RPAREN KWD_WITH KWD_IN KWD_END KWD_AS EOF COLON ASSIGN ]
 ##
@@ -265,7 +265,7 @@ term_parser: KWD_LET ID COLON ID RPAREN
 ## This implies that, although the LR(1) items shown above provide an
 ## accurate view of the past (what has been recognized so far), they
 ## may provide an INCOMPLETE view of the future (what was expected next).
-## In state 40, spurious reduction of production term -> fact
+## In state 29, spurious reduction of production term -> fact
 ##
 
 I'm currently parsing the bounded term's type of a let expression.
@@ -276,7 +276,7 @@ For example:
 
 term_parser: KWD_LET ID COLON ID ASSIGN VERNAC_VARIANT_S
 ##
-## Ends in an error in state: 49.
+## Ends in an error in state: 44.
 ##
 ## term -> KWD_LET id COLON term ASSIGN . term KWD_IN term [ VERNAC_SEPARATOR VBAR RPAREN KWD_WITH KWD_IN KWD_END KWD_AS EOF COLON ASSIGN ]
 ##
@@ -291,7 +291,7 @@ For example:
 
 term_parser: KWD_LET ID COLON ID ASSIGN ID VERNAC_SEPARATOR
 ##
-## Ends in an error in state: 50.
+## Ends in an error in state: 45.
 ##
 ## term -> KWD_LET id COLON term ASSIGN term . KWD_IN term [ VERNAC_SEPARATOR VBAR RPAREN KWD_WITH KWD_IN KWD_END KWD_AS EOF COLON ASSIGN ]
 ##
@@ -302,14 +302,14 @@ term_parser: KWD_LET ID COLON ID ASSIGN ID VERNAC_SEPARATOR
 ## This implies that, although the LR(1) items shown above provide an
 ## accurate view of the past (what has been recognized so far), they
 ## may provide an INCOMPLETE view of the future (what was expected next).
-## In state 40, spurious reduction of production term -> fact
+## In state 29, spurious reduction of production term -> fact
 ##
 
 Missing `in` keyword, in let expression.
 
 term_parser: KWD_LET ID COLON ID ASSIGN ID KWD_IN VERNAC_VARIANT_S
 ##
-## Ends in an error in state: 51.
+## Ends in an error in state: 46.
 ##
 ## term -> KWD_LET id COLON term ASSIGN term KWD_IN . term [ VERNAC_SEPARATOR VBAR RPAREN KWD_WITH KWD_IN KWD_END KWD_AS EOF COLON ASSIGN ]
 ##
@@ -324,7 +324,7 @@ For example:
 
 term_parser: KWD_UNKNOWN RPAREN
 ##
-## Ends in an error in state: 21.
+## Ends in an error in state: 9.
 ##
 ## atom -> KWD_UNKNOWN . INT [ VERNAC_SEPARATOR VBAR RPAREN LPAREN KWD_WITH KWD_UNKNOWN_T KWD_UNKNOWN KWD_UNIVERSE KWD_IN KWD_END KWD_AS ID EOF COLON ASSIGN ARROW ]
 ##
@@ -340,7 +340,7 @@ For example:
 
 term_parser: KWD_UNKNOWN_T RPAREN
 ##
-## Ends in an error in state: 19.
+## Ends in an error in state: 7.
 ##
 ## atom -> KWD_UNKNOWN_T . INT [ VERNAC_SEPARATOR VBAR RPAREN LPAREN KWD_WITH KWD_UNKNOWN_T KWD_UNKNOWN KWD_UNIVERSE KWD_IN KWD_END KWD_AS ID EOF COLON ASSIGN ARROW ]
 ##
@@ -356,7 +356,7 @@ For example:
 
 term_parser: LPAREN RPAREN
 ##
-## Ends in an error in state: 18.
+## Ends in an error in state: 6.
 ##
 ## atom -> LPAREN . top RPAREN [ VERNAC_SEPARATOR VBAR RPAREN LPAREN KWD_WITH KWD_UNKNOWN_T KWD_UNKNOWN KWD_UNIVERSE KWD_IN KWD_END KWD_AS ID EOF COLON ASSIGN ARROW ]
 ##
@@ -373,7 +373,7 @@ For example:
 
 term_parser: RPAREN
 ##
-## Ends in an error in state: 125.
+## Ends in an error in state: 129.
 ##
 ## term_parser' -> . term_parser [ # ]
 ##
@@ -389,7 +389,7 @@ For example:
 
 program_parser: RPAREN
 ##
-## Ends in an error in state: 119.
+## Ends in an error in state: 123.
 ##
 ## program_parser' -> . program_parser [ # ]
 ##
@@ -406,7 +406,7 @@ For example:
 
 program_parser: VERNAC_EVAL VERNAC_SEPARATOR
 ##
-## Ends in an error in state: 93.
+## Ends in an error in state: 97.
 ##
 ## command -> VERNAC_EVAL . top [ VERNAC_SEPARATOR ]
 ##
@@ -421,7 +421,7 @@ For example:
 
 term_parser: KWD_LAMBDA LPAREN ID COLON ID RPAREN COMMA
 ##
-## Ends in an error in state: 33.
+## Ends in an error in state: 40.
 ##
 ## term -> KWD_LAMBDA nonempty_list(arg) . BIG_ARROW term [ VERNAC_SEPARATOR VBAR RPAREN KWD_WITH KWD_IN KWD_END KWD_AS EOF COLON ASSIGN ]
 ##
@@ -432,7 +432,7 @@ term_parser: KWD_LAMBDA LPAREN ID COLON ID RPAREN COMMA
 ## This implies that, although the LR(1) items shown above provide an
 ## accurate view of the past (what has been recognized so far), they
 ## may provide an INCOMPLETE view of the future (what was expected next).
-## In state 45, spurious reduction of production nonempty_list(arg) -> arg
+## In state 34, spurious reduction of production nonempty_list(arg) -> arg
 ##
 
 I'm currently parsing the arguments of a lambda expression.
@@ -445,7 +445,7 @@ For example:
 
 program_parser: VERNAC_ELABORATE VERNAC_SEPARATOR
 ##
-## Ends in an error in state: 95.
+## Ends in an error in state: 99.
 ##
 ## command -> VERNAC_ELABORATE . top [ VERNAC_SEPARATOR ]
 ##
@@ -459,7 +459,7 @@ For example:
 
 program_parser: VERNAC_CHECK VERNAC_SEPARATOR
 ##
-## Ends in an error in state: 104.
+## Ends in an error in state: 108.
 ##
 ## command -> VERNAC_CHECK . top [ VERNAC_SEPARATOR ]
 ##
@@ -473,7 +473,7 @@ For example:
 
 program_parser: VERNAC_ELABORATE ID VERNAC_SEPARATOR VERNAC_SEPARATOR
 ##
-## Ends in an error in state: 120.
+## Ends in an error in state: 124.
 ##
 ## list(sequenced_command) -> sequenced_command . list(sequenced_command) [ EOF ]
 ##
@@ -485,7 +485,7 @@ After `$0`, another command or the EOF are expected.
 
 program_parser: VERNAC_SET VERNAC_VARIANT_S
 ##
-## Ends in an error in state: 1.
+## Ends in an error in state: 70.
 ##
 ## command -> VERNAC_SET . flag [ VERNAC_SEPARATOR ]
 ##
@@ -501,7 +501,7 @@ For example:
 
 term_parser: LPAREN ID VERNAC_SEPARATOR
 ##
-## Ends in an error in state: 73.
+## Ends in an error in state: 61.
 ##
 ## atom -> LPAREN top . RPAREN [ VERNAC_SEPARATOR VBAR RPAREN LPAREN KWD_WITH KWD_UNKNOWN_T KWD_UNKNOWN KWD_UNIVERSE KWD_IN KWD_END KWD_AS ID EOF COLON ASSIGN ARROW ]
 ## top -> top . COLON term [ RPAREN COLON ]
@@ -513,15 +513,15 @@ term_parser: LPAREN ID VERNAC_SEPARATOR
 ## This implies that, although the LR(1) items shown above provide an
 ## accurate view of the past (what has been recognized so far), they
 ## may provide an INCOMPLETE view of the future (what was expected next).
-## In state 40, spurious reduction of production term -> fact
-## In state 66, spurious reduction of production top -> term
+## In state 29, spurious reduction of production term -> fact
+## In state 60, spurious reduction of production top -> term
 ##
 
 Missing `)` after $0, to close the parenthesised term.
 
 term_parser: ID COLON VERNAC_VARIANT_S
 ##
-## Ends in an error in state: 64.
+## Ends in an error in state: 58.
 ##
 ## top -> top COLON . term [ VERNAC_SEPARATOR VBAR RPAREN KWD_WITH KWD_END KWD_AS EOF COLON ]
 ##
@@ -536,7 +536,7 @@ For example:
 
 program_parser: VERNAC_CHECK ID RPAREN
 ##
-## Ends in an error in state: 105.
+## Ends in an error in state: 109.
 ##
 ## command -> VERNAC_CHECK top . [ VERNAC_SEPARATOR ]
 ## top -> top . COLON term [ VERNAC_SEPARATOR COLON ]
@@ -548,12 +548,12 @@ program_parser: VERNAC_CHECK ID RPAREN
 ## This implies that, although the LR(1) items shown above provide an
 ## accurate view of the past (what has been recognized so far), they
 ## may provide an INCOMPLETE view of the future (what was expected next).
-## In state 40, spurious reduction of production term -> fact
-## In state 66, spurious reduction of production top -> term
+## In state 29, spurious reduction of production term -> fact
+## In state 60, spurious reduction of production top -> term
 ##
 program_parser: VERNAC_ELABORATE ID VERNAC_VARIANT_S
 ##
-## Ends in an error in state: 96.
+## Ends in an error in state: 100.
 ##
 ## command -> VERNAC_ELABORATE top . [ VERNAC_SEPARATOR ]
 ## top -> top . COLON term [ VERNAC_SEPARATOR COLON ]
@@ -565,12 +565,12 @@ program_parser: VERNAC_ELABORATE ID VERNAC_VARIANT_S
 ## This implies that, although the LR(1) items shown above provide an
 ## accurate view of the past (what has been recognized so far), they
 ## may provide an INCOMPLETE view of the future (what was expected next).
-## In state 40, spurious reduction of production term -> fact
-## In state 66, spurious reduction of production top -> term
+## In state 29, spurious reduction of production term -> fact
+## In state 60, spurious reduction of production top -> term
 ##
 program_parser: VERNAC_EVAL ID VERNAC_VARIANT_S
 ##
-## Ends in an error in state: 94.
+## Ends in an error in state: 98.
 ##
 ## command -> VERNAC_EVAL top . [ VERNAC_SEPARATOR ]
 ## top -> top . COLON term [ VERNAC_SEPARATOR COLON ]
@@ -582,8 +582,8 @@ program_parser: VERNAC_EVAL ID VERNAC_VARIANT_S
 ## This implies that, although the LR(1) items shown above provide an
 ## accurate view of the past (what has been recognized so far), they
 ## may provide an INCOMPLETE view of the future (what was expected next).
-## In state 40, spurious reduction of production term -> fact
-## In state 66, spurious reduction of production top -> term
+## In state 29, spurious reduction of production term -> fact
+## In state 60, spurious reduction of production top -> term
 ##
 
 Missing a `.` after $0, to close the command. 
@@ -593,7 +593,7 @@ For example:
 
 program_parser: VERNAC_DEFINITION VERNAC_VARIANT_S
 ##
-## Ends in an error in state: 97.
+## Ends in an error in state: 101.
 ##
 ## command -> VERNAC_DEFINITION . id list(arg) COLON term ASSIGN top [ VERNAC_SEPARATOR ]
 ##
@@ -607,7 +607,7 @@ For example:
 
 program_parser: VERNAC_DEFINITION ID VERNAC_VARIANT_S
 ##
-## Ends in an error in state: 98.
+## Ends in an error in state: 102.
 ##
 ## command -> VERNAC_DEFINITION id . list(arg) COLON term ASSIGN top [ VERNAC_SEPARATOR ]
 ##
@@ -623,7 +623,7 @@ For example:
 
 command_parser: VERNAC_DEFINITION ID LPAREN ID COLON ID RPAREN VERNAC_VARIANT_S
 ##
-## Ends in an error in state: 88.
+## Ends in an error in state: 92.
 ##
 ## list(arg) -> arg . list(arg) [ COLON ]
 ##
@@ -640,7 +640,7 @@ For example:
 
 program_parser: VERNAC_DEFINITION ID COLON VERNAC_VARIANT_S
 ##
-## Ends in an error in state: 100.
+## Ends in an error in state: 104.
 ##
 ## command -> VERNAC_DEFINITION id list(arg) COLON . term ASSIGN top [ VERNAC_SEPARATOR ]
 ##
@@ -654,7 +654,7 @@ For example:
 
 program_parser: VERNAC_DEFINITION ID COLON ID VERNAC_VARIANT_S
 ##
-## Ends in an error in state: 101.
+## Ends in an error in state: 105.
 ##
 ## command -> VERNAC_DEFINITION id list(arg) COLON term . ASSIGN top [ VERNAC_SEPARATOR ]
 ##
@@ -665,7 +665,7 @@ program_parser: VERNAC_DEFINITION ID COLON ID VERNAC_VARIANT_S
 ## This implies that, although the LR(1) items shown above provide an
 ## accurate view of the past (what has been recognized so far), they
 ## may provide an INCOMPLETE view of the future (what was expected next).
-## In state 40, spurious reduction of production term -> fact
+## In state 29, spurious reduction of production term -> fact
 ##
 
 I expect an `:=` (assign) followed by the body of the definition.
@@ -674,7 +674,7 @@ For example:
 
 command_parser: VERNAC_DEFINITION ID COLON ID ASSIGN VERNAC_VARIANT_S
 ##
-## Ends in an error in state: 102.
+## Ends in an error in state: 106.
 ##
 ## command -> VERNAC_DEFINITION id list(arg) COLON term ASSIGN . top [ VERNAC_SEPARATOR ]
 ##
@@ -688,7 +688,7 @@ For example:
 
 command_parser: VERNAC_DEFINITION ID COLON ID ASSIGN ID VBAR
 ##
-## Ends in an error in state: 103.
+## Ends in an error in state: 107.
 ##
 ## command -> VERNAC_DEFINITION id list(arg) COLON term ASSIGN top . [ VERNAC_SEPARATOR ]
 ## top -> top . COLON term [ VERNAC_SEPARATOR COLON ]
@@ -700,8 +700,8 @@ command_parser: VERNAC_DEFINITION ID COLON ID ASSIGN ID VBAR
 ## This implies that, although the LR(1) items shown above provide an
 ## accurate view of the past (what has been recognized so far), they
 ## may provide an INCOMPLETE view of the future (what was expected next).
-## In state 40, spurious reduction of production term -> fact
-## In state 66, spurious reduction of production top -> term
+## In state 29, spurious reduction of production term -> fact
+## In state 60, spurious reduction of production top -> term
 ##
 
 Missing a `.`, to close the definition. 
@@ -710,7 +710,7 @@ For example:
 
 program_parser: VERNAC_LOAD VERNAC_VARIANT_S
 ##
-## Ends in an error in state: 10.
+## Ends in an error in state: 79.
 ##
 ## command -> VERNAC_LOAD . FILENAME [ VERNAC_SEPARATOR ]
 ##
@@ -724,7 +724,7 @@ For example:
 
 command_parser: VERNAC_VARIANT_S
 ##
-## Ends in an error in state: 0.
+## Ends in an error in state: 69.
 ##
 ## command_parser' -> . command_parser [ # ]
 ##
@@ -740,7 +740,7 @@ For example:
 
 command_parser: VERNAC_CHECK ID VERNAC_SEPARATOR VERNAC_VARIANT_S
 ##
-## Ends in an error in state: 106.
+## Ends in an error in state: 110.
 ##
 ## command_parser -> sequenced_command . EOF [ # ]
 ##
@@ -753,7 +753,7 @@ After `$0`, the end of file is expected.
 
 flag_parser: VERNAC_FLAG_VARIANT VERNAC_SET
 ##
-## Ends in an error in state: 2.
+## Ends in an error in state: 71.
 ##
 ## flag -> VERNAC_FLAG_VARIANT . variant [ VERNAC_SEPARATOR EOF ]
 ##
@@ -769,7 +769,7 @@ For example:
 
 flag_parser: VERNAC_FLAG_FUEL VERNAC_VARIANT_S
 ##
-## Ends in an error in state: 7.
+## Ends in an error in state: 76.
 ##
 ## flag -> VERNAC_FLAG_FUEL . INT [ VERNAC_SEPARATOR EOF ]
 ##
@@ -785,7 +785,7 @@ For example:
 
 command_parser: VERNAC_SET VERNAC_FLAG_FUEL INT VERNAC_VARIANT_S
 ##
-## Ends in an error in state: 109.
+## Ends in an error in state: 113.
 ##
 ## sequenced_command -> command . VERNAC_SEPARATOR [ VERNAC_SET VERNAC_LOAD VERNAC_INDUCTIVE VERNAC_EVAL VERNAC_ELABORATE VERNAC_DEFINITION VERNAC_CHECK EOF ]
 ##
@@ -799,7 +799,7 @@ For example:
 
 flag_parser: VERNAC_VARIANT_S
 ##
-## Ends in an error in state: 115.
+## Ends in an error in state: 119.
 ##
 ## flag_parser' -> . flag_parser [ # ]
 ##
@@ -814,7 +814,7 @@ For example:
 
 flag_parser: VERNAC_FLAG_FUEL INT VERNAC_VARIANT_S
 ##
-## Ends in an error in state: 117.
+## Ends in an error in state: 121.
 ##
 ## flag_parser -> flag . EOF [ # ]
 ##
@@ -827,7 +827,7 @@ After `$0`, the end of file is expected.
 
 command_parser: VERNAC_INDUCTIVE VERNAC_VARIANT_S
 ##
-## Ends in an error in state: 12.
+## Ends in an error in state: 81.
 ##
 ## command -> VERNAC_INDUCTIVE . id list(arg) COLON term ASSIGN list(ctor_decl) [ VERNAC_SEPARATOR ]
 ##
@@ -835,13 +835,14 @@ command_parser: VERNAC_INDUCTIVE VERNAC_VARIANT_S
 ## VERNAC_INDUCTIVE
 ##
 
+I'm currently parsing an inductive declaration.
 An identifier must come after `$0`.
 For example:
 > $0 my_inductive_name (x : Type) : Type@1 := <ctor-declarations>.
 
 command_parser: VERNAC_INDUCTIVE ID VERNAC_VARIANT_S
 ##
-## Ends in an error in state: 14.
+## Ends in an error in state: 82.
 ##
 ## command -> VERNAC_INDUCTIVE id . list(arg) COLON term ASSIGN list(ctor_decl) [ VERNAC_SEPARATOR ]
 ##
@@ -849,6 +850,7 @@ command_parser: VERNAC_INDUCTIVE ID VERNAC_VARIANT_S
 ## VERNAC_INDUCTIVE id
 ##
 
+I'm currently parsing an inductive declaration.
 I expect arguments of the form `(id ... id : type)` or a `:` (colon) followed
 by the sort of the inductive.
 For example:
@@ -857,7 +859,7 @@ For example:
 
 command_parser: VERNAC_INDUCTIVE ID COLON VERNAC_VARIANT_S
 ##
-## Ends in an error in state: 80.
+## Ends in an error in state: 84.
 ##
 ## command -> VERNAC_INDUCTIVE id list(arg) COLON . term ASSIGN list(ctor_decl) [ VERNAC_SEPARATOR ]
 ##
@@ -865,13 +867,14 @@ command_parser: VERNAC_INDUCTIVE ID COLON VERNAC_VARIANT_S
 ## VERNAC_INDUCTIVE id list(arg) COLON
 ##
 
+I'm currently parsing an inductive declaration.
 The sort of the inductive declaration must follow the `:` (colon).
 For example:
 > $3 $2 $1 $0 Type := <ctor-declarations>.
 
 command_parser: VERNAC_INDUCTIVE ID COLON ID VERNAC_VARIANT_S
 ##
-## Ends in an error in state: 81.
+## Ends in an error in state: 85.
 ##
 ## command -> VERNAC_INDUCTIVE id list(arg) COLON term . ASSIGN list(ctor_decl) [ VERNAC_SEPARATOR ]
 ##
@@ -882,62 +885,57 @@ command_parser: VERNAC_INDUCTIVE ID COLON ID VERNAC_VARIANT_S
 ## This implies that, although the LR(1) items shown above provide an
 ## accurate view of the past (what has been recognized so far), they
 ## may provide an INCOMPLETE view of the future (what was expected next).
-## In state 40, spurious reduction of production term -> fact
+## In state 29, spurious reduction of production term -> fact
 ##
 
-I expect an `:=` (assign) followed by the body of the definition.
+I'm currently parsing an inductive declaration.
+I expect an `:=` (assign) followed by the constructor declarations.
 For example:
 > $4 $3 $2 $1 $0 := <ctor-declarations>.
 
 
-ctor_decl_parser: VBAR VERNAC_VARIANT_S
-##
-## Ends in an error in state: 83.
-##
-## ctor_decl -> VBAR . id list(arg) COLON term [ VERNAC_SEPARATOR VBAR EOF ]
-##
-## The known suffix of the stack is as follows:
-## VBAR
-##
-
-An identifier must come after `$0`.
-For example:
-> $0 my_constructor_name (x : Type) ...
-
-ctor_decl_parser: VBAR ID VERNAC_VARIANT_S
-##
-## Ends in an error in state: 84.
-##
-## ctor_decl -> VBAR id . list(arg) COLON term [ VERNAC_SEPARATOR VBAR EOF ]
-##
-## The known suffix of the stack is as follows:
-## VBAR id
-##
-
-I expect arguments of the form `(id ... id : type)` or a `:` (colon) followed
-by the type of the constructor.
-For example:
-> $1 $0 (a b : Type) : <type>
-> $1 $0 : <type>
-
-ctor_decl_parser: VBAR ID COLON VERNAC_VARIANT_S
+command_parser: VERNAC_INDUCTIVE ID COLON ID ASSIGN VERNAC_VARIANT_S
 ##
 ## Ends in an error in state: 86.
 ##
-## ctor_decl -> VBAR id list(arg) COLON . term [ VERNAC_SEPARATOR VBAR EOF ]
+## command -> VERNAC_INDUCTIVE id list(arg) COLON term ASSIGN . list(ctor_decl) [ VERNAC_SEPARATOR ]
 ##
 ## The known suffix of the stack is as follows:
-## VBAR id list(arg) COLON
+## VERNAC_INDUCTIVE id list(arg) COLON term ASSIGN
 ##
 
-The type of the constructor must follow the `:` (colon).
+I'm currently parsing an inductive declaration.
+After the `:=` (assign), the constructor deckarations are expected.
 For example:
-> $3 $2 $1 $0 <type>
+> $5 $4 $3 $2 $1 $0 <ctor-declarations>.
+> ... $0 | nil : list a
 
+command_parser: VERNAC_INDUCTIVE ID COLON ID ASSIGN VBAR ID COLON ID RPAREN
+##
+## Ends in an error in state: 95.
+##
+## list(ctor_decl) -> ctor_decl . list(ctor_decl) [ VERNAC_SEPARATOR ]
+##
+## The known suffix of the stack is as follows:
+## ctor_decl
+##
+## WARNING: This example involves spurious reductions.
+## This implies that, although the LR(1) items shown above provide an
+## accurate view of the past (what has been recognized so far), they
+## may provide an INCOMPLETE view of the future (what was expected next).
+## In state 29, spurious reduction of production term -> fact
+## In state 91, spurious reduction of production ctor_decl -> VBAR id list(arg) COLON term
+##
+
+I'm currently parsing an inductive declaration.
+After the `:=` (assign), the constructor deckarations are expected.
+For example:
+> $5 $4 $3 $2 $1 $0 <ctor-declarations>.
+> ... $0 | nil : list a
 
 ctor_decl_parser: VERNAC_VARIANT_S
 ##
-## Ends in an error in state: 111.
+## Ends in an error in state: 115.
 ##
 ## ctor_decl_parser' -> . ctor_decl_parser [ # ]
 ##
@@ -947,9 +945,56 @@ ctor_decl_parser: VERNAC_VARIANT_S
 
 I expect a constructor declaration starting with `|`.
 
+ctor_decl_parser: VBAR VERNAC_VARIANT_S
+##
+## Ends in an error in state: 87.
+##
+## ctor_decl -> VBAR . id list(arg) COLON term [ VERNAC_SEPARATOR VBAR EOF ]
+##
+## The known suffix of the stack is as follows:
+## VBAR
+##
+
+I'm currently parsing a constructor declaration.
+An identifier must come after `$0`.
+For example:
+> $0 my_constructor_name (x : Type) ...
+
+ctor_decl_parser: VBAR ID VERNAC_VARIANT_S
+##
+## Ends in an error in state: 88.
+##
+## ctor_decl -> VBAR id . list(arg) COLON term [ VERNAC_SEPARATOR VBAR EOF ]
+##
+## The known suffix of the stack is as follows:
+## VBAR id
+##
+
+I'm currently parsing a constructor declaration.
+I expect arguments of the form `(id ... id : type)` or a `:` (colon) followed
+by the type of the constructor.
+For example:
+> $1 $0 (a b : Type) : <type>
+> $1 $0 : <type>
+
+ctor_decl_parser: VBAR ID COLON VERNAC_VARIANT_S
+##
+## Ends in an error in state: 90.
+##
+## ctor_decl -> VBAR id list(arg) COLON . term [ VERNAC_SEPARATOR VBAR EOF ]
+##
+## The known suffix of the stack is as follows:
+## VBAR id list(arg) COLON
+##
+
+I'm currently parsing a constructor declaration.
+The type of the constructor must follow the `:` (colon).
+For example:
+> $3 $2 $1 $0 <type>
+
 ctor_decl_parser: VBAR ID COLON ID VERNAC_VARIANT_S
 ##
-## Ends in an error in state: 113.
+## Ends in an error in state: 117.
 ##
 ## ctor_decl_parser -> ctor_decl . EOF [ # ]
 ##
@@ -960,8 +1005,8 @@ ctor_decl_parser: VBAR ID COLON ID VERNAC_VARIANT_S
 ## This implies that, although the LR(1) items shown above provide an
 ## accurate view of the past (what has been recognized so far), they
 ## may provide an INCOMPLETE view of the future (what was expected next).
-## In state 40, spurious reduction of production term -> fact
-## In state 87, spurious reduction of production ctor_decl -> VBAR id list(arg) COLON term
+## In state 29, spurious reduction of production term -> fact
+## In state 91, spurious reduction of production ctor_decl -> VBAR id list(arg) COLON term
 ##
 
 I'm currently parsing a single constructor declaration.
@@ -969,7 +1014,7 @@ After `$0`, the end of file is expected.
 
 term_parser: KWD_UNIVERSE VERNAC_VARIANT_S
 ##
-## Ends in an error in state: 23.
+## Ends in an error in state: 11.
 ##
 ## atom -> KWD_UNIVERSE . AT INT [ VERNAC_SEPARATOR VBAR RPAREN LPAREN KWD_WITH KWD_UNKNOWN_T KWD_UNKNOWN KWD_UNIVERSE KWD_IN KWD_END KWD_AS ID EOF COLON ASSIGN ARROW ]
 ## atom -> KWD_UNIVERSE . [ VERNAC_SEPARATOR VBAR RPAREN LPAREN KWD_WITH KWD_UNKNOWN_T KWD_UNKNOWN KWD_UNIVERSE KWD_IN KWD_END KWD_AS ID EOF COLON ASSIGN ARROW ]
@@ -985,7 +1030,7 @@ For example:
 
 term_parser: KWD_UNIVERSE AT VERNAC_VARIANT_S
 ##
-## Ends in an error in state: 24.
+## Ends in an error in state: 12.
 ##
 ## atom -> KWD_UNIVERSE AT . INT [ VERNAC_SEPARATOR VBAR RPAREN LPAREN KWD_WITH KWD_UNKNOWN_T KWD_UNKNOWN KWD_UNIVERSE KWD_IN KWD_END KWD_AS ID EOF COLON ASSIGN ARROW ]
 ##
@@ -1000,7 +1045,7 @@ For example:
 
 term_parser: KWD_MATCH VERNAC_VARIANT_S
 ##
-## Ends in an error in state: 26.
+## Ends in an error in state: 14.
 ##
 ## term -> KWD_MATCH . AT id top KWD_AS id KWD_RETURN top KWD_WITH list(branch_decl) KWD_END [ VERNAC_SEPARATOR VBAR RPAREN KWD_WITH KWD_IN KWD_END KWD_AS EOF COLON ASSIGN ]
 ##
@@ -1008,11 +1053,14 @@ term_parser: KWD_MATCH VERNAC_VARIANT_S
 ## KWD_MATCH
 ##
 
-<YOUR SYNTAX ERROR MESSAGE HERE>
+I'm currently parsing a match expression.
+After the `$0`, a `@` (at) is expected followed by the name of an inductive type.
+For example:
+> $0 @ bool
 
 term_parser: KWD_MATCH AT VERNAC_VARIANT_S
 ##
-## Ends in an error in state: 27.
+## Ends in an error in state: 15.
 ##
 ## term -> KWD_MATCH AT . id top KWD_AS id KWD_RETURN top KWD_WITH list(branch_decl) KWD_END [ VERNAC_SEPARATOR VBAR RPAREN KWD_WITH KWD_IN KWD_END KWD_AS EOF COLON ASSIGN ]
 ##
@@ -1020,11 +1068,14 @@ term_parser: KWD_MATCH AT VERNAC_VARIANT_S
 ## KWD_MATCH AT
 ##
 
-<YOUR SYNTAX ERROR MESSAGE HERE>
+I'm currently parsing a match expression.
+After the `$0` (at), the name of an inductive type is expected.
+For example:
+> $1 $0 bool
 
 term_parser: KWD_MATCH AT ID VERNAC_VARIANT_S
 ##
-## Ends in an error in state: 28.
+## Ends in an error in state: 16.
 ##
 ## term -> KWD_MATCH AT id . top KWD_AS id KWD_RETURN top KWD_WITH list(branch_decl) KWD_END [ VERNAC_SEPARATOR VBAR RPAREN KWD_WITH KWD_IN KWD_END KWD_AS EOF COLON ASSIGN ]
 ##
@@ -1032,11 +1083,15 @@ term_parser: KWD_MATCH AT ID VERNAC_VARIANT_S
 ## KWD_MATCH AT id
 ##
 
-<YOUR SYNTAX ERROR MESSAGE HERE>
+I'm currently parsing a match expression.
+The discriminant of the match expression is expected.
+For example:
+> $2 $1 $0 x ...
+> $2 $1 $0 (nil bool) ...
 
 term_parser: KWD_MATCH AT ID ID VERNAC_SEPARATOR
 ##
-## Ends in an error in state: 53.
+## Ends in an error in state: 48.
 ##
 ## term -> KWD_MATCH AT id top . KWD_AS id KWD_RETURN top KWD_WITH list(branch_decl) KWD_END [ VERNAC_SEPARATOR VBAR RPAREN KWD_WITH KWD_IN KWD_END KWD_AS EOF COLON ASSIGN ]
 ## top -> top . COLON term [ KWD_AS COLON ]
@@ -1048,15 +1103,18 @@ term_parser: KWD_MATCH AT ID ID VERNAC_SEPARATOR
 ## This implies that, although the LR(1) items shown above provide an
 ## accurate view of the past (what has been recognized so far), they
 ## may provide an INCOMPLETE view of the future (what was expected next).
-## In state 40, spurious reduction of production term -> fact
-## In state 66, spurious reduction of production top -> term
+## In state 29, spurious reduction of production term -> fact
+## In state 60, spurious reduction of production top -> term
 ##
 
-<YOUR SYNTAX ERROR MESSAGE HERE>
+I'm currently parsing a the discriminant of a match expression.
+After the discriminant, the keyword `as` is expected followed by an identifier.
+For example:
+> $3 $2 $1 $0 as z ...
 
 term_parser: KWD_MATCH AT ID ID KWD_AS VERNAC_VARIANT_S
 ##
-## Ends in an error in state: 54.
+## Ends in an error in state: 49.
 ##
 ## term -> KWD_MATCH AT id top KWD_AS . id KWD_RETURN top KWD_WITH list(branch_decl) KWD_END [ VERNAC_SEPARATOR VBAR RPAREN KWD_WITH KWD_IN KWD_END KWD_AS EOF COLON ASSIGN ]
 ##
@@ -1064,11 +1122,14 @@ term_parser: KWD_MATCH AT ID ID KWD_AS VERNAC_VARIANT_S
 ## KWD_MATCH AT id top KWD_AS
 ##
 
-<YOUR SYNTAX ERROR MESSAGE HERE>
+I'm currently parsing a match expression.
+After the keyword `as`, an identifier is expected followed by the keyword `return`.
+For example:
+> $4 $3 $2 $1 $0 z return ...
 
 term_parser: KWD_MATCH AT ID ID KWD_AS ID VERNAC_VARIANT_S
 ##
-## Ends in an error in state: 55.
+## Ends in an error in state: 50.
 ##
 ## term -> KWD_MATCH AT id top KWD_AS id . KWD_RETURN top KWD_WITH list(branch_decl) KWD_END [ VERNAC_SEPARATOR VBAR RPAREN KWD_WITH KWD_IN KWD_END KWD_AS EOF COLON ASSIGN ]
 ##
@@ -1076,11 +1137,14 @@ term_parser: KWD_MATCH AT ID ID KWD_AS ID VERNAC_VARIANT_S
 ## KWD_MATCH AT id top KWD_AS id
 ##
 
-<YOUR SYNTAX ERROR MESSAGE HERE>
+I'm currently parsing a match expression.
+After the identifier $0, the keyword `return` is expected followed by a term.
+For example:
+> $5 $4 $3 $2 $1 $0 return <term> with ...
 
 term_parser: KWD_MATCH AT ID ID KWD_AS ID KWD_RETURN VERNAC_VARIANT_S
 ##
-## Ends in an error in state: 56.
+## Ends in an error in state: 51.
 ##
 ## term -> KWD_MATCH AT id top KWD_AS id KWD_RETURN . top KWD_WITH list(branch_decl) KWD_END [ VERNAC_SEPARATOR VBAR RPAREN KWD_WITH KWD_IN KWD_END KWD_AS EOF COLON ASSIGN ]
 ##
@@ -1088,11 +1152,14 @@ term_parser: KWD_MATCH AT ID ID KWD_AS ID KWD_RETURN VERNAC_VARIANT_S
 ## KWD_MATCH AT id top KWD_AS id KWD_RETURN
 ##
 
-<YOUR SYNTAX ERROR MESSAGE HERE>
+I'm currently parsing a match expression.
+After the keyword `return`, a term is expected followed by the keyword `with`.
+For example:
+> $6 $5 $4 $3 $2 $1 $0 bool with ...
 
 term_parser: KWD_MATCH AT ID ID KWD_AS ID KWD_RETURN ID VERNAC_SEPARATOR
 ##
-## Ends in an error in state: 57.
+## Ends in an error in state: 52.
 ##
 ## term -> KWD_MATCH AT id top KWD_AS id KWD_RETURN top . KWD_WITH list(branch_decl) KWD_END [ VERNAC_SEPARATOR VBAR RPAREN KWD_WITH KWD_IN KWD_END KWD_AS EOF COLON ASSIGN ]
 ## top -> top . COLON term [ KWD_WITH COLON ]
@@ -1104,15 +1171,18 @@ term_parser: KWD_MATCH AT ID ID KWD_AS ID KWD_RETURN ID VERNAC_SEPARATOR
 ## This implies that, although the LR(1) items shown above provide an
 ## accurate view of the past (what has been recognized so far), they
 ## may provide an INCOMPLETE view of the future (what was expected next).
-## In state 40, spurious reduction of production term -> fact
-## In state 66, spurious reduction of production top -> term
+## In state 29, spurious reduction of production term -> fact
+## In state 60, spurious reduction of production top -> term
 ##
 
-<YOUR SYNTAX ERROR MESSAGE HERE>
+I'm currently parsing the type of a match expression.
+The keyword `with` is expected, followed by the branches of the match expression.
+For example:
+> $7 $6 $5 $4 $3 $2 $1 $0 with <branches>
 
 term_parser: KWD_MATCH AT ID ID KWD_AS ID KWD_RETURN ID KWD_WITH VERNAC_VARIANT_S
 ##
-## Ends in an error in state: 58.
+## Ends in an error in state: 53.
 ##
 ## term -> KWD_MATCH AT id top KWD_AS id KWD_RETURN top KWD_WITH . list(branch_decl) KWD_END [ VERNAC_SEPARATOR VBAR RPAREN KWD_WITH KWD_IN KWD_END KWD_AS EOF COLON ASSIGN ]
 ##
@@ -1120,50 +1190,102 @@ term_parser: KWD_MATCH AT ID ID KWD_AS ID KWD_RETURN ID KWD_WITH VERNAC_VARIANT_
 ## KWD_MATCH AT id top KWD_AS id KWD_RETURN top KWD_WITH
 ##
 
-<YOUR SYNTAX ERROR MESSAGE HERE>
+I'm currently parsing the branches of a match expression.
+After the keyword `with`, the branches of the match expression are expected followed by the keyword `end`.
+For example:
+> $8 $7 $6 $5 $4 $3 $2 $1 $0 <branches> end
+> ... $0 | nil a => true end
+> ... $0 | nil a => true | cons a x xs => false end
 
-term_parser: KWD_MATCH AT ID ID KWD_AS ID KWD_RETURN ID KWD_WITH VBAR VERNAC_VARIANT_S
+term_parser: KWD_MATCH AT ID ID KWD_AS ID KWD_RETURN ID KWD_WITH VBAR ID BIG_ARROW ID EOF
 ##
-## Ends in an error in state: 59.
+## Ends in an error in state: 56.
 ##
-## branch_decl -> VBAR . id list(id) BIG_ARROW top [ VBAR KWD_END ]
+## list(branch_decl) -> branch_decl . list(branch_decl) [ KWD_END ]
+##
+## The known suffix of the stack is as follows:
+## branch_decl
+##
+## WARNING: This example involves spurious reductions.
+## This implies that, although the LR(1) items shown above provide an
+## accurate view of the past (what has been recognized so far), they
+## may provide an INCOMPLETE view of the future (what was expected next).
+## In state 29, spurious reduction of production term -> fact
+## In state 60, spurious reduction of production top -> term
+## In state 63, spurious reduction of production branch_decl -> VBAR id list(id) BIG_ARROW top
+##
+
+I'm currently parsing the branches of a match expression.
+The list of branches must be followed by the keyword `end`.
+For example:
+> ... $0 end
+
+branch_parser: VERNAC_VARIANT_S
+##
+## Ends in an error in state: 0.
+##
+## branch_parser' -> . branch_parser [ # ]
+##
+## The known suffix of the stack is as follows:
+##
+##
+
+A branch of a match expression is expected.
+For example:
+> | nil a => true
+
+branch_parser: VBAR VERNAC_VARIANT_S
+##
+## Ends in an error in state: 1.
+##
+## branch_decl -> VBAR . id list(id) BIG_ARROW top [ VBAR KWD_END EOF ]
 ##
 ## The known suffix of the stack is as follows:
 ## VBAR
 ##
 
-<YOUR SYNTAX ERROR MESSAGE HERE>
+I'm currently parsing a branch of a match expression.
+After the `$0` (bar), a pattern is expected followed by a `=>` (big arrow).
+For example:
+> $0 nil a => <term>
 
-term_parser: KWD_MATCH AT ID ID KWD_AS ID KWD_RETURN ID KWD_WITH VBAR ID VERNAC_VARIANT_S
+branch_parser: VBAR ID VERNAC_VARIANT_S
 ##
-## Ends in an error in state: 60.
+## Ends in an error in state: 3.
 ##
-## branch_decl -> VBAR id . list(id) BIG_ARROW top [ VBAR KWD_END ]
+## branch_decl -> VBAR id . list(id) BIG_ARROW top [ VBAR KWD_END EOF ]
 ##
 ## The known suffix of the stack is as follows:
 ## VBAR id
 ##
 
-<YOUR SYNTAX ERROR MESSAGE HERE>
+I'm currently parsing a branch of a match expression.
+After the pattern, a `=>` is expected followed by the body of the branch.
+For example:
+> $1 $0 => <term>
 
-term_parser: KWD_MATCH AT ID ID KWD_AS ID KWD_RETURN ID KWD_WITH VBAR ID BIG_ARROW VERNAC_VARIANT_S
+branch_parser: VBAR ID BIG_ARROW VERNAC_VARIANT_S
 ##
-## Ends in an error in state: 62.
+## Ends in an error in state: 5.
 ##
-## branch_decl -> VBAR id list(id) BIG_ARROW . top [ VBAR KWD_END ]
+## branch_decl -> VBAR id list(id) BIG_ARROW . top [ VBAR KWD_END EOF ]
 ##
 ## The known suffix of the stack is as follows:
 ## VBAR id list(id) BIG_ARROW
 ##
 
-<YOUR SYNTAX ERROR MESSAGE HERE>
+I'm currently parsing a branch of a match expression.
+After the  `=>` (big arrow), the body of the branch is expected.
+For example:
+> $2 $1 $0 false
+> $2 $1 $0 (fun (x : Type) => x)
 
-term_parser: KWD_MATCH AT ID ID KWD_AS ID KWD_RETURN ID KWD_WITH VBAR ID BIG_ARROW ID VERNAC_SEPARATOR
+branch_parser: VBAR ID BIG_ARROW ID VERNAC_SEPARATOR
 ##
 ## Ends in an error in state: 63.
 ##
-## branch_decl -> VBAR id list(id) BIG_ARROW top . [ VBAR KWD_END ]
-## top -> top . COLON term [ VBAR KWD_END COLON ]
+## branch_decl -> VBAR id list(id) BIG_ARROW top . [ VBAR KWD_END EOF ]
+## top -> top . COLON term [ VBAR KWD_END EOF COLON ]
 ##
 ## The known suffix of the stack is as follows:
 ## VBAR id list(id) BIG_ARROW top
@@ -1172,15 +1294,19 @@ term_parser: KWD_MATCH AT ID ID KWD_AS ID KWD_RETURN ID KWD_WITH VBAR ID BIG_ARR
 ## This implies that, although the LR(1) items shown above provide an
 ## accurate view of the past (what has been recognized so far), they
 ## may provide an INCOMPLETE view of the future (what was expected next).
-## In state 40, spurious reduction of production term -> fact
-## In state 66, spurious reduction of production top -> term
+## In state 29, spurious reduction of production term -> fact
+## In state 60, spurious reduction of production top -> term
 ##
 
-<YOUR SYNTAX ERROR MESSAGE HERE>
+I'm currently parsing the branches of a match expression.
+A new branch is expected or the keyword `end`.
+For example:
+> $4 $3 $2 $1 $0 | ...
+> $4 $3 $2 $1 $0 end
 
-term_parser: KWD_MATCH AT ID ID KWD_AS ID KWD_RETURN ID KWD_WITH VBAR ID ID VERNAC_VARIANT_S
+branch_parser: VBAR ID ID VERNAC_VARIANT_S
 ##
-## Ends in an error in state: 67.
+## Ends in an error in state: 64.
 ##
 ## list(id) -> id . list(id) [ BIG_ARROW ]
 ##
@@ -1188,35 +1314,29 @@ term_parser: KWD_MATCH AT ID ID KWD_AS ID KWD_RETURN ID KWD_WITH VBAR ID ID VERN
 ## id
 ##
 
-<YOUR SYNTAX ERROR MESSAGE HERE>
+I'm currently parsing the pattern of a branch.
+A list of identifiers is expected or a `=>` followed by the body of the branch.
+For example:
+> $0 => <body>
+> $0 a b c => <body>
 
-command_parser: VERNAC_INDUCTIVE ID COLON ID ASSIGN VERNAC_VARIANT_S
+branch_parser: VBAR ID BIG_ARROW ID VBAR
 ##
-## Ends in an error in state: 82.
+## Ends in an error in state: 67.
 ##
-## command -> VERNAC_INDUCTIVE id list(arg) COLON term ASSIGN . list(ctor_decl) [ VERNAC_SEPARATOR ]
+## branch_parser -> branch_decl . EOF [ # ]
 ##
 ## The known suffix of the stack is as follows:
-## VERNAC_INDUCTIVE id list(arg) COLON term ASSIGN
-##
-
-<YOUR SYNTAX ERROR MESSAGE HERE>
-
-command_parser: VERNAC_INDUCTIVE ID COLON ID ASSIGN VBAR ID COLON ID RPAREN
-##
-## Ends in an error in state: 91.
-##
-## list(ctor_decl) -> ctor_decl . list(ctor_decl) [ VERNAC_SEPARATOR ]
-##
-## The known suffix of the stack is as follows:
-## ctor_decl
+## branch_decl
 ##
 ## WARNING: This example involves spurious reductions.
 ## This implies that, although the LR(1) items shown above provide an
 ## accurate view of the past (what has been recognized so far), they
 ## may provide an INCOMPLETE view of the future (what was expected next).
-## In state 40, spurious reduction of production term -> fact
-## In state 87, spurious reduction of production ctor_decl -> VBAR id list(arg) COLON term
+## In state 29, spurious reduction of production term -> fact
+## In state 60, spurious reduction of production top -> term
+## In state 63, spurious reduction of production branch_decl -> VBAR id list(id) BIG_ARROW top
 ##
 
-<YOUR SYNTAX ERROR MESSAGE HERE>
+I'm currently parsing a branch of a match expression.
+After `$0`, the end of file is expected.

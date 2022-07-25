@@ -72,13 +72,17 @@
 %type <Config.Flag.t> flag_parser
 
 /* Dummy starts. Only used to reduce number of error messages. */
-%start ctor_decl_parser
+%start ctor_decl_parser branch_parser
 %type <unit> ctor_decl_parser
+%type <unit> branch_parser
 
 %%
 /* Dummy parsers. Only used to reduce number of error messages. */
 ctor_decl_parser :
   ctor_decl; EOF {} 
+
+branch_parser : 
+  branch_decl; EOF {}
 
  /* Start grammar productions */
 program_parser :
