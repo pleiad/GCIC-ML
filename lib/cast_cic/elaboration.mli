@@ -19,20 +19,17 @@ type elaboration = Ast.term * Ast.term
 
 (** The elaboration procedure, as per the paper *)
 val elaborate
-  :  (Ast.term -> (Ast.term, ([> elaboration_error ] as 'e)) result)
-  -> Ast.term Name.Map.t
+  :  Ast.term Name.Map.t
   -> Kernel.Ast.term
-  -> (elaboration, 'e) result
+  -> (elaboration, [> elaboration_error | Reduction.reduction_error ]) result
 
 val check_elab
-  :  (Ast.term -> (Ast.term, ([> elaboration_error ] as 'e)) result)
-  -> Ast.term Name.Map.t
+  :  Ast.term Name.Map.t
   -> Kernel.Ast.term
   -> Ast.term
-  -> (Ast.term, 'e) result
+  -> (Ast.term, [> elaboration_error | Reduction.reduction_error ]) result
 
 val elab_univ
-  :  (Ast.term -> (Ast.term, ([> elaboration_error ] as 'e)) result)
-  -> Ast.term Name.Map.t
+  :  Ast.term Name.Map.t
   -> Kernel.Ast.term
-  -> (Ast.term * int, 'e) result
+  -> (Ast.term * int, [> elaboration_error | Reduction.reduction_error ]) result

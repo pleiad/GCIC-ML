@@ -36,7 +36,7 @@ let rec string_of_error = function
 let execute_eval term : (cmd_result, execute_error) result =
   let open Elaboration in
   let open Reduction in
-  let* elab_term, _ = elaborate reduce Name.Map.empty term in
+  let* elab_term, _ = elaborate Name.Map.empty term in
   let* v = reduce elab_term in
   Ok (Reduction v)
 
@@ -45,7 +45,7 @@ let execute_check term : (cmd_result, execute_error) result =
   let open Typing in
   let open Reduction in
   let empty_ctx = Name.Map.empty in
-  let* elab_term, _ = elaborate reduce empty_ctx term in
+  let* elab_term, _ = elaborate empty_ctx term in
   let* ty = infer_type empty_ctx elab_term in
   let* v = reduce ty in
   (* By default it normalizes the output. TODO: Add flag *)
@@ -53,7 +53,7 @@ let execute_check term : (cmd_result, execute_error) result =
 
 let execute_elab term : (cmd_result, execute_error) result =
   let open Elaboration in
-  let* elab_term, _ = elaborate Reduction.reduce Name.Map.empty term in
+  let* elab_term, _ = elaborate Name.Map.empty term in
   Ok (Elaboration elab_term)
 
 let execute_set_flag (flag : Config.Flag.t) : (cmd_result, execute_error) result =
@@ -63,13 +63,12 @@ let execute_set_flag (flag : Config.Flag.t) : (cmd_result, execute_error) result
 let execute_definition gdef : (cmd_result, execute_error) result =
   let open Elaboration in
   let open Typing in
-  let open Reduction in
   let open Common.Declarations in
   let empty_ctx = Name.Map.empty in
   match gdef with
   | { name; ty; term } ->
-    let* elab_ty, _ = elab_univ reduce empty_ctx ty in
-    let* elab_term = check_elab reduce empty_ctx term elab_ty in
+    let* elab_ty, _ = elab_univ empty_ctx ty in
+    let* elab_term = check_elab empty_ctx term elab_ty in
     let* _ = check_type empty_ctx elab_term elab_ty in
     Declarations.Const.add name { name; ty; term };
     Declarations.Const.add_cache name { name; ty = elab_ty; term = elab_term };
@@ -78,10 +77,9 @@ let execute_definition gdef : (cmd_result, execute_error) result =
 let execute_inductive ind ctors : (cmd_result, execute_error) result =
   let open Declarations in
   let open Elaboration in
-  let open Reduction in
   let empty_ctx = Name.Map.empty in
   let elab_univ_param (elab_params, ctx) (id, param) =
-    let* elab_param, _ = elab_univ reduce ctx param in
+    let* elab_param, _ = elab_univ ctx param in
     Ok ((id, elab_param) :: elab_params, Name.Map.add id elab_param ctx)
   in
   let elab_univ_params ctx params =
@@ -89,7 +87,7 @@ let execute_inductive ind ctors : (cmd_result, execute_error) result =
     Ok (List.rev elab_params, elab_ctx)
   in
   let execute_ind_decl (ind : Ind.t) =
-    let* elab_sort, level = elab_univ reduce empty_ctx ind.sort in
+    let* elab_sort, level = elab_univ empty_ctx ind.sort in
     let* elab_params, _ = elab_univ_params empty_ctx ind.params in
     let cached_ind =
       { ind with sort = elab_sort; level = level - 1; params = elab_params }
@@ -103,7 +101,7 @@ let execute_inductive ind ctors : (cmd_result, execute_error) result =
   let execute_ctor_decl (ctor : Ctor.t) =
     let* elab_params, elab_ctx = elab_univ_params empty_ctx ctor.params in
     let* elab_args, _ = elab_univ_params elab_ctx ctor.args in
-    let* elab_ty, _ = elab_univ reduce empty_ctx ctor.ty in
+    let* elab_ty, _ = elab_univ empty_ctx ctor.ty in
     (* FIXME: Check whether the type of the constructor matches the inductive's.
        e.g. You can define "cons : a -> list a -> bool" and it will be ok   
     *)

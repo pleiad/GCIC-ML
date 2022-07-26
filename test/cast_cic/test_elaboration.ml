@@ -10,7 +10,7 @@ let omega i =
   let d = delta i in
   App (d, d)
 
-let elaborate = Elaboration.elaborate Reduction.reduce
+let elaborate = Elaboration.elaborate
 
 let tests_base_elaborations () =
   let open Kernel.Ast in
