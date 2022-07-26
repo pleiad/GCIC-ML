@@ -6,7 +6,9 @@ open Common.Declarations
 type parsed_term = Parsing.Ast.term
 type term = Kernel.Ast.term
 
-let defined_ids : [ `Const | `Ind of int | `Ctor ] Name.Map.t ref = ref Name.Map.empty
+let defined_ids : [ `Const | `Ind of int * int | `Ctor of int ] Name.Map.t ref =
+  ref Name.Map.empty
+
 let from_opt_name id = Option.value id ~default:Name.default
 
 (* For simplicity, any free identifier is treated as a Const (an identifier refering to a global declaration).
@@ -17,17 +19,28 @@ let rec of_parsed_term (t : parsed_term) : term =
     (try
        match Name.Map.find x !defined_ids with
        | `Const -> Const x
-       | `Ind lvl -> Inductive (x, lvl, [])
-       | `Ctor -> Constructor (x, [])
+       | `Ind (lvl, _) -> Inductive (x, lvl, [])
+       | `Ctor _ -> Constructor (x, [])
      with
     | Not_found -> Var x)
   | Universe i -> Universe i
   | App (t, u) ->
     let t' = of_parsed_term t in
     let u' = of_parsed_term u in
+    (* Checks if a constructor or inductive can be applied to more arguments. *)
+    let is_not_saturated (x : Name.t) (actual : int) : bool =
+      try
+        match Name.Map.find x !defined_ids with
+        | `Const -> false
+        | `Ind (_, expected) | `Ctor expected -> actual < expected
+      with
+      | Not_found -> false
+    in
     (match t' with
-    | Inductive (ind, i, params) -> Inductive (ind, i, List.append params [ u' ])
-    | Constructor (ctor, args) -> Constructor (ctor, List.append args [ u' ])
+    | Inductive (ind, i, params) when is_not_saturated ind (List.length params) ->
+      Inductive (ind, i, List.append params [ u' ])
+    | Constructor (ctor, args) when is_not_saturated ctor (List.length args) ->
+      Constructor (ctor, List.append args [ u' ])
     | _ -> App (t', u'))
   | Lambda (args, body) -> expand_lambda (fun fi -> Kernel.Ast.Lambda fi) args body
   | Prod (args, body) -> expand_lambda (fun fi -> Kernel.Ast.Prod fi) args body
@@ -78,14 +91,15 @@ let of_parsed_const_decl (d : parsed_term const_decl) =
 let of_parsed_ind_decl (d : parsed_term ind_decl) =
   let params = List.map (map_snd of_parsed_term) d.params in
   let lvl = of_parsed_term d.sort |> Kernel.Ast.get_universe_lvl in
-  defined_ids := Name.Map.add d.name (`Ind lvl) !defined_ids;
+  defined_ids := Name.Map.add d.name (`Ind (lvl, List.length params)) !defined_ids;
   { d with params; sort = of_parsed_term d.sort }
 
 let of_parsed_ctor_decl (d : parsed_term ctor_decl) =
   let params = List.map (map_snd of_parsed_term) d.params in
   let args = List.map (map_snd of_parsed_term) d.args in
+  let arity = List.(length params + length args) in
   let ty = of_parsed_term d.ty in
-  defined_ids := Name.Map.add d.name `Ctor !defined_ids;
+  defined_ids := Name.Map.add d.name (`Ctor arity) !defined_ids;
   { d with params; args; ty }
 
 let of_parsed_command : parsed_term Command.t -> term Command.t = function
