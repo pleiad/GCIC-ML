@@ -1,3 +1,5 @@
+open Common
+
 module type Elaboration = sig
   type o
 

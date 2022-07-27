@@ -1,6 +1,6 @@
 (library
  (name elaboration)
- (modules main ast cast_CIC gCIC)
+ (modules main ast cast_CIC)
  (libraries common config)
  (preprocess
   (pps bisect_ppx)))

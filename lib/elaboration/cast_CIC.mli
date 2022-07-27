@@ -1,6 +1,7 @@
 open Main
 open Ast
 open Common.Id
+open Common
 
 type elaboration_error =
   [ `Err_free_identifier of Name.t
