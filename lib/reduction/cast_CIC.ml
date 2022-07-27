@@ -17,16 +17,12 @@ module type Store = sig
   val ctor_param_args : Name.t -> (Name.t * t) list * (Name.t * t) list
 end
 
-module Red (ST : Store with type t = term) :
-  Reduction with type t = term with type error = reduction_error = struct
-  type t = term
-  type error = reduction_error
-  type o = (term, error) result
+module type CastCICRed =
+  Reduction with type t = term with type o = (term, reduction_error) result
 
-  (* let string_of_error = function
-    | `Err_not_enough_fuel -> "not enough fuel"
-    | `Err_stuck_term _term -> "stuck term"
-    | `Err_free_const -> "free constant" *)
+module Make (ST : Store with type t = term) : CastCICRed = struct
+  type t = term
+  type o = (term, reduction_error) result
 
   (** Head constructors *)
   type head =

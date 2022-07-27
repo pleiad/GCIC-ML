@@ -16,5 +16,7 @@ module type Store = sig
   val ctor_param_args : Name.t -> (Name.t * t) list * (Name.t * t) list
 end
 
-module Red (ST : Store with type t = term) :
-  Reduction with type t = term with type error = reduction_error
+module type CastCICRed =
+  Reduction with type t = term with type o = (term, reduction_error) result
+
+module Make (ST : Store with type t = term) : CastCICRed
