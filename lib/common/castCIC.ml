@@ -1,5 +1,5 @@
 (** This module specifies the structure of CastCIC *)
-open Common.Id
+open Id
 
 (** Global counter used to create new identifiers *)
 let id_counter : int ref = ref 0

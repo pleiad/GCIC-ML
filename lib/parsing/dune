@@ -8,8 +8,8 @@
 
 (library
  (name parsing)
- (modules parser lexer ast lex_and_parse parserMessages)
- (libraries common sedlex menhirLib kernel vernac)
+ (modules parser lexer ast lex_and_parse parserMessages command)
+ (libraries common config sedlex menhirLib)
  (preprocess
   (pps sedlex.ppx)))
 

@@ -14,7 +14,7 @@
       The body of the lambda is being ascribed to the expected type.
   *)
   let mk_definition name args ty' body =
-    let open Vernac.Command in
+    let open Command in
     let open Common.Declarations in
     let term = Lambda (args, Ascription (body, ty')) in
     let ty  = Prod (args, ty') in
@@ -23,7 +23,7 @@
 
   (* The inductive's parameters are included immediately in the constructors during parsing *)
   let mk_ind_decl ind params' sort ctors =
-    let open Vernac.Command in
+    let open Command in
     let open Common.Declarations in
     (* Sets anonymous ids to a default value *)
     let fix_name (x, t) = Option.value ~default:Name.default x, t in
@@ -66,9 +66,9 @@
 %start program_parser term_parser command_parser flag_parser
 
 /* Types for the result of productions */
-%type <Ast.term Vernac.Command.t list> program_parser
+%type <Ast.term Command.t list> program_parser
 %type <Ast.term> term_parser
-%type <Ast.term Vernac.Command.t> command_parser
+%type <Ast.term Command.t> command_parser
 %type <Config.Flag.t> flag_parser
 
 /* Dummy starts. Only used to reduce number of error messages. */

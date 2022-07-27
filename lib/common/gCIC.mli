@@ -1,5 +1,5 @@
 (** This module specifies the structure of GCIC *)
-open Common.Id
+open Id
 
 (** Terms in GCIC *)
 type term =

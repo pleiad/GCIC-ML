@@ -1,6 +1,0 @@
-(library
- (name vernac)
- (libraries kernel cast_cic common stdio fmt)
- (preprocess
-  (pps bisect_ppx))
- (modules command exec))

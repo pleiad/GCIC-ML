@@ -1,5 +1,5 @@
 (** This module specifies the structure of CastCIC *)
-open Common.Id
+open Id
 
 val new_identifier : unit -> Name.t
 

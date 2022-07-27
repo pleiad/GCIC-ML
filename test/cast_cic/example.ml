@@ -1,20 +1,24 @@
-open Cast_cic
+open Common.CastCIC
 open Common.Id
 
+let reduce = Gcic.CastCIC.CastCICReduction.reduce
 let empty_ctx = Name.Map.empty
 let name_of_int n = string_of_int n |> Name.of_string
 let id = Name.of_string "__"
+let idf = Lambda { id; dom = Universe 0; body = Var id }
+let unknown i = Unknown (Universe i)
 
-let idf =
-  let open Ast in
-  Lambda { id; dom = Universe 0; body = Var id }
+let germ_prod (i : int) : term =
+  let cprod = Config.cast_universe_level i in
+  let univ = Universe cprod in
+  if cprod >= 0
+  then Prod { id = Name.default; dom = Unknown univ; body = Unknown univ }
+  else Err univ
 
-let unknown i = Ast.Unknown (Ast.Universe i)
+let germ_univ (i : int) (j : int) : term = if j < i then Universe j else Err (Universe i)
 
 (* From the GCIC paper, this is the elaboration of delta (from which omega is built) *)
 let delta' i =
-  let open Ast in
-  let open Reduction in
   let dom =
     Cast
       { source = unknown (i + 1); target = Universe i; term = Unknown (unknown (i + 1)) }
@@ -24,7 +28,7 @@ let delta' i =
     ; dom
     ; body =
         App
-          ( Cast { source = dom; target = germ i HProd; term = Var id }
+          ( Cast { source = dom; target = germ_prod i; term = Var id }
           , Cast
               { source = dom
               ; target = unknown (Config.cast_universe_level i)
@@ -33,7 +37,6 @@ let delta' i =
     }
 
 let omega i =
-  let open Ast in
   let d' = delta' i in
   let dom =
     Cast

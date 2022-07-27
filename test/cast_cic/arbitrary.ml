@@ -1,4 +1,4 @@
-open Cast_cic.Ast
+open Common.CastCIC
 open Common.Id
 
 let term =
@@ -37,7 +37,7 @@ let term =
 (* This one should go somewhere else, but since there are no other tests it's staying
    here for now *)
 let gcic_term =
-  let open Kernel.Ast in
+  let open Common.GCIC in
   let name_of_int n = string_of_int n |> Name.of_string in
   let var n = Var (name_of_int n) in
   let universe n = Universe n in

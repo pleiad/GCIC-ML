@@ -1,12 +1,12 @@
-open! Cast_cic.Ast
+open Common.CastCIC
 open Example
 open Common.Id
-open Cast_cic.Reduction
 
 let is_type : term -> bool = function
   | Prod _ | Universe _ -> true
   | _ -> false
 
+(*
 let tests_head () =
   Alcotest.(check (result Testable.head string))
     "head of Prod is Prod"
@@ -22,28 +22,6 @@ let tests_head_not_type =
     Test.make ~count:20 ~name:"head of not types is error" Arbitrary.term (fun t ->
         assume (not (is_type t));
         head t |> Result.is_error))
-
-let tests_is_canonical () =
-  Alcotest.(check bool)
-    "cast from Prod germ to unknown is canonical"
-    true
-    (is_canonical
-       (Cast { source = germ 1 HProd; target = unknown 1; term = Universe 57 }));
-  Alcotest.(check bool)
-    "cast from Prod germ to unknown is not canonical"
-    false
-    (is_canonical
-       (Cast { source = germ 2 HProd; target = unknown 1; term = Universe 57 }));
-  Alcotest.(check bool)
-    "cast from Univ germ to unknown is canonical"
-    true
-    (is_canonical
-       (Cast { source = germ 1 (HUniverse 0); target = unknown 1; term = Universe 57 }));
-  Alcotest.(check bool)
-    "cast from Univ germ to unknown is not canonical"
-    true
-    (is_canonical
-       (Cast { source = germ 1 (HUniverse 1); target = unknown 1; term = Universe 57 }))
 
 let tests_is_neutral () =
   Alcotest.(check bool)
@@ -75,6 +53,7 @@ let tests_germ () =
 let tests_is_germ () =
   Alcotest.(check bool) "Univ at lower level is germ" true (is_germ 1 (Universe 0));
   Alcotest.(check bool) "Univ is not germ at gte level" false (is_germ 0 (Universe 0))
+*)
 
 let tests_alpha_equal () =
   Alcotest.(check bool)
@@ -158,14 +137,16 @@ let tests_to_string () =
     (to_string (Prod { id = Name.of_string "x"; dom = Universe 0; body = prod12 }))
 
 let tests =
-  [ "head", `Quick, tests_head
-  ; "is_canonical", `Quick, tests_is_canonical
+  [ (*"head", `Quick, tests_head
   ; "is_neutral", `Quick, tests_is_neutral
   ; "germ", `Quick, tests_germ
   ; "is_germ", `Quick, tests_is_germ
-  ; "alpha_equal", `Quick, tests_alpha_equal
+  *)
+    "alpha_equal", `Quick, tests_alpha_equal
   ; "subst", `Quick, tests_subst
   ; "to_string", `Quick, tests_to_string
+    (*
   ; QCheck_alcotest.to_alcotest tests_head_not_type
   ; QCheck_alcotest.to_alcotest neutrals_are_canonical
+  *)
   ]
