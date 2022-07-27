@@ -1,4 +1,4 @@
-open Ast
+open Common.CastCIC
 open Common.Id
 
 type type_error =

@@ -1,6 +1,6 @@
 (library
  (name reduction)
- (modules main ast cast_CIC)
+ (modules main cast_CIC)
  (libraries common config)
  (preprocess
   (pps bisect_ppx)))

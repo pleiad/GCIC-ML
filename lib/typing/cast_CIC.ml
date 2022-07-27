@@ -1,8 +1,8 @@
 open Common.Id
 open Common.Std
-open Ast
+open Common.CastCIC
 
-type typing_context = Ast.term Name.Map.t
+type typing_context = term Name.Map.t
 
 type type_error =
   [ `Err_not_convertible of term * term

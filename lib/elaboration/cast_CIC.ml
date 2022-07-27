@@ -1,12 +1,11 @@
 open Main
-open Ast
 open Common.Id
 open Common.Std
 open Common
 
 type elaboration_error =
   [ `Err_free_identifier of Name.t
-  | `Err_inconsistent of GCIC.term * elaborated_term * elaborated_term
+  | `Err_inconsistent of GCIC.term * CastCIC.term * CastCIC.term
   | `Err_constrained_universe of GCIC.term
   | `Err_constrained_product of GCIC.term
   | `Err_constrained_inductive of GCIC.term
@@ -14,7 +13,7 @@ type elaboration_error =
 
 type reduction_error =
   [ `Err_not_enough_fuel
-  | `Err_stuck_term of elaborated_term
+  | `Err_stuck_term of CastCIC.term
   | `Err_free_const
   ]
 
@@ -24,22 +23,22 @@ type errors =
   ]
 
 module type Reducer = sig
-  val reduce : elaborated_term -> (elaborated_term, [> reduction_error ]) result
+  val reduce : CastCIC.term -> (CastCIC.term, [> reduction_error ]) result
 end
 
 module type Store = sig
   type ind_info =
-    { params : (Name.t * elaborated_term) list
+    { params : (Name.t * CastCIC.term) list
     ; level : int
     }
 
   type ctor_info =
-    { params : (Name.t * elaborated_term) list
-    ; args : (Name.t * elaborated_term) list
+    { params : (Name.t * CastCIC.term) list
+    ; args : (Name.t * CastCIC.term) list
     ; ind : Name.t
     }
 
-  val find_const : Name.t -> elaborated_term
+  val find_const : Name.t -> CastCIC.term
   val find_ind : Name.t -> ind_info
   val find_ctor_info : Name.t -> ctor_info
 end
@@ -54,11 +53,11 @@ module type Typer = sig
 end
 
 module type CastCICElab =
-  Elaboration with type o = (elaborated_term * elaborated_term, errors) result
+  Elaboration with type o = (CastCIC.term * CastCIC.term, errors) result
 
 module Make (ST : Store) (R : Reducer) : CastCICElab = struct
-  (* type elaboration = elaborated_term * elaborated_term *)
-  type o = (elaborated_term * elaborated_term, errors) result
+  (* type elaboration = CastCIC.term * CastCIC.term *)
+  type o = (CastCIC.term * CastCIC.term, errors) result
 
   (** Head constructors *)
   type head =
@@ -67,8 +66,9 @@ module Make (ST : Store) (R : Reducer) : CastCICElab = struct
 
   (** Returns the least precise type for the given head constructor, 
   at the provided level *)
-  let germ i : head -> elaborated_term = function
+  let germ i : head -> CastCIC.term = function
     | HProd ->
+      let open CastCIC in
       let cprod = Config.cast_universe_level i in
       let univ = Universe cprod in
       if cprod >= 0
@@ -76,7 +76,7 @@ module Make (ST : Store) (R : Reducer) : CastCICElab = struct
       else Err univ
     | HInductive ind ->
       let params = (ST.find_ind ind).params |> List.map snd in
-      let unk_params = List.map (fun t -> Unknown t) params in
+      let unk_params = List.map (fun t -> CastCIC.Unknown t) params in
       Inductive (ind, i, unk_params)
 
   (** Checks if two terms are consistent *)
@@ -89,7 +89,7 @@ module Make (ST : Store) (R : Reducer) : CastCICElab = struct
     Result.fold ~ok:(fun x -> x) ~error:(fun _ -> false) res
 
   and alpha_consistent t1 t2 : bool =
-    let open Ast in
+    let open CastCIC in
     match t1, t2 with
     | Var x, Var y -> x = y
     | Universe i, Universe j -> i = j
@@ -120,7 +120,7 @@ module Make (ST : Store) (R : Reducer) : CastCICElab = struct
       && List.for_all2 are_consistent c1.params c2.params
     | Match m1, Match m2 ->
       let are_consistent_branch b1 b2 =
-        let open Ast in
+        let open CastCIC in
         if List.compare_lengths b1.ids b2.ids = 0
         then (
           let new_ids = List.map (fun _ -> Var (new_identifier ())) b1.ids in
@@ -144,8 +144,7 @@ module Make (ST : Store) (R : Reducer) : CastCICElab = struct
     | _ -> false
 
   (** The elaboration procedure, as per the paper *)
-  let rec elab ctx (term : GCIC.term) : (elaborated_term * elaborated_term, errors) result
-    =
+  let rec elab ctx (term : GCIC.term) : (CastCIC.term * CastCIC.term, errors) result =
     let open GCIC in
     match term with
     | Var x ->
@@ -159,27 +158,27 @@ module Make (ST : Store) (R : Reducer) : CastCICElab = struct
       let extended_ctx = Name.Map.add id elab_dom ctx in
       let* elab_body, j = elab_univ extended_ctx body in
       Ok
-        ( Ast.Prod { id; dom = elab_dom; body = elab_body }
-        , Ast.Universe (Config.product_universe_level i j) )
+        ( CastCIC.Prod { id; dom = elab_dom; body = elab_body }
+        , CastCIC.Universe (Config.product_universe_level i j) )
     | Lambda { id; dom; body } ->
       let* elab_dom, _ = elab_univ ctx dom in
       let extended_ctx = Name.Map.add id elab_dom ctx in
       let* elab_body, elab_body_ty = elab extended_ctx body in
       Ok
-        ( Ast.Lambda { id; dom = elab_dom; body = elab_body }
-        , Ast.Prod { id; dom = elab_dom; body = elab_body_ty } )
+        ( CastCIC.Lambda { id; dom = elab_dom; body = elab_body }
+        , CastCIC.Prod { id; dom = elab_dom; body = elab_body_ty } )
     | Unknown i ->
-      let unk_ty = Ast.Unknown (Ast.Universe i) in
-      Ok (Ast.Unknown unk_ty, unk_ty)
+      let unk_ty = CastCIC.Unknown (CastCIC.Universe i) in
+      Ok (CastCIC.Unknown unk_ty, unk_ty)
     | App (t, u) ->
       let* t', id, dom, body = elab_prod ctx t in
       let* u' = check_elab ctx u dom in
-      Ok (Ast.App (t', u'), Ast.subst1 id u' body)
+      Ok (CastCIC.App (t', u'), CastCIC.subst1 id u' body)
     (* Inductives *)
     | Inductive (ind, i, params) ->
       let params_ty = (ST.find_ind ind).params in
       let* elab_params = check_elab_params ctx params params_ty in
-      Ok Ast.(Inductive (ind, i, elab_params), Universe i)
+      Ok CastCIC.(Inductive (ind, i, elab_params), Universe i)
     (* CONS *)
     | Constructor (ctor, pargs) ->
       let cinfo = ST.find_ctor_info ctor in
@@ -187,57 +186,57 @@ module Make (ST : Store) (R : Reducer) : CastCICElab = struct
       let* elab_pargs = check_elab_params ctx pargs (cinfo.params @ cinfo.args) in
       let elab_params, elab_args = List.split_at (List.length cinfo.params) elab_pargs in
       let elab_ctor =
-        Ast.Constructor
+        CastCIC.Constructor
           { ctor; level = ind.level; params = elab_params; args = elab_args }
       in
-      Ok (elab_ctor, Ast.Inductive (cinfo.ind, ind.level, elab_params))
+      Ok (elab_ctor, CastCIC.Inductive (cinfo.ind, ind.level, elab_params))
     (* FIX *)
     | Match { ind; discr; z; pred; f; branches } ->
       let* elab_discr, ind', level, params = elab_ind ctx ind discr in
       (* TODO Check that ind matches the one elaborated by elab_ind *)
       assert (ind = ind');
-      let elab_ind = Ast.Inductive (ind, level, params) in
+      let elab_ind = CastCIC.Inductive (ind, level, params) in
       let ctx_w_z = Name.Map.add z elab_ind ctx in
       let* elab_pred, _ = elab_univ ctx_w_z pred in
       let ctx_w_f =
-        Name.Map.add f (Ast.Prod { id = z; dom = elab_ind; body = elab_pred }) ctx
+        Name.Map.add f (CastCIC.Prod { id = z; dom = elab_ind; body = elab_pred }) ctx
       in
       let* elab_branches =
         map_results (check_elab_branch ctx_w_f z elab_pred params level) branches
       in
       let elab_match =
-        Ast.Match
+        CastCIC.Match
           { ind; discr = elab_discr; z; pred = elab_pred; f; branches = elab_branches }
       in
-      Ok (elab_match, Ast.subst1 z elab_discr elab_pred)
+      Ok (elab_match, CastCIC.subst1 z elab_discr elab_pred)
     (* Extra rules *)
     | Ascription (t, ty) ->
       let* ty', _ = elab_univ ctx ty in
       let* t' = check_elab ctx t ty' in
       Ok (t', ty')
-    | UnknownT i -> Ok (Ast.Unknown (Ast.Universe i), Ast.Universe i)
+    | UnknownT i -> Ok (CastCIC.Unknown (CastCIC.Universe i), CastCIC.Universe i)
     | Const x ->
       let* ty =
         try Ok (ST.find_const x) with
         | Not_found -> Error (`Err_free_identifier x)
       in
-      Ok (Ast.Const x, ty)
+      Ok (CastCIC.Const x, ty)
 
   (* CHECK rule from the original paper *)
-  and check_elab ctx term (s_ty : elaborated_term) =
+  and check_elab ctx term (s_ty : CastCIC.term) =
     let* t', ty = elab ctx term in
     if are_consistent ty s_ty
     then
       Ok
-        (if Ast.alpha_equal ty s_ty
+        (if CastCIC.alpha_equal ty s_ty
         then t'
-        else Ast.Cast { source = ty; target = s_ty; term = t' })
+        else CastCIC.Cast { source = ty; target = s_ty; term = t' })
     else Error (`Err_inconsistent (term, ty, s_ty))
 
   (* Instead of returning the complete Universe type, we only return the level.
 Otherwise, we need to repeat the pattern-matching/extraction wherever this
 is called *)
-  and elab_univ ctx term : (elaborated_term * int, [> elaboration_error ]) result =
+  and elab_univ ctx term : (CastCIC.term * int, [> elaboration_error ]) result =
     let* t, ty = elab ctx term in
     let* v = R.reduce ty in
     match v with
@@ -245,7 +244,7 @@ is called *)
     | Universe i -> Ok (t, i)
     (* Inf-Univ? *)
     | Unknown (Universe i) ->
-      Ok (Ast.Cast { source = ty; target = Universe (i - 1); term = t }, i - 1)
+      Ok (CastCIC.Cast { source = ty; target = Universe (i - 1); term = t }, i - 1)
     | _ -> Error (`Err_constrained_universe term)
 
   (* Similarly to elab_univ, instead of returning the complete product type,
@@ -253,8 +252,8 @@ we only return the constituents of it, ie. its identifier, domain and body.
 Otherwise, we need to repeat the pattern-matching/extraction wherever this
 is called *)
   and elab_prod ctx term
-      : ( elaborated_term * Name.t * elaborated_term * elaborated_term
-      , [> elaboration_error ] ) result
+      : ( CastCIC.term * Name.t * CastCIC.term * CastCIC.term, [> elaboration_error ] )
+      result
     =
     let* t, ty = elab ctx term in
     let* v = R.reduce ty in
@@ -276,8 +275,7 @@ inductive type, we only return the constituents of it.
 Otherwise, we need to repeat the pattern-matching/extraction wherever this
 is called *)
   and elab_ind ctx ind term
-      : ( elaborated_term * Name.t * int * elaborated_term list, [> elaboration_error ]
-      ) result
+      : (CastCIC.term * Name.t * int * CastCIC.term list, [> elaboration_error ]) result
     =
     let* t, ty = elab ctx term in
     let* v = R.reduce ty in
@@ -289,7 +287,7 @@ is called *)
       let ind_germ = germ i (HInductive ind) in
       (match ind_germ with
       | Inductive (ind, i, params) ->
-        Ok (Ast.Cast { source = ty; target = ind_germ; term = t }, ind, i, params)
+        Ok (CastCIC.Cast { source = ty; target = ind_germ; term = t }, ind, i, params)
       | _ -> assert false)
     | _ -> Error (`Err_constrained_inductive term)
 
@@ -299,7 +297,7 @@ It assumes that the constructor in the branch includes all
 parameters and arguments EXPLICITLY.
 *)
   and check_elab_branch ctx z pred params level br =
-    let open Ast in
+    let open CastCIC in
     let ctor_info = ST.find_ctor_info br.ctor in
     let branch_vars = List.map (fun x -> Var x) br.ids in
     (* Substitute all params and args from the branch in the expected types, to obtain all types instantiated to 
@@ -321,7 +319,7 @@ have the expected types from the elaborated ones (which we obtain at the moment 
     let check_elab_param ctx (elab_params, params_ty) param =
       let expected_type = List.hd params_ty |> snd in
       let* elab_param = check_elab ctx param expected_type in
-      Ok (elab_param :: elab_params, Ast.subst1_tele elab_param params_ty)
+      Ok (elab_param :: elab_params, CastCIC.subst1_tele elab_param params_ty)
     in
     fold_results (check_elab_param ctx) (Ok ([], params_ty)) params
     |> Result.map (fun (l, _) -> List.rev l)

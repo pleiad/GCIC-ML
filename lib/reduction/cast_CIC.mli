@@ -1,5 +1,5 @@
 open Main
-open Ast
+open Common.CastCIC
 open Common.Id
 
 type reduction_error =
