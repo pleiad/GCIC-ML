@@ -1,6 +1,14 @@
 (library
  (name gcic)
- (libraries parsing kernel cast_cic vernac config)
+ (libraries
+  parsing
+  kernel
+  cast_cic
+  vernac
+  config
+  reduction
+  typing
+  elaboration)
  (preprocess
   (pps bisect_ppx))
- (modules main))
+ (modules main pipeline))

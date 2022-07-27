@@ -31,4 +31,6 @@ module type Store = sig
   val find_ctor_info : Name.t -> ctor_info
 end
 
-module Typing (ST : Store) (R : Reducer) : Main.Typing
+module type CastCICTyping = Main.Typing with type t = term
+
+module Make (ST : Store) (R : Reducer) : Main.Typing

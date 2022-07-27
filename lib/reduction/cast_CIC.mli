@@ -9,14 +9,12 @@ type reduction_error =
   ]
 
 module type Store = sig
-  type t
-
-  val ind_params : Name.t -> t list
-  val const : Name.t -> t
-  val ctor_param_args : Name.t -> (Name.t * t) list * (Name.t * t) list
+  val ind_params : Name.t -> term list
+  val const : Name.t -> term
+  val ctor_param_args : Name.t -> (Name.t * term) list * (Name.t * term) list
 end
 
 module type CastCICRed =
   Reduction with type t = term with type o = (term, reduction_error) result
 
-module Make (ST : Store with type t = term) : CastCICRed
+module Make (ST : Store) : CastCICRed
