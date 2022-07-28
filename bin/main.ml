@@ -4,10 +4,12 @@ let get_input () =
   flush Out_channel.stdout;
   In_channel.input_line In_channel.stdin
 
+module CastCIC = Gcic.Main.Make (Gcic.CastCIC.Executor)
+
 let rec eval = function
   | None -> ()
   | Some x ->
-    print_endline (Gcic.Main.run x);
+    print_endline (CastCIC.run x);
     eval (get_input ())
 
 let () = eval (get_input ())

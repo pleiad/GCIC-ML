@@ -9,14 +9,22 @@ type type_error =
   | `Err_not_inductive of term * term
   ]
 
-module type Reducer = sig
-  type error =
-    [ `Err_not_enough_fuel
-    | `Err_stuck_term of term
-    | `Err_free_const
-    ]
+type reduction_error =
+  [ `Err_not_enough_fuel
+  | `Err_stuck_term of term
+  | `Err_free_const
+  ]
 
-  val reduce : term -> (term, [> error ]) result
+type errors =
+  [ reduction_error
+  | type_error
+  ]
+
+(** Extracts the error message or description *)
+val string_of_error : errors -> string
+
+module type Reducer = sig
+  val reduce : term -> (term, errors) result
 end
 
 module type Store = sig
@@ -31,6 +39,10 @@ module type Store = sig
   val find_ctor_info : Name.t -> ctor_info
 end
 
-module type CastCICTyping = Main.Typing with type t = term
+module type CastCICTyping =
+  Main.Typing
+    with type t = term
+    with type i = (term, errors) result
+    with type c = (unit, errors) result
 
-module Make (ST : Store) (R : Reducer) : Main.Typing
+module Make (ST : Store) (R : Reducer) : CastCICTyping

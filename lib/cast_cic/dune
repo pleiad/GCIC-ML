@@ -1,6 +1,0 @@
-(library
- (name cast_cic)
- (modules ast typing reduction elaboration declarations)
- (preprocess
-  (pps bisect_ppx))
- (libraries common kernel config))

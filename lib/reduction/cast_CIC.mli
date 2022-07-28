@@ -8,6 +8,8 @@ type reduction_error =
   | `Err_free_const
   ]
 
+val string_of_error : reduction_error -> string
+
 module type Store = sig
   val ind_params : Name.t -> term list
   val const : Name.t -> term

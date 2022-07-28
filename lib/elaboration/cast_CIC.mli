@@ -21,6 +21,9 @@ type errors =
   | elaboration_error
   ]
 
+(** Returns a string representation of the error *)
+val string_of_error : errors -> string
+
 module type Reducer = sig
   val reduce : CastCIC.term -> (CastCIC.term, [> reduction_error ]) result
 end
@@ -51,7 +54,19 @@ module type Typer = sig
   val infer_type : t Name.Map.t -> t -> i
 end
 
-module type CastCICElab =
-  Elaboration with type o = (CastCIC.term * CastCIC.term, errors) result
+module type CastCICElab = sig
+  include Elaboration with type o = (CastCIC.term * CastCIC.term, errors) result
+
+  val elab_univ
+    :  CastCIC.term Name.Map.t
+    -> GCIC.term
+    -> (CastCIC.term * int, errors) result
+
+  val check_elab
+    :  CastCIC.term Name.Map.t
+    -> GCIC.term
+    -> CastCIC.term
+    -> (CastCIC.term, errors) result
+end
 
 module Make (ST : Store) (R : Reducer) : CastCICElab

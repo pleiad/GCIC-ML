@@ -9,6 +9,11 @@ type reduction_error =
   | `Err_free_const
   ]
 
+let string_of_error = function
+  | `Err_not_enough_fuel -> "not enough fuel"
+  | `Err_stuck_term _term -> "stuck term"
+  | `Err_free_const -> "free constant"
+
 module type Store = sig
   val ind_params : Common.Id.Name.t -> term list
   val const : Common.Id.Name.t -> term
@@ -334,7 +339,7 @@ module Make (ST : Store) : CastCICRed = struct
     else reduce_fueled (fuel - 1) (reduce1 s)
 
   (** Reduces a term *)
-  and reduce term : (term, [> reduction_error ]) result =
+  let reduce term : o =
     let initial_state = term, [] in
     let initial_fuel = Config.initial_fuel () in
     try Ok (reduce_fueled initial_fuel initial_state) with

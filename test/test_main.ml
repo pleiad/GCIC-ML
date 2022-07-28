@@ -1,9 +1,8 @@
-open Gcic
-open Cast_cic.Ast
-
 exception Parse_error of string
 
-let cmd_result =
+module CastCIC = Gcic.Main.Make (Gcic.CastCIC.Executor)
+
+(* let cmd_result =
   let open Vernac.Exec in
   let pprint_cmd_result ppf res = Format.pp_print_string ppf (string_of_cmd_result res) in
   let term_eq = alpha_equal in
@@ -16,13 +15,9 @@ let cmd_result =
     | Definition (n1, t1), Definition (n2, t2) -> n1 = n2 && Kernel.Ast.eq t1 t2
     | _, _ -> false
   in
-  Alcotest.testable pprint_cmd_result cmd_eq
+  Alcotest.testable pprint_cmd_result cmd_eq *)
 
-let run line =
-  let cmd = Parsing.Lex_and_parse.parse_command line in
-  Result.bind cmd (fun c ->
-      Main.execute c |> Result.map_error Vernac.Exec.string_of_error)
-
+let run = CastCIC.run
 let false_ind = "Inductive false : Type@0 :=."
 let bool_ind = "Inductive bool : Type := | false : bool | true : bool."
 
@@ -39,9 +34,9 @@ let w_ind =
   \  "
 
 let test_inductive_defs () =
-  Alcotest.(check (result cmd_result string)) "false ind" (Ok Unit) (run false_ind);
-  Alcotest.(check (result cmd_result string)) "bool ind" (Ok Unit) (run bool_ind);
-  Alcotest.(check (result cmd_result string)) "list ind" (Ok Unit) (run list_ind);
-  Alcotest.(check (result cmd_result string)) "W ind" (Ok Unit) (run w_ind)
+  Alcotest.(check string) "false ind" "OK" (run false_ind);
+  Alcotest.(check string) "bool ind" "OK" (run bool_ind);
+  Alcotest.(check string) "list ind" "OK" (run list_ind);
+  Alcotest.(check string) "W ind" "OK" (run w_ind)
 
 let tests = [ "inductive defs", `Quick, test_inductive_defs ]

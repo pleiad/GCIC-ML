@@ -22,6 +22,48 @@ type errors =
   | elaboration_error
   ]
 
+let string_of_error (err : errors) =
+  let error_code =
+    match err with
+    | `Err_free_identifier _ -> "free_id"
+    | `Err_inconsistent _ -> "inconsistent_terms"
+    | `Err_constrained_universe _ -> "constrained_univ_elab"
+    | `Err_constrained_product _ -> "constrained_prod_elab"
+    | `Err_constrained_inductive _ -> "constrained_ind_elab"
+    | `Err_not_enough_fuel -> "not enough fuel"
+    | `Err_stuck_term _term -> "stuck term"
+    | `Err_free_const -> "free constant"
+  in
+  let message =
+    match err with
+    | `Err_free_identifier _x -> "free_id"
+    | `Err_inconsistent (_term, ty, s_ty) ->
+      Fmt.str
+        "elaborated type@ %a@ is not consistent with the expected type@ %a"
+        CastCIC.pp_term
+        ty
+        CastCIC.pp_term
+        s_ty
+    | `Err_constrained_universe _term -> "term does not elaborate to universe"
+    | `Err_constrained_product _term -> "term does not elaborate to product"
+    | `Err_constrained_inductive _term -> "term does not elaborate to inductive"
+    | `Err_not_enough_fuel -> "not enough fuel"
+    | `Err_stuck_term _term -> "stuck term"
+    | `Err_free_const -> "free constant"
+  in
+  let term =
+    match err with
+    | `Err_free_identifier x -> CastCIC.(Var x |> to_string)
+    | `Err_inconsistent (term, _, _) -> GCIC.to_string term
+    | `Err_constrained_universe term -> GCIC.to_string term
+    | `Err_constrained_product term -> GCIC.to_string term
+    | `Err_constrained_inductive term -> GCIC.to_string term
+    | `Err_not_enough_fuel -> "not enough fuel"
+    | `Err_stuck_term _term -> "stuck term"
+    | `Err_free_const -> "free constant"
+  in
+  Format.asprintf "[%s] elaboration of term (%s) failed: %s" error_code term message
+
 module type Reducer = sig
   val reduce : CastCIC.term -> (CastCIC.term, [> reduction_error ]) result
 end
@@ -52,8 +94,20 @@ module type Typer = sig
   val infer_type : t Name.Map.t -> t -> i
 end
 
-module type CastCICElab =
-  Elaboration with type o = (CastCIC.term * CastCIC.term, errors) result
+module type CastCICElab = sig
+  include Elaboration with type o = (CastCIC.term * CastCIC.term, errors) result
+
+  val elab_univ
+    :  CastCIC.term Name.Map.t
+    -> GCIC.term
+    -> (CastCIC.term * int, errors) result
+
+  val check_elab
+    :  CastCIC.term Name.Map.t
+    -> GCIC.term
+    -> CastCIC.term
+    -> (CastCIC.term, errors) result
+end
 
 module Make (ST : Store) (R : Reducer) : CastCICElab = struct
   (* type elaboration = CastCIC.term * CastCIC.term *)

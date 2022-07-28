@@ -1,3 +1,0 @@
-(test
- (name test_cast_cic)
- (libraries cast_cic common alcotest qcheck qcheck-alcotest))

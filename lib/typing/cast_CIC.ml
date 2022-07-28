@@ -12,14 +12,30 @@ type type_error =
   | `Err_not_inductive of term * term
   ]
 
-module type Reducer = sig
-  type error =
-    [ `Err_not_enough_fuel
-    | `Err_stuck_term of term
-    | `Err_free_const
-    ]
+type reduction_error =
+  [ `Err_not_enough_fuel
+  | `Err_stuck_term of term
+  | `Err_free_const
+  ]
 
-  val reduce : term -> (term, [> error ]) result
+type errors =
+  [ reduction_error
+  | type_error
+  ]
+
+let string_of_error = function
+  | `Err_not_convertible (t1, t2) ->
+    Fmt.str "not convertible: %a, %a" pp_term t1 pp_term t2
+  | `Err_free_identifier _x -> "free identifier"
+  | `Err_not_product (_t1, _t2) -> "not a product"
+  | `Err_not_universe (_t1, _t2) -> "not a universe"
+  | `Err_not_inductive (_t1, _t2) -> "not an inductive"
+  | `Err_not_enough_fuel -> "not enough fuel"
+  | `Err_stuck_term _term -> "stuck term"
+  | `Err_free_const -> "free constant"
+
+module type Reducer = sig
+  val reduce : term -> (term, errors) result
 end
 
 module type Store = sig
@@ -34,16 +50,14 @@ module type Store = sig
   val find_ctor_info : Name.t -> ctor_info
 end
 
-module type CastCICTyping = Main.Typing with type t = term
+module type CastCICTyping =
+  Main.Typing
+    with type t = term
+    with type i = (term, errors) result
+    with type c = (unit, errors) result
 
-module Make (ST : Store) (R : Reducer) : Main.Typing = struct
+module Make (ST : Store) (R : Reducer) : CastCICTyping = struct
   type t = term
-
-  type errors =
-    [ R.error
-    | type_error
-    ]
-
   type i = (term, errors) result
   type c = (unit, errors) result
 
