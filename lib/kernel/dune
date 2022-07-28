@@ -1,6 +1,0 @@
-(library
- (name kernel)
- (modules ast)
- (preprocess
-  (pps bisect_ppx))
- (libraries common config fmt))
