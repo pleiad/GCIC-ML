@@ -1,6 +1,6 @@
 (library
  (name gcic)
- (libraries parsing kernel vernac config reduction typing elaboration)
+ (libraries parsing kernel config reduction typing elaboration stdio)
  (preprocess
   (pps bisect_ppx))
  (modules main castCIC))

@@ -2,21 +2,6 @@ exception Parse_error of string
 
 module CastCIC = Gcic.Main.Make (Gcic.CastCIC.Executor)
 
-(* let cmd_result =
-  let open Vernac.Exec in
-  let pprint_cmd_result ppf res = Format.pp_print_string ppf (string_of_cmd_result res) in
-  let term_eq = alpha_equal in
-  let cmd_eq c1 c2 =
-    match c1, c2 with
-    | Reduction t1, Reduction t2
-    | Elaboration t1, Elaboration t2
-    | Inference t1, Inference t2 -> term_eq t1 t2
-    | Unit, Unit -> true
-    | Definition (n1, t1), Definition (n2, t2) -> n1 = n2 && Kernel.Ast.eq t1 t2
-    | _, _ -> false
-  in
-  Alcotest.testable pprint_cmd_result cmd_eq *)
-
 let run = CastCIC.run
 let false_ind = "Inductive false : Type@0 :=."
 let bool_ind = "Inductive bool : Type := | false : bool | true : bool."

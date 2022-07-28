@@ -1,4 +1,3 @@
-open Vernac
 open Common.Id
 open Common.Std
 open Common.Declarations
@@ -28,8 +27,8 @@ module type Executor = sig
 
   (** Executes a command *)
   val execute
-    :  (string -> Common.GCIC.term Command.t list)
-    -> Common.GCIC.term Command.t
+    :  (string -> Common.GCIC.term Parsing.Command.t list)
+    -> Common.GCIC.term Parsing.Command.t
     -> (cmd_result, execute_error) result
 end
 
@@ -133,7 +132,8 @@ module Make (E : Executor) : Run = struct
     defined_ids := Name.Map.add d.name (`Ctor arity) !defined_ids;
     { d with params; args; ty }
 
-  let of_parsed_command : parsed_term Command.t -> term Command.t = function
+  let of_parsed_command : parsed_term Parsing.Command.t -> term Parsing.Command.t
+    = function
     | Eval t -> Eval (of_parsed_term t)
     | Check t -> Check (of_parsed_term t)
     | Elab t -> Elab (of_parsed_term t)

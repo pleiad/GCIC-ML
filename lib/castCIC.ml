@@ -246,7 +246,7 @@ module Executor : Main.Executor = struct
   exception LoadFail of execute_error
 
   let rec execute file_parser cmd : (cmd_result, execute_error) result =
-    let open Vernac.Command in
+    let open Parsing.Command in
     match cmd with
     | Eval t -> execute_eval t
     | Check t -> execute_check t

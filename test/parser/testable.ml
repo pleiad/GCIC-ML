@@ -1,11 +1,11 @@
 open Parsing.Ast
+open Parsing
 
 let term =
   let pprint_term ppf t = Format.pp_print_string ppf (to_string t) in
   Alcotest.testable pprint_term eq_term
 
 let command =
-  let open Vernac in
   let open Common.Declarations in
   let def_to_string ({ name; _ } : term const_decl) = Common.Id.Name.to_string name in
   let eq_definition (d1 : term const_decl) (d2 : term const_decl) =
