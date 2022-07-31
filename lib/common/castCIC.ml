@@ -41,6 +41,7 @@ type term =
       ; f : Name.t
       ; branches : branch list
       }
+  | Fixpoint of fix_info
 
 and fun_info =
   { id : Name.t
@@ -54,13 +55,25 @@ and branch =
   ; term : term
   }
 
+and fix_info =
+  { fix_id : Name.t
+  ; fix_body : term
+  ; fix_type : term
+  ; fix_rarg : int (* index of the recursive argument *)
+  }
+
+(** Checks if a term is a lambda expression *)
+let is_lambda = function
+  | Lambda _ -> true
+  | _ -> false
+
 (** Pretty printer *)
 module Pretty = struct
   open Fmt
 
   (** Returns if a term requires a parenthesis for unambiguation *)
   let need_parens = function
-    | Lambda _ | Prod _ | Cast _ | Match _ -> true
+    | Lambda _ | Prod _ | Cast _ | Match _ | Fixpoint _ -> true
     | Inductive (_, _, args) -> args <> []
     | Constructor { params; args; _ } -> params <> [] || args <> []
     | _ -> false
@@ -98,6 +111,7 @@ module Pretty = struct
       pf ppf "@[%a@ %a@]" Name.pp ctor (list ~sep:sp maybe_parens) (params @ args)
     | Match { discr; z; pred; _ } ->
       pf ppf "@[match %a as %a return@ %a with@]" pp discr Name.pp z pp pred
+    | Fixpoint { fix_body; _ } -> pf ppf "@[fix@ %a@]" maybe_parens fix_body
 
   (** Pretty-prints an argument of a lambda or prod *)
   and pp_arg ppf (x, ty) = pf ppf "@[(%a : %a)@]" Name.pp x pp ty
@@ -170,6 +184,9 @@ let rec subst ctx = function
       ; pred = subst (Context.add mi.z (Var mi.z) ctx) mi.pred
       ; branches = List.map (subst_branch ctx) mi.branches
       }
+  | Fixpoint fi ->
+    Fixpoint
+      { fi with fix_body = subst ctx fi.fix_body; fix_type = subst ctx fi.fix_type }
 
 and subst_branch ctx br =
   let ids_ctx = List.map (fun x -> x, Var x) br.ids |> List.to_seq in
@@ -230,7 +247,14 @@ let rec alpha_equal t1 t2 =
     && m1.z = m2.z
     && alpha_equal m1.pred m2.pred
     && List.equal alpha_equal_branch m1.branches m2.branches
+  | Fixpoint fi1, Fixpoint fi2 -> alpha_equal_fix fi1 fi2
   | _ -> false
+
+and alpha_equal_fix fi1 fi2 =
+  fi1.fix_id = fi2.fix_id
+  && alpha_equal fi1.fix_body fi2.fix_body
+  && alpha_equal fi1.fix_type fi2.fix_type
+  && fi1.fix_rarg = fi2.fix_rarg
 
 let rec subst_tele ?(acc = []) ts params =
   match ts, params with

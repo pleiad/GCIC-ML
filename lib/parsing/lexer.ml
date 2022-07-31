@@ -47,6 +47,7 @@ let rec token lexbuf =
   | "Eval" -> VERNAC_EVAL
   | "Elab" -> VERNAC_ELABORATE
   | "Definition" -> VERNAC_DEFINITION
+  | "Fixpoint" -> VERNAC_FIXPOINT
   | "Inductive" -> VERNAC_INDUCTIVE
   | "Set" -> VERNAC_SET
   | "Variant" -> VERNAC_FLAG_VARIANT

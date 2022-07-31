@@ -36,6 +36,7 @@ type term =
       ; f : Name.t
       ; branches : branch list
       }
+  | Fixpoint of fix_info
 
 and fun_info =
   { id : Name.t
@@ -48,6 +49,16 @@ and branch =
   ; ids : Name.t list
   ; term : term
   }
+
+and fix_info =
+  { fix_id : Name.t
+  ; fix_body : term
+  ; fix_type : term
+  ; fix_rarg : int (* index of the recursive argument *)
+  }
+
+(** Checks if a term is a lambda expression *)
+val is_lambda : term -> bool
 
 (** Pretty printers *)
 val pp_term : Format.formatter -> term -> unit

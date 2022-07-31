@@ -7,6 +7,7 @@ type type_error =
   | `Err_not_product of term * term
   | `Err_not_universe of term * term
   | `Err_not_inductive of term * term
+  | `Err_invalid_fixpoint of fix_info
   ]
 
 type reduction_error =

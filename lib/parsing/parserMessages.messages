@@ -14,7 +14,7 @@ For example:
 
 term_parser: ID RPAREN
 ##
-## Ends in an error in state: 130.
+## Ends in an error in state: 137.
 ##
 ## term_parser -> top . EOF [ # ]
 ## top -> top . COLON term [ EOF COLON ]
@@ -373,7 +373,7 @@ For example:
 
 term_parser: RPAREN
 ##
-## Ends in an error in state: 129.
+## Ends in an error in state: 136.
 ##
 ## term_parser' -> . term_parser [ # ]
 ##
@@ -389,7 +389,7 @@ For example:
 
 program_parser: RPAREN
 ##
-## Ends in an error in state: 123.
+## Ends in an error in state: 130.
 ##
 ## program_parser' -> . program_parser [ # ]
 ##
@@ -406,7 +406,7 @@ For example:
 
 program_parser: VERNAC_EVAL VERNAC_SEPARATOR
 ##
-## Ends in an error in state: 97.
+## Ends in an error in state: 104.
 ##
 ## command -> VERNAC_EVAL . top [ VERNAC_SEPARATOR ]
 ##
@@ -445,7 +445,7 @@ For example:
 
 program_parser: VERNAC_ELABORATE VERNAC_SEPARATOR
 ##
-## Ends in an error in state: 99.
+## Ends in an error in state: 106.
 ##
 ## command -> VERNAC_ELABORATE . top [ VERNAC_SEPARATOR ]
 ##
@@ -459,7 +459,7 @@ For example:
 
 program_parser: VERNAC_CHECK VERNAC_SEPARATOR
 ##
-## Ends in an error in state: 108.
+## Ends in an error in state: 115.
 ##
 ## command -> VERNAC_CHECK . top [ VERNAC_SEPARATOR ]
 ##
@@ -473,7 +473,7 @@ For example:
 
 program_parser: VERNAC_ELABORATE ID VERNAC_SEPARATOR VERNAC_SEPARATOR
 ##
-## Ends in an error in state: 124.
+## Ends in an error in state: 131.
 ##
 ## list(sequenced_command) -> sequenced_command . list(sequenced_command) [ EOF ]
 ##
@@ -536,7 +536,7 @@ For example:
 
 program_parser: VERNAC_CHECK ID RPAREN
 ##
-## Ends in an error in state: 109.
+## Ends in an error in state: 116.
 ##
 ## command -> VERNAC_CHECK top . [ VERNAC_SEPARATOR ]
 ## top -> top . COLON term [ VERNAC_SEPARATOR COLON ]
@@ -553,7 +553,7 @@ program_parser: VERNAC_CHECK ID RPAREN
 ##
 program_parser: VERNAC_ELABORATE ID VERNAC_VARIANT_S
 ##
-## Ends in an error in state: 100.
+## Ends in an error in state: 107.
 ##
 ## command -> VERNAC_ELABORATE top . [ VERNAC_SEPARATOR ]
 ## top -> top . COLON term [ VERNAC_SEPARATOR COLON ]
@@ -570,7 +570,7 @@ program_parser: VERNAC_ELABORATE ID VERNAC_VARIANT_S
 ##
 program_parser: VERNAC_EVAL ID VERNAC_VARIANT_S
 ##
-## Ends in an error in state: 98.
+## Ends in an error in state: 105.
 ##
 ## command -> VERNAC_EVAL top . [ VERNAC_SEPARATOR ]
 ## top -> top . COLON term [ VERNAC_SEPARATOR COLON ]
@@ -593,7 +593,7 @@ For example:
 
 program_parser: VERNAC_DEFINITION VERNAC_VARIANT_S
 ##
-## Ends in an error in state: 101.
+## Ends in an error in state: 108.
 ##
 ## command -> VERNAC_DEFINITION . id list(arg) COLON term ASSIGN top [ VERNAC_SEPARATOR ]
 ##
@@ -607,7 +607,7 @@ For example:
 
 program_parser: VERNAC_DEFINITION ID VERNAC_VARIANT_S
 ##
-## Ends in an error in state: 102.
+## Ends in an error in state: 109.
 ##
 ## command -> VERNAC_DEFINITION id . list(arg) COLON term ASSIGN top [ VERNAC_SEPARATOR ]
 ##
@@ -640,7 +640,7 @@ For example:
 
 program_parser: VERNAC_DEFINITION ID COLON VERNAC_VARIANT_S
 ##
-## Ends in an error in state: 104.
+## Ends in an error in state: 111.
 ##
 ## command -> VERNAC_DEFINITION id list(arg) COLON . term ASSIGN top [ VERNAC_SEPARATOR ]
 ##
@@ -654,7 +654,7 @@ For example:
 
 program_parser: VERNAC_DEFINITION ID COLON ID VERNAC_VARIANT_S
 ##
-## Ends in an error in state: 105.
+## Ends in an error in state: 112.
 ##
 ## command -> VERNAC_DEFINITION id list(arg) COLON term . ASSIGN top [ VERNAC_SEPARATOR ]
 ##
@@ -674,7 +674,7 @@ For example:
 
 command_parser: VERNAC_DEFINITION ID COLON ID ASSIGN VERNAC_VARIANT_S
 ##
-## Ends in an error in state: 106.
+## Ends in an error in state: 113.
 ##
 ## command -> VERNAC_DEFINITION id list(arg) COLON term ASSIGN . top [ VERNAC_SEPARATOR ]
 ##
@@ -688,7 +688,7 @@ For example:
 
 command_parser: VERNAC_DEFINITION ID COLON ID ASSIGN ID VBAR
 ##
-## Ends in an error in state: 107.
+## Ends in an error in state: 114.
 ##
 ## command -> VERNAC_DEFINITION id list(arg) COLON term ASSIGN top . [ VERNAC_SEPARATOR ]
 ## top -> top . COLON term [ VERNAC_SEPARATOR COLON ]
@@ -740,7 +740,7 @@ For example:
 
 command_parser: VERNAC_CHECK ID VERNAC_SEPARATOR VERNAC_VARIANT_S
 ##
-## Ends in an error in state: 110.
+## Ends in an error in state: 117.
 ##
 ## command_parser -> sequenced_command . EOF [ # ]
 ##
@@ -785,9 +785,9 @@ For example:
 
 command_parser: VERNAC_SET VERNAC_FLAG_FUEL INT VERNAC_VARIANT_S
 ##
-## Ends in an error in state: 113.
+## Ends in an error in state: 120.
 ##
-## sequenced_command -> command . VERNAC_SEPARATOR [ VERNAC_SET VERNAC_LOAD VERNAC_INDUCTIVE VERNAC_EVAL VERNAC_ELABORATE VERNAC_DEFINITION VERNAC_CHECK EOF ]
+## sequenced_command -> command . VERNAC_SEPARATOR [ VERNAC_SET VERNAC_LOAD VERNAC_INDUCTIVE VERNAC_FIXPOINT VERNAC_EVAL VERNAC_ELABORATE VERNAC_DEFINITION VERNAC_CHECK EOF ]
 ##
 ## The known suffix of the stack is as follows:
 ## command
@@ -799,7 +799,7 @@ For example:
 
 flag_parser: VERNAC_VARIANT_S
 ##
-## Ends in an error in state: 119.
+## Ends in an error in state: 126.
 ##
 ## flag_parser' -> . flag_parser [ # ]
 ##
@@ -814,7 +814,7 @@ For example:
 
 flag_parser: VERNAC_FLAG_FUEL INT VERNAC_VARIANT_S
 ##
-## Ends in an error in state: 121.
+## Ends in an error in state: 128.
 ##
 ## flag_parser -> flag . EOF [ # ]
 ##
@@ -935,7 +935,7 @@ For example:
 
 ctor_decl_parser: VERNAC_VARIANT_S
 ##
-## Ends in an error in state: 115.
+## Ends in an error in state: 122.
 ##
 ## ctor_decl_parser' -> . ctor_decl_parser [ # ]
 ##
@@ -994,7 +994,7 @@ For example:
 
 ctor_decl_parser: VBAR ID COLON ID VERNAC_VARIANT_S
 ##
-## Ends in an error in state: 117.
+## Ends in an error in state: 124.
 ##
 ## ctor_decl_parser -> ctor_decl . EOF [ # ]
 ##
@@ -1340,3 +1340,89 @@ branch_parser: VBAR ID BIG_ARROW ID VBAR
 
 I'm currently parsing a branch of a match expression.
 After `$0`, the end of file is expected.
+
+command_parser: VERNAC_FIXPOINT VERNAC_VARIANT_S
+##
+## Ends in an error in state: 97.
+##
+## command -> VERNAC_FIXPOINT . id list(arg) COLON term ASSIGN top [ VERNAC_SEPARATOR ]
+##
+## The known suffix of the stack is as follows:
+## VERNAC_FIXPOINT
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>
+
+command_parser: VERNAC_FIXPOINT ID VERNAC_VARIANT_S
+##
+## Ends in an error in state: 98.
+##
+## command -> VERNAC_FIXPOINT id . list(arg) COLON term ASSIGN top [ VERNAC_SEPARATOR ]
+##
+## The known suffix of the stack is as follows:
+## VERNAC_FIXPOINT id
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>
+
+command_parser: VERNAC_FIXPOINT ID COLON VERNAC_VARIANT_S
+##
+## Ends in an error in state: 100.
+##
+## command -> VERNAC_FIXPOINT id list(arg) COLON . term ASSIGN top [ VERNAC_SEPARATOR ]
+##
+## The known suffix of the stack is as follows:
+## VERNAC_FIXPOINT id list(arg) COLON
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>
+
+command_parser: VERNAC_FIXPOINT ID COLON ID VERNAC_SEPARATOR
+##
+## Ends in an error in state: 101.
+##
+## command -> VERNAC_FIXPOINT id list(arg) COLON term . ASSIGN top [ VERNAC_SEPARATOR ]
+##
+## The known suffix of the stack is as follows:
+## VERNAC_FIXPOINT id list(arg) COLON term
+##
+## WARNING: This example involves spurious reductions.
+## This implies that, although the LR(1) items shown above provide an
+## accurate view of the past (what has been recognized so far), they
+## may provide an INCOMPLETE view of the future (what was expected next).
+## In state 29, spurious reduction of production term -> fact
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>
+
+command_parser: VERNAC_FIXPOINT ID COLON ID ASSIGN VERNAC_VARIANT_S
+##
+## Ends in an error in state: 102.
+##
+## command -> VERNAC_FIXPOINT id list(arg) COLON term ASSIGN . top [ VERNAC_SEPARATOR ]
+##
+## The known suffix of the stack is as follows:
+## VERNAC_FIXPOINT id list(arg) COLON term ASSIGN
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>
+
+command_parser: VERNAC_FIXPOINT ID COLON ID ASSIGN ID VBAR
+##
+## Ends in an error in state: 103.
+##
+## command -> VERNAC_FIXPOINT id list(arg) COLON term ASSIGN top . [ VERNAC_SEPARATOR ]
+## top -> top . COLON term [ VERNAC_SEPARATOR COLON ]
+##
+## The known suffix of the stack is as follows:
+## VERNAC_FIXPOINT id list(arg) COLON term ASSIGN top
+##
+## WARNING: This example involves spurious reductions.
+## This implies that, although the LR(1) items shown above provide an
+## accurate view of the past (what has been recognized so far), they
+## may provide an INCOMPLETE view of the future (what was expected next).
+## In state 29, spurious reduction of production term -> fact
+## In state 60, spurious reduction of production top -> term
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>

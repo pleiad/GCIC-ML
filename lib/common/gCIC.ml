@@ -24,6 +24,7 @@ type term =
   | Ascription of term * term
   | UnknownT of int
   | Const of Name.t
+  | Fixpoint of fix_info
 
 and fun_info =
   { id : Name.t
@@ -37,6 +38,13 @@ and branch =
   ; term : term
   }
 
+and fix_info =
+  { fix_id : Name.t
+  ; fix_body : term
+  ; fix_type : term
+  ; fix_rarg : int (* index of the recursive argument *)
+  }
+
 (** Pretty printers *)
 
 (** Pretty printer *)
@@ -45,7 +53,7 @@ module Pretty = struct
 
   (** Returns if a term requires a parenthesis for disambiguation *)
   let need_parens = function
-    | Lambda _ | Prod _ | Ascription _ | Match _ -> true
+    | Lambda _ | Prod _ | Ascription _ | Match _ | Fixpoint _ -> true
     | Inductive (_, _, args) | Constructor (_, args) -> args <> []
     | _ -> false
 
@@ -89,6 +97,7 @@ module Pretty = struct
     | Ascription (t, ty) -> pf ppf "@[%a ::@ %a@]" pp t pp ty
     | UnknownT i -> pf ppf "?▢%i" i
     | Const x -> pf ppf "%a" Name.pp x
+    | Fixpoint { fix_body; _ } -> pf ppf "@[fix@ %a@]" maybe_parens fix_body
 
   (** Pretty-prints an argument of a lambda or prod *)
   and pp_arg ppf (x, ty) = pf ppf "@[(%a : %a)@]" Name.pp x pp ty
@@ -143,7 +152,14 @@ let rec eq t1 t2 =
   | Ascription (t1, ty1), Ascription (t2, ty2) -> eq t1 t2 && eq ty1 ty2
   | UnknownT i, UnknownT j -> i = j
   | Const c1, Const c2 -> c1 = c2
+  | Fixpoint fi1, Fixpoint fi2 -> eq_fix fi1 fi2
   | _ -> false
+
+and eq_fix fi1 fi2 =
+  fi1.fix_id = fi2.fix_id
+  && eq fi1.fix_body fi2.fix_body
+  && eq fi1.fix_type fi2.fix_type
+  && fi1.fix_rarg = fi2.fix_rarg
 
 and branch_eq b1 b2 =
   b1.ctor = b2.ctor && List.equal ( = ) b1.ids b2.ids && eq b1.term b2.term

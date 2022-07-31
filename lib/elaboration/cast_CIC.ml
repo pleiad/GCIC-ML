@@ -266,6 +266,19 @@ module Make (ST : Store) (R : Reducer) : CastCICElab = struct
         | Not_found -> Error (`Err_free_identifier x)
       in
       Ok (CastCIC.Const x, ty)
+    | Fixpoint fi ->
+      let* elab_fix_type, _ = elab_univ ctx fi.fix_type in
+      let fix_ctx = Name.Map.add fi.fix_id elab_fix_type ctx in
+      let* elab_fix_body = check_elab fix_ctx fi.fix_body elab_fix_type in
+      let elab_fix =
+        CastCIC.Fixpoint
+          { fix_id = fi.fix_id
+          ; fix_body = elab_fix_body
+          ; fix_type = elab_fix_type
+          ; fix_rarg = fi.fix_rarg
+          }
+      in
+      Ok (elab_fix, elab_fix_type)
 
   (* CHECK rule from the original paper *)
   and check_elab ctx term (s_ty : CastCIC.term) =

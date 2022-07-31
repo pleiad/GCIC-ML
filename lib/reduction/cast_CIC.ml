@@ -117,12 +117,16 @@ module Make (ST : Store) : CastCICRed = struct
 
   (** Checks if a term is in canonical form *)
   let is_canonical : term -> bool = function
-    | Universe _ | Lambda _ | Prod _ | Constructor _ | Inductive _ -> true
+    | Universe _ | Lambda _ | Prod _ | Constructor _ | Inductive _ | Fixpoint _ -> true
     | Unknown t -> is_unknown_or_error_canonical t
     | Err t -> is_unknown_or_error_canonical t
     | Cast { source = ty; target = Unknown (Universe i); term = _ } when is_germ i ty ->
       true
     | t -> is_neutral t
+
+  (** Unfolds one recursion step of a Fixpoint *)
+  let unfold_fixpoint (fi : fix_info) : int * term =
+    fi.fix_rarg, subst1 fi.fix_id (Fixpoint fi) fi.fix_body
 
   (** The representation of a continuation of the CEK machine *)
   type continuation =
@@ -185,6 +189,10 @@ module Make (ST : Store) : CastCICRed = struct
     (* Match-Err *)
     | Match { discr = Err (Inductive _) as discr; z; pred; _ }, _ ->
       Err (subst1 z discr pred), cont
+    (* Fixpoint unfold *)
+    | Fixpoint fi, KApp_l u :: cont ->
+      let _narg, fn = unfold_fixpoint fi in
+      App (fn, u), cont
     (* Ind-Unk *)
     | ( Cast
           { source = Inductive (ind1, i1, _)

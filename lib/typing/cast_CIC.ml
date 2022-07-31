@@ -10,6 +10,7 @@ type type_error =
   | `Err_not_product of term * term
   | `Err_not_universe of term * term
   | `Err_not_inductive of term * term
+  | `Err_invalid_fixpoint of fix_info
   ]
 
 type reduction_error =
@@ -33,6 +34,7 @@ let string_of_error = function
   | `Err_not_enough_fuel -> "not enough fuel"
   | `Err_stuck_term _term -> "stuck term"
   | `Err_free_const -> "free constant"
+  | `Err_invalid_fixpoint _fi -> "invalid fixpoint"
 
 module type Reducer = sig
   val reduce : term -> (term, errors) result
@@ -60,6 +62,14 @@ module Make (ST : Store) (R : Reducer) : CastCICTyping = struct
   type t = term
   type i = (term, errors) result
   type c = (unit, errors) result
+
+  let fix_guard _term = Ok ()
+
+  let fix_context (fi : fix_info) : typing_context =
+    Name.Map.singleton fi.fix_id fi.fix_type
+
+  let wf_fixpoint (fi : fix_info) =
+    if is_lambda fi.fix_body then Ok () else Error (`Err_invalid_fixpoint fi)
 
   let are_convertible t1 t2 : (unit, [> type_error ]) result =
     let* v1 = R.reduce t1 in
@@ -121,6 +131,13 @@ module Make (ST : Store) (R : Reducer) : CastCICTyping = struct
       let branch_ctx = Name.Map.add f (Prod { id = z; dom = indt; body = pred }) ctx in
       let* _ = map_results (check_branch branch_ctx z pred params level) branches in
       Ok (subst1 z discr pred)
+    | Fixpoint fi ->
+      let fix_ctx = Name.Map.union (fun _ x _ -> Some x) (fix_context fi) ctx in
+      let* () = fix_guard fi.fix_body in
+      let* () = wf_fixpoint fi in
+      let* _ = infer_univ ctx fi.fix_type in
+      let* () = check_type fix_ctx fi.fix_body fi.fix_type in
+      Ok fi.fix_type
 
   and check_type (ctx : typing_context) (t : term) (ty : term)
       : (unit, [> type_error ]) result

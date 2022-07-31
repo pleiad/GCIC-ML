@@ -139,6 +139,7 @@ module Make (E : Executor) : Run = struct
     | Elab t -> Elab (of_parsed_term t)
     | Set cfg -> Set cfg
     | Define d -> Define (of_parsed_const_decl d)
+    | Fix d -> Fix (of_parsed_const_decl d)
     | Load filename -> Load filename
     | Inductive (ind, ctors) ->
       let ind' = of_parsed_ind_decl ind in

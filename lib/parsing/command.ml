@@ -8,5 +8,6 @@ type 'a t =
   | Elab of 'a
   | Set of Config.Flag.t
   | Define of 'a const_decl
+  | Fix of 'a const_decl
   | Load of string
   | Inductive of 'a ind_decl * 'a ctor_decl list
