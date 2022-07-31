@@ -271,7 +271,7 @@ module Make (ST : Store) : CastCICRed = struct
       let casted_args, _ =
         List.fold_left cast_arg ([], target_args) (List.combine source_args ci.args)
       in
-      Constructor { ci with params = target_params; args = casted_args }, cont
+      Constructor { ci with params = target_params; args = List.rev casted_args }, cont
       (* Head-Err *)
     | Cast { source; target; term = _ }, _
       when is_type source && is_type target && not (equal_head source target) ->
