@@ -49,6 +49,19 @@ match@W w as z return E z with
 | sup A B a f => e a f (fun (b : B a) => recW A B E e (f b))
 end.
 
-Definition recnatW (C : W bool natarity -> Type@1) 
+Definition recnatW (C : natW -> Type@1) 
   (e : forall (x : bool) (f : natarity x -> W bool natarity) (rec : forall (b : natarity x), C (f b)), C (sup bool natarity x f))
   (n : W bool natarity) : C n := recW bool natarity C e n.
+
+Definition double : natW -> natW :=
+recnatW (fun (x : natW) => natW) (fun (a : bool) =>
+ rec2 (forall (f : natarity a -> natW)
+              (g : natarity a -> natW),
+              W bool natarity)
+      (fun (f : natarity a -> natW)
+           (g : natarity a -> natW) =>
+           zero)
+      (fun (f : natarity a -> natW)
+           (g : natarity a -> natW) =>
+           succ (succ (g (tt : ?0 : natarity a))))
+      a).
