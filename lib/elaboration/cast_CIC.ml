@@ -155,7 +155,7 @@ module Make (ST : Store) (R : Reducer) : CastCICElab = struct
     | Cast ci1, _ -> are_consistent ci1.term t2
     | _, Unknown _ -> true
     | Unknown _, _ -> true
-    | Const x, Const y -> x = y
+    | Const _x, Const _y -> assert false (* should not happend. x = y *)
     | Inductive (ind1, i1, params1), Inductive (ind2, i2, params2) ->
       ind1 = ind2 && i1 = i2 && List.for_all2 are_consistent params1 params2
     | Constructor c1, Constructor c2 ->
@@ -170,7 +170,7 @@ module Make (ST : Store) (R : Reducer) : CastCICElab = struct
         then (
           let new_ids = List.map (fun _ -> Var (new_identifier ())) b1.ids in
           let ids1 = List.combine b1.ids new_ids in
-          let ids2 = List.combine b1.ids new_ids in
+          let ids2 = List.combine b2.ids new_ids in
           let subst_body body ids =
             List.fold_left
               (fun body (old_id, new_id) -> subst1 old_id new_id body)
