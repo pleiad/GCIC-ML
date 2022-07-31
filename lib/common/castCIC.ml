@@ -73,7 +73,7 @@ module Pretty = struct
 
   (** Returns if a term requires a parenthesis for unambiguation *)
   let need_parens = function
-    | App _ |  Lambda _ | Prod _ | Cast _ | Match _ | Fixpoint _ -> true
+    | App _ | Lambda _ | Prod _ | Cast _ | Match _ | Fixpoint _ -> true
     | Inductive (_, _, args) -> args <> []
     | Constructor { params; args; _ } -> params <> [] || args <> []
     | _ -> false
@@ -126,14 +126,14 @@ module Pretty = struct
 
   (** Adds parenthesis around a term if needed *)
   and maybe_parens ppf t =
-  match t with
-  | _ -> if need_parens t then parens pp ppf t else pp ppf t
+    match t with
+    | _ -> if need_parens t then parens pp ppf t else pp ppf t
 
   (** Adds parenthesis around a term if needed *)
   and maybe_parens_app ppf t =
-  match t with
-  | App _ -> pp ppf t
-  | _ -> if need_parens t then parens pp ppf t else pp ppf t
+    match t with
+    | App _ -> pp ppf t
+    | _ -> if need_parens t then parens pp ppf t else pp ppf t
 
   (** Returns the prettified version of a term *)
   let to_string = to_to_string pp

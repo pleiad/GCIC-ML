@@ -203,7 +203,8 @@ module Executor : Main.Executor = struct
         GCIC.Fixpoint { fix_id = name; fix_body = term; fix_type = ty; fix_rarg = 0 }
       in
       Const.add name { name; ty; term = fix };
-      Const.add_cache name { name; ty = elab_ty; term = Const name }; (* Temporary definition por typing *)
+      Const.add_cache name { name; ty = elab_ty; term = Const name };
+      (* Temporary definition por typing *)
       let* elab_term =
         CastCICElab.check_elab empty_ctx term elab_ty
         |> Result.map_error Elaboration.Cast_CIC.string_of_error
