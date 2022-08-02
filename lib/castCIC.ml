@@ -200,7 +200,7 @@ module Executor : Main.Executor = struct
         |> Result.map_error Elaboration.Cast_CIC.string_of_error
       in
       let fix =
-        GCIC.Fixpoint { fix_id = name; fix_body = term; fix_type = ty; fix_rarg = 0 }
+        GCIC.Fixpoint { fix_id = name; fix_body = term; fix_type = ty; fix_rarg = 1 }
       in
       Const.add name { name; ty; term = fix };
       Const.add_cache name { name; ty = elab_ty; term = Const name };
@@ -211,7 +211,7 @@ module Executor : Main.Executor = struct
       in
       let elab_fix =
         CastCIC.Fixpoint
-          { fix_id = name; fix_body = elab_term; fix_type = elab_ty; fix_rarg = 0 }
+          { fix_id = name; fix_body = elab_term; fix_type = elab_ty; fix_rarg = 1 }
       in
       Const.add_cache name { name; ty = elab_ty; term = elab_fix };
       let* _ =

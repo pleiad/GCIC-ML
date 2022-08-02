@@ -155,7 +155,7 @@ module Make (ST : Store) (R : Reducer) : CastCICElab = struct
     | Cast ci1, _ -> are_consistent ci1.term t2
     | _, Unknown _ -> true
     | Unknown _, _ -> true
-    | Const _x, Const _y -> assert false (* should not happend. x = y *)
+    | Const x, Const y -> x = y
     | Inductive (ind1, i1, params1), Inductive (ind2, i2, params2) ->
       ind1 = ind2 && i1 = i2 && List.for_all2 are_consistent params1 params2
     | Constructor c1, Constructor c2 ->
@@ -186,6 +186,7 @@ module Make (ST : Store) (R : Reducer) : CastCICElab = struct
       && m1.ind = m2.ind
       && are_consistent m1.pred m2.pred
       && List.equal are_consistent_branch m1.branches m2.branches
+    | Fixpoint fi1, Fixpoint fi2 -> fi1.fix_id = fi2.fix_id
     | _ -> false
 
   (** The elaboration procedure, as per the paper *)

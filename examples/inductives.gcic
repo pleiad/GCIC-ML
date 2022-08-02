@@ -63,5 +63,5 @@ recnatW (fun (x : natW) => natW) (fun (a : bool) =>
            zero)
       (fun (f : natarity a -> natW)
            (g : natarity a -> natW) =>
-           succ (succ (g (tt : ?0 : natarity a))))
+           succ (succ (g (tt : ?0))))
       a).
