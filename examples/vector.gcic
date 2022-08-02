@@ -7,7 +7,7 @@ Inductive unit : Type := | tt : unit.
 Inductive prod (A B : Type) : Type := 
 | pair (a : A) (b : B) : prod A B.
 
-Fixpoint vec (A : Type) (n : Nat) : Type := 
+Fixpoint vec (A : Type) (n : Nat) {struct n} : Type := 
     match@Nat n as z return Type with 
     | O => unit 
     | Succ m => prod A (vec A m) 

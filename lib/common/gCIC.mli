@@ -60,3 +60,6 @@ val eq : term -> term -> bool
 (** Gets the level of a universe or a product.
     Raises an error if applied on something else. *)
 val get_universe_lvl : term -> int
+
+(** Returns the list of arguments of a product type. *)
+val prod_args : term -> Name.t list

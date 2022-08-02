@@ -14,7 +14,7 @@ For example:
 
 term_parser: ID RPAREN
 ##
-## Ends in an error in state: 137.
+## Ends in an error in state: 141.
 ##
 ## term_parser -> top . EOF [ # ]
 ## top -> top . COLON term [ EOF COLON ]
@@ -91,7 +91,7 @@ term_parser: KWD_LAMBDA LPAREN ID COLON ID KWD_LET
 ##
 ## Ends in an error in state: 36.
 ##
-## arg -> LPAREN nonempty_list(id) COLON term . RPAREN [ LPAREN COMMA COLON BIG_ARROW ]
+## arg -> LPAREN nonempty_list(id) COLON term . RPAREN [ LPAREN LBRACE COMMA COLON BIG_ARROW ]
 ##
 ## The known suffix of the stack is as follows:
 ## LPAREN nonempty_list(id) COLON term
@@ -143,7 +143,7 @@ term_parser: KWD_LAMBDA LPAREN ID COLON RPAREN
 ##
 ## Ends in an error in state: 23.
 ##
-## arg -> LPAREN nonempty_list(id) COLON . term RPAREN [ LPAREN COMMA COLON BIG_ARROW ]
+## arg -> LPAREN nonempty_list(id) COLON . term RPAREN [ LPAREN LBRACE COMMA COLON BIG_ARROW ]
 ##
 ## The known suffix of the stack is as follows:
 ## LPAREN nonempty_list(id) COLON
@@ -175,7 +175,7 @@ term_parser: KWD_LAMBDA LPAREN RPAREN
 ##
 ## Ends in an error in state: 21.
 ##
-## arg -> LPAREN . nonempty_list(id) COLON term RPAREN [ LPAREN COMMA COLON BIG_ARROW ]
+## arg -> LPAREN . nonempty_list(id) COLON term RPAREN [ LPAREN LBRACE COMMA COLON BIG_ARROW ]
 ##
 ## The known suffix of the stack is as follows:
 ## LPAREN
@@ -373,7 +373,7 @@ For example:
 
 term_parser: RPAREN
 ##
-## Ends in an error in state: 136.
+## Ends in an error in state: 140.
 ##
 ## term_parser' -> . term_parser [ # ]
 ##
@@ -389,7 +389,7 @@ For example:
 
 program_parser: RPAREN
 ##
-## Ends in an error in state: 130.
+## Ends in an error in state: 134.
 ##
 ## program_parser' -> . program_parser [ # ]
 ##
@@ -406,7 +406,7 @@ For example:
 
 program_parser: VERNAC_EVAL VERNAC_SEPARATOR
 ##
-## Ends in an error in state: 104.
+## Ends in an error in state: 108.
 ##
 ## command -> VERNAC_EVAL . top [ VERNAC_SEPARATOR ]
 ##
@@ -445,7 +445,7 @@ For example:
 
 program_parser: VERNAC_ELABORATE VERNAC_SEPARATOR
 ##
-## Ends in an error in state: 106.
+## Ends in an error in state: 110.
 ##
 ## command -> VERNAC_ELABORATE . top [ VERNAC_SEPARATOR ]
 ##
@@ -459,7 +459,7 @@ For example:
 
 program_parser: VERNAC_CHECK VERNAC_SEPARATOR
 ##
-## Ends in an error in state: 115.
+## Ends in an error in state: 119.
 ##
 ## command -> VERNAC_CHECK . top [ VERNAC_SEPARATOR ]
 ##
@@ -473,7 +473,7 @@ For example:
 
 program_parser: VERNAC_ELABORATE ID VERNAC_SEPARATOR VERNAC_SEPARATOR
 ##
-## Ends in an error in state: 131.
+## Ends in an error in state: 135.
 ##
 ## list(sequenced_command) -> sequenced_command . list(sequenced_command) [ EOF ]
 ##
@@ -536,7 +536,7 @@ For example:
 
 program_parser: VERNAC_CHECK ID RPAREN
 ##
-## Ends in an error in state: 116.
+## Ends in an error in state: 120.
 ##
 ## command -> VERNAC_CHECK top . [ VERNAC_SEPARATOR ]
 ## top -> top . COLON term [ VERNAC_SEPARATOR COLON ]
@@ -553,7 +553,7 @@ program_parser: VERNAC_CHECK ID RPAREN
 ##
 program_parser: VERNAC_ELABORATE ID VERNAC_VARIANT_S
 ##
-## Ends in an error in state: 107.
+## Ends in an error in state: 111.
 ##
 ## command -> VERNAC_ELABORATE top . [ VERNAC_SEPARATOR ]
 ## top -> top . COLON term [ VERNAC_SEPARATOR COLON ]
@@ -570,7 +570,7 @@ program_parser: VERNAC_ELABORATE ID VERNAC_VARIANT_S
 ##
 program_parser: VERNAC_EVAL ID VERNAC_VARIANT_S
 ##
-## Ends in an error in state: 105.
+## Ends in an error in state: 109.
 ##
 ## command -> VERNAC_EVAL top . [ VERNAC_SEPARATOR ]
 ## top -> top . COLON term [ VERNAC_SEPARATOR COLON ]
@@ -593,7 +593,7 @@ For example:
 
 program_parser: VERNAC_DEFINITION VERNAC_VARIANT_S
 ##
-## Ends in an error in state: 108.
+## Ends in an error in state: 112.
 ##
 ## command -> VERNAC_DEFINITION . id list(arg) COLON term ASSIGN top [ VERNAC_SEPARATOR ]
 ##
@@ -607,7 +607,7 @@ For example:
 
 program_parser: VERNAC_DEFINITION ID VERNAC_VARIANT_S
 ##
-## Ends in an error in state: 109.
+## Ends in an error in state: 113.
 ##
 ## command -> VERNAC_DEFINITION id . list(arg) COLON term ASSIGN top [ VERNAC_SEPARATOR ]
 ##
@@ -625,7 +625,7 @@ command_parser: VERNAC_DEFINITION ID LPAREN ID COLON ID RPAREN VERNAC_VARIANT_S
 ##
 ## Ends in an error in state: 92.
 ##
-## list(arg) -> arg . list(arg) [ COLON ]
+## list(arg) -> arg . list(arg) [ LBRACE COLON ]
 ##
 ## The known suffix of the stack is as follows:
 ## arg
@@ -640,7 +640,7 @@ For example:
 
 program_parser: VERNAC_DEFINITION ID COLON VERNAC_VARIANT_S
 ##
-## Ends in an error in state: 111.
+## Ends in an error in state: 115.
 ##
 ## command -> VERNAC_DEFINITION id list(arg) COLON . term ASSIGN top [ VERNAC_SEPARATOR ]
 ##
@@ -654,7 +654,7 @@ For example:
 
 program_parser: VERNAC_DEFINITION ID COLON ID VERNAC_VARIANT_S
 ##
-## Ends in an error in state: 112.
+## Ends in an error in state: 116.
 ##
 ## command -> VERNAC_DEFINITION id list(arg) COLON term . ASSIGN top [ VERNAC_SEPARATOR ]
 ##
@@ -674,7 +674,7 @@ For example:
 
 command_parser: VERNAC_DEFINITION ID COLON ID ASSIGN VERNAC_VARIANT_S
 ##
-## Ends in an error in state: 113.
+## Ends in an error in state: 117.
 ##
 ## command -> VERNAC_DEFINITION id list(arg) COLON term ASSIGN . top [ VERNAC_SEPARATOR ]
 ##
@@ -688,7 +688,7 @@ For example:
 
 command_parser: VERNAC_DEFINITION ID COLON ID ASSIGN ID VBAR
 ##
-## Ends in an error in state: 114.
+## Ends in an error in state: 118.
 ##
 ## command -> VERNAC_DEFINITION id list(arg) COLON term ASSIGN top . [ VERNAC_SEPARATOR ]
 ## top -> top . COLON term [ VERNAC_SEPARATOR COLON ]
@@ -740,7 +740,7 @@ For example:
 
 command_parser: VERNAC_CHECK ID VERNAC_SEPARATOR VERNAC_VARIANT_S
 ##
-## Ends in an error in state: 117.
+## Ends in an error in state: 121.
 ##
 ## command_parser -> sequenced_command . EOF [ # ]
 ##
@@ -785,7 +785,7 @@ For example:
 
 command_parser: VERNAC_SET VERNAC_FLAG_FUEL INT VERNAC_VARIANT_S
 ##
-## Ends in an error in state: 120.
+## Ends in an error in state: 124.
 ##
 ## sequenced_command -> command . VERNAC_SEPARATOR [ VERNAC_SET VERNAC_LOAD VERNAC_INDUCTIVE VERNAC_FIXPOINT VERNAC_EVAL VERNAC_ELABORATE VERNAC_DEFINITION VERNAC_CHECK EOF ]
 ##
@@ -799,7 +799,7 @@ For example:
 
 flag_parser: VERNAC_VARIANT_S
 ##
-## Ends in an error in state: 126.
+## Ends in an error in state: 130.
 ##
 ## flag_parser' -> . flag_parser [ # ]
 ##
@@ -814,7 +814,7 @@ For example:
 
 flag_parser: VERNAC_FLAG_FUEL INT VERNAC_VARIANT_S
 ##
-## Ends in an error in state: 128.
+## Ends in an error in state: 132.
 ##
 ## flag_parser -> flag . EOF [ # ]
 ##
@@ -935,7 +935,7 @@ For example:
 
 ctor_decl_parser: VERNAC_VARIANT_S
 ##
-## Ends in an error in state: 122.
+## Ends in an error in state: 126.
 ##
 ## ctor_decl_parser' -> . ctor_decl_parser [ # ]
 ##
@@ -994,7 +994,7 @@ For example:
 
 ctor_decl_parser: VBAR ID COLON ID VERNAC_VARIANT_S
 ##
-## Ends in an error in state: 124.
+## Ends in an error in state: 128.
 ##
 ## ctor_decl_parser -> ctor_decl . EOF [ # ]
 ##
@@ -1341,11 +1341,52 @@ branch_parser: VBAR ID BIG_ARROW ID VBAR
 I'm currently parsing a branch of a match expression.
 After `$0`, the end of file is expected.
 
+
+
+
+command_parser: VERNAC_INDUCTIVE ID LPAREN ID COLON ID RPAREN LBRACE
+##
+## Ends in an error in state: 83.
+##
+## command -> VERNAC_INDUCTIVE id list(arg) . COLON term ASSIGN list(ctor_decl) [ VERNAC_SEPARATOR ]
+##
+## The known suffix of the stack is as follows:
+## VERNAC_INDUCTIVE id list(arg)
+##
+## WARNING: This example involves spurious reductions.
+## This implies that, although the LR(1) items shown above provide an
+## accurate view of the past (what has been recognized so far), they
+## may provide an INCOMPLETE view of the future (what was expected next).
+## In state 92, spurious reduction of production list(arg) ->
+## In state 93, spurious reduction of production list(arg) -> arg list(arg)
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>
+
+ctor_decl_parser: VBAR ID LPAREN ID COLON ID RPAREN LBRACE
+##
+## Ends in an error in state: 89.
+##
+## ctor_decl -> VBAR id list(arg) . COLON term [ VERNAC_SEPARATOR VBAR EOF ]
+##
+## The known suffix of the stack is as follows:
+## VBAR id list(arg)
+##
+## WARNING: This example involves spurious reductions.
+## This implies that, although the LR(1) items shown above provide an
+## accurate view of the past (what has been recognized so far), they
+## may provide an INCOMPLETE view of the future (what was expected next).
+## In state 92, spurious reduction of production list(arg) ->
+## In state 93, spurious reduction of production list(arg) -> arg list(arg)
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>
+
 command_parser: VERNAC_FIXPOINT VERNAC_VARIANT_S
 ##
 ## Ends in an error in state: 97.
 ##
-## command -> VERNAC_FIXPOINT . id list(arg) COLON term ASSIGN top [ VERNAC_SEPARATOR ]
+## command -> VERNAC_FIXPOINT . id list(arg) LBRACE KWD_STRUCT id RBRACE COLON term ASSIGN top [ VERNAC_SEPARATOR ]
 ##
 ## The known suffix of the stack is as follows:
 ## VERNAC_FIXPOINT
@@ -1357,7 +1398,7 @@ command_parser: VERNAC_FIXPOINT ID VERNAC_VARIANT_S
 ##
 ## Ends in an error in state: 98.
 ##
-## command -> VERNAC_FIXPOINT id . list(arg) COLON term ASSIGN top [ VERNAC_SEPARATOR ]
+## command -> VERNAC_FIXPOINT id . list(arg) LBRACE KWD_STRUCT id RBRACE COLON term ASSIGN top [ VERNAC_SEPARATOR ]
 ##
 ## The known suffix of the stack is as follows:
 ## VERNAC_FIXPOINT id
@@ -1365,26 +1406,93 @@ command_parser: VERNAC_FIXPOINT ID VERNAC_VARIANT_S
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-command_parser: VERNAC_FIXPOINT ID COLON VERNAC_VARIANT_S
+command_parser: VERNAC_FIXPOINT ID LPAREN ID COLON ID RPAREN COLON
 ##
-## Ends in an error in state: 100.
+## Ends in an error in state: 99.
 ##
-## command -> VERNAC_FIXPOINT id list(arg) COLON . term ASSIGN top [ VERNAC_SEPARATOR ]
+## command -> VERNAC_FIXPOINT id list(arg) . LBRACE KWD_STRUCT id RBRACE COLON term ASSIGN top [ VERNAC_SEPARATOR ]
 ##
 ## The known suffix of the stack is as follows:
-## VERNAC_FIXPOINT id list(arg) COLON
+## VERNAC_FIXPOINT id list(arg)
+##
+## WARNING: This example involves spurious reductions.
+## This implies that, although the LR(1) items shown above provide an
+## accurate view of the past (what has been recognized so far), they
+## may provide an INCOMPLETE view of the future (what was expected next).
+## In state 92, spurious reduction of production list(arg) ->
+## In state 93, spurious reduction of production list(arg) -> arg list(arg)
 ##
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-command_parser: VERNAC_FIXPOINT ID COLON ID VERNAC_SEPARATOR
+command_parser: VERNAC_FIXPOINT ID LBRACE VERNAC_VARIANT_S
+##
+## Ends in an error in state: 100.
+##
+## command -> VERNAC_FIXPOINT id list(arg) LBRACE . KWD_STRUCT id RBRACE COLON term ASSIGN top [ VERNAC_SEPARATOR ]
+##
+## The known suffix of the stack is as follows:
+## VERNAC_FIXPOINT id list(arg) LBRACE
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>
+
+command_parser: VERNAC_FIXPOINT ID LBRACE KWD_STRUCT VERNAC_VARIANT_S
 ##
 ## Ends in an error in state: 101.
 ##
-## command -> VERNAC_FIXPOINT id list(arg) COLON term . ASSIGN top [ VERNAC_SEPARATOR ]
+## command -> VERNAC_FIXPOINT id list(arg) LBRACE KWD_STRUCT . id RBRACE COLON term ASSIGN top [ VERNAC_SEPARATOR ]
 ##
 ## The known suffix of the stack is as follows:
-## VERNAC_FIXPOINT id list(arg) COLON term
+## VERNAC_FIXPOINT id list(arg) LBRACE KWD_STRUCT
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>
+
+command_parser: VERNAC_FIXPOINT ID LBRACE KWD_STRUCT ID VERNAC_VARIANT_S
+##
+## Ends in an error in state: 102.
+##
+## command -> VERNAC_FIXPOINT id list(arg) LBRACE KWD_STRUCT id . RBRACE COLON term ASSIGN top [ VERNAC_SEPARATOR ]
+##
+## The known suffix of the stack is as follows:
+## VERNAC_FIXPOINT id list(arg) LBRACE KWD_STRUCT id
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>
+
+command_parser: VERNAC_FIXPOINT ID LBRACE KWD_STRUCT ID RBRACE VERNAC_VARIANT_S
+##
+## Ends in an error in state: 103.
+##
+## command -> VERNAC_FIXPOINT id list(arg) LBRACE KWD_STRUCT id RBRACE . COLON term ASSIGN top [ VERNAC_SEPARATOR ]
+##
+## The known suffix of the stack is as follows:
+## VERNAC_FIXPOINT id list(arg) LBRACE KWD_STRUCT id RBRACE
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>
+
+command_parser: VERNAC_FIXPOINT ID LBRACE KWD_STRUCT ID RBRACE COLON VERNAC_VARIANT_S
+##
+## Ends in an error in state: 104.
+##
+## command -> VERNAC_FIXPOINT id list(arg) LBRACE KWD_STRUCT id RBRACE COLON . term ASSIGN top [ VERNAC_SEPARATOR ]
+##
+## The known suffix of the stack is as follows:
+## VERNAC_FIXPOINT id list(arg) LBRACE KWD_STRUCT id RBRACE COLON
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>
+
+command_parser: VERNAC_FIXPOINT ID LBRACE KWD_STRUCT ID RBRACE COLON ID VERNAC_SEPARATOR
+##
+## Ends in an error in state: 105.
+##
+## command -> VERNAC_FIXPOINT id list(arg) LBRACE KWD_STRUCT id RBRACE COLON term . ASSIGN top [ VERNAC_SEPARATOR ]
+##
+## The known suffix of the stack is as follows:
+## VERNAC_FIXPOINT id list(arg) LBRACE KWD_STRUCT id RBRACE COLON term
 ##
 ## WARNING: This example involves spurious reductions.
 ## This implies that, although the LR(1) items shown above provide an
@@ -1395,27 +1503,27 @@ command_parser: VERNAC_FIXPOINT ID COLON ID VERNAC_SEPARATOR
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-command_parser: VERNAC_FIXPOINT ID COLON ID ASSIGN VERNAC_VARIANT_S
+command_parser: VERNAC_FIXPOINT ID LBRACE KWD_STRUCT ID RBRACE COLON ID ASSIGN VERNAC_VARIANT_S
 ##
-## Ends in an error in state: 102.
+## Ends in an error in state: 106.
 ##
-## command -> VERNAC_FIXPOINT id list(arg) COLON term ASSIGN . top [ VERNAC_SEPARATOR ]
+## command -> VERNAC_FIXPOINT id list(arg) LBRACE KWD_STRUCT id RBRACE COLON term ASSIGN . top [ VERNAC_SEPARATOR ]
 ##
 ## The known suffix of the stack is as follows:
-## VERNAC_FIXPOINT id list(arg) COLON term ASSIGN
+## VERNAC_FIXPOINT id list(arg) LBRACE KWD_STRUCT id RBRACE COLON term ASSIGN
 ##
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-command_parser: VERNAC_FIXPOINT ID COLON ID ASSIGN ID VBAR
+command_parser: VERNAC_FIXPOINT ID LBRACE KWD_STRUCT ID RBRACE COLON ID ASSIGN ID VBAR
 ##
-## Ends in an error in state: 103.
+## Ends in an error in state: 107.
 ##
-## command -> VERNAC_FIXPOINT id list(arg) COLON term ASSIGN top . [ VERNAC_SEPARATOR ]
+## command -> VERNAC_FIXPOINT id list(arg) LBRACE KWD_STRUCT id RBRACE COLON term ASSIGN top . [ VERNAC_SEPARATOR ]
 ## top -> top . COLON term [ VERNAC_SEPARATOR COLON ]
 ##
 ## The known suffix of the stack is as follows:
-## VERNAC_FIXPOINT id list(arg) COLON term ASSIGN top
+## VERNAC_FIXPOINT id list(arg) LBRACE KWD_STRUCT id RBRACE COLON term ASSIGN top
 ##
 ## WARNING: This example involves spurious reductions.
 ## This implies that, although the LR(1) items shown above provide an
@@ -1423,6 +1531,25 @@ command_parser: VERNAC_FIXPOINT ID COLON ID ASSIGN ID VBAR
 ## may provide an INCOMPLETE view of the future (what was expected next).
 ## In state 29, spurious reduction of production term -> fact
 ## In state 60, spurious reduction of production top -> term
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>
+
+command_parser: VERNAC_DEFINITION ID LPAREN ID COLON ID RPAREN LBRACE
+##
+## Ends in an error in state: 114.
+##
+## command -> VERNAC_DEFINITION id list(arg) . COLON term ASSIGN top [ VERNAC_SEPARATOR ]
+##
+## The known suffix of the stack is as follows:
+## VERNAC_DEFINITION id list(arg)
+##
+## WARNING: This example involves spurious reductions.
+## This implies that, although the LR(1) items shown above provide an
+## accurate view of the past (what has been recognized so far), they
+## may provide an INCOMPLETE view of the future (what was expected next).
+## In state 92, spurious reduction of production list(arg) ->
+## In state 93, spurious reduction of production list(arg) -> arg list(arg)
 ##
 
 <YOUR SYNTAX ERROR MESSAGE HERE>

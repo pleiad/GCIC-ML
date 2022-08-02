@@ -169,3 +169,7 @@ let rec get_universe_lvl (t : term) =
   | Universe lvl -> lvl
   | Prod fi -> get_universe_lvl fi.body
   | _ -> failwith "type of inductive definition must be a universe"
+
+let rec prod_args : term -> Name.t list = function
+  | Prod fi -> fi.id :: prod_args fi.body
+  | _ -> []

@@ -44,7 +44,7 @@ end.
 
 Fixpoint recW (A : Type) (B : A -> Type) (E : W A B -> Type@1) 
   (e : forall (x : A) (f : B x -> W A B) (rec : forall (b : B x), E (f b)), E (sup A B x f))
-  (w : W A B) : E w :=
+  (w : W A B) {struct w} : E w :=
 match@W w as z return E z with
 | sup A B a f => e a f (fun (b : B a) => recW A B E e (f b))
 end.

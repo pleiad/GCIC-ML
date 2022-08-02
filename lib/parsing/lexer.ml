@@ -48,6 +48,7 @@ let rec token lexbuf =
   | "Elab" -> VERNAC_ELABORATE
   | "Definition" -> VERNAC_DEFINITION
   | "Fixpoint" -> VERNAC_FIXPOINT
+  | "struct" -> KWD_STRUCT
   | "Inductive" -> VERNAC_INDUCTIVE
   | "Set" -> VERNAC_SET
   | "Variant" -> VERNAC_FLAG_VARIANT
@@ -63,6 +64,8 @@ let rec token lexbuf =
   | big_arrow -> BIG_ARROW
   | '(' -> LPAREN
   | ')' -> RPAREN
+  | '{' -> LBRACE
+  | '}' -> RBRACE
   | ":=" -> ASSIGN
   | ':' -> COLON
   | ',' -> COMMA
