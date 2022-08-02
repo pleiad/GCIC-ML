@@ -54,15 +54,14 @@ Definition recnatW (C : natW -> Type@1)
   (n : W bool natarity) : C n := recW bool natarity C e n.
 
 Definition double : natW -> natW :=
-recnatW (fun (x : natW) => natW) (fun (a : bool) =>
- rec2 (fun (b : bool ) =>
-  forall (f : natarity b -> natW)
-         (g : natarity b -> natW),
-         W bool natarity)
-      (fun (f : void -> natW)
-           (g : void -> natW) =>
-           zero)
-      (fun (f : unit -> natW)
-           (g : unit -> natW) =>
-           succ (succ (g tt)))
-      a).
+recnatW (fun (x : natW) => natW) 
+  (rec2 (fun (b : bool ) =>
+    forall (f : natarity b -> natW)
+          (g : natarity b -> natW),
+          W bool natarity)
+        (fun (f : void -> natW)
+            (g : void -> natW) =>
+            zero)
+        (fun (f : unit -> natW)
+            (g : unit -> natW) =>
+            succ (succ (g tt)))).
