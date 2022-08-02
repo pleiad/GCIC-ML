@@ -2,8 +2,8 @@ Inductive bool : Type :=
 | false : bool 
 | true : bool.
 
-Definition rec2 (c : Type@1) (fb tb : c) (b : bool) : c :=
-match@bool b as z return c with 
+Definition rec2 (c : bool -> Type@1) (fb : c false) (tb : c true) (b : bool) : c b :=
+match@bool b as z return c z with 
 | false => fb 
 | true => tb 
 end.
@@ -22,7 +22,7 @@ Inductive W (a : Type) (b : a -> Type) : Type@1 :=
 | sup (x : a) (f : b x -> W a b) : W a b.
 
 
-Definition natarity : bool -> Type := rec2 Type void unit.
+Definition natarity : bool -> Type := rec2 (fun (b : bool) => Type) void unit.
 
 Definition natW : Type@1 := W bool natarity.
 
@@ -55,13 +55,14 @@ Definition recnatW (C : natW -> Type@1)
 
 Definition double : natW -> natW :=
 recnatW (fun (x : natW) => natW) (fun (a : bool) =>
- rec2 (forall (f : natarity a -> natW)
-              (g : natarity a -> natW),
-              W bool natarity)
-      (fun (f : natarity a -> natW)
-           (g : natarity a -> natW) =>
+ rec2 (fun (b : bool ) =>
+  forall (f : natarity b -> natW)
+         (g : natarity b -> natW),
+         W bool natarity)
+      (fun (f : void -> natW)
+           (g : void -> natW) =>
            zero)
-      (fun (f : natarity a -> natW)
-           (g : natarity a -> natW) =>
-           succ (succ (g (tt : ?0))))
+      (fun (f : unit -> natW)
+           (g : unit -> natW) =>
+           succ (succ (g tt)))
       a).
