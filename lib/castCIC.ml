@@ -191,6 +191,44 @@ module Executor : Main.Executor = struct
       Const.add_cache name { name; ty = elab_ty; term = elab_term };
       Ok (Definition (name, ty))
 
+  let execute_fixpoint struct_id gdef : (cmd_result, execute_error) result =
+    let empty_ctx = Name.Map.empty in
+    match gdef with
+    | { name; ty; term } ->
+      let* rarg =
+        GCIC.prod_args ty
+        |> List.find_index_opt struct_id
+        |> Option.to_result
+             ~none:
+               (Format.asprintf
+                  "recursive argument not found: %s"
+                  (Name.to_string struct_id))
+      in
+      let* elab_ty, _ =
+        CastCICElab.elab_univ empty_ctx ty
+        |> Result.map_error Elaboration.Cast_CIC.string_of_error
+      in
+      let fix =
+        GCIC.Fixpoint { fix_id = name; fix_body = term; fix_type = ty; fix_rarg = rarg }
+      in
+      Const.add name { name; ty; term = fix };
+      Const.add_cache name { name; ty = elab_ty; term = Const name };
+      (* Temporary definition por typing *)
+      let* elab_term =
+        CastCICElab.check_elab empty_ctx term elab_ty
+        |> Result.map_error Elaboration.Cast_CIC.string_of_error
+      in
+      let elab_fix =
+        CastCIC.Fixpoint
+          { fix_id = name; fix_body = elab_term; fix_type = elab_ty; fix_rarg = rarg }
+      in
+      Const.add_cache name { name; ty = elab_ty; term = elab_fix };
+      let* _ =
+        CastCICTyping.check_type empty_ctx elab_term elab_ty
+        |> Result.map_error Typing.Cast_CIC.string_of_error
+      in
+      Ok (Definition (name, ty))
+
   let execute_inductive ind ctors : (cmd_result, execute_error) result =
     let empty_ctx = Name.Map.empty in
     let elab_univ_param (elab_params, ctx) (id, param) =
@@ -253,6 +291,7 @@ module Executor : Main.Executor = struct
     | Elab t -> execute_elab t
     | Set f -> execute_set_flag f
     | Define gdef -> execute_definition gdef
+    | Fix (struct_id, gdef) -> execute_fixpoint struct_id gdef
     | Load filename -> execute_load file_parser filename
     | Inductive (ind, ctors) -> execute_inductive ind ctors
 

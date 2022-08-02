@@ -17,6 +17,7 @@ let command =
     | Elab t -> "elab " ^ to_string t
     | Set flag -> "set " ^ Config.Flag.to_string flag
     | Define gdef -> "definition " ^ def_to_string gdef
+    | Fix (_, gdef) -> "fixpoint " ^ def_to_string gdef
     | Load filename -> Format.asprintf "import \"%s\"" filename
     | Inductive (ind, _ctors) ->
       Format.asprintf "inductive %s" (Common.Id.Name.to_string ind.name)

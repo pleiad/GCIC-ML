@@ -24,6 +24,7 @@ type term =
   | Ascription of term * term
   | UnknownT of int
   | Const of Name.t
+  | Fixpoint of fix_info
 
 and fun_info =
   { id : Name.t
@@ -35,6 +36,13 @@ and branch =
   { ctor : Name.t
   ; ids : Name.t list
   ; term : term
+  }
+
+and fix_info =
+  { fix_id : Name.t
+  ; fix_body : term
+  ; fix_type : term
+  ; fix_rarg : int (* index of the recursive argument *)
   }
 
 (** Pretty printers *)
@@ -52,3 +60,6 @@ val eq : term -> term -> bool
 (** Gets the level of a universe or a product.
     Raises an error if applied on something else. *)
 val get_universe_lvl : term -> int
+
+(** Returns the list of arguments of a product type. *)
+val prod_args : term -> Name.t list

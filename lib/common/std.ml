@@ -38,4 +38,12 @@ module List = struct
       | _ -> List.rev acc, []
     in
     go [] n xs
+
+  let find_index_opt x xs =
+    let rec go acc xs =
+      match xs with
+      | [] -> None
+      | y :: ys -> if x = y then Some acc else go (acc + 1) ys
+    in
+    go 0 xs
 end

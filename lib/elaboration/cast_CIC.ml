@@ -170,7 +170,7 @@ module Make (ST : Store) (R : Reducer) : CastCICElab = struct
         then (
           let new_ids = List.map (fun _ -> Var (new_identifier ())) b1.ids in
           let ids1 = List.combine b1.ids new_ids in
-          let ids2 = List.combine b1.ids new_ids in
+          let ids2 = List.combine b2.ids new_ids in
           let subst_body body ids =
             List.fold_left
               (fun body (old_id, new_id) -> subst1 old_id new_id body)
@@ -186,6 +186,7 @@ module Make (ST : Store) (R : Reducer) : CastCICElab = struct
       && m1.ind = m2.ind
       && are_consistent m1.pred m2.pred
       && List.equal are_consistent_branch m1.branches m2.branches
+    | Fixpoint fi1, Fixpoint fi2 -> fi1.fix_id = fi2.fix_id
     | _ -> false
 
   (** The elaboration procedure, as per the paper *)
@@ -266,6 +267,19 @@ module Make (ST : Store) (R : Reducer) : CastCICElab = struct
         | Not_found -> Error (`Err_free_identifier x)
       in
       Ok (CastCIC.Const x, ty)
+    | Fixpoint fi ->
+      let* elab_fix_type, _ = elab_univ ctx fi.fix_type in
+      let fix_ctx = Name.Map.add fi.fix_id elab_fix_type ctx in
+      let* elab_fix_body = check_elab fix_ctx fi.fix_body elab_fix_type in
+      let elab_fix =
+        CastCIC.Fixpoint
+          { fix_id = fi.fix_id
+          ; fix_body = elab_fix_body
+          ; fix_type = elab_fix_type
+          ; fix_rarg = fi.fix_rarg
+          }
+      in
+      Ok (elab_fix, elab_fix_type)
 
   (* CHECK rule from the original paper *)
   and check_elab ctx term (s_ty : CastCIC.term) =

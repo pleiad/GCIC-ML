@@ -93,9 +93,24 @@ module Make (ST : Store) : CastCICRed = struct
     | Ok (HInductive i), Ok (HInductive j) -> i = j
     | _, _ -> assert false
 
+  let rec is_fix_neutral (t : term) : bool =
+    let rec get_args acc = function
+      | Fixpoint fi -> Ok (fi.fix_rarg, List.rev acc)
+      | App (t, u) -> get_args (u :: acc) t
+      | _ -> Error ()
+    in
+    let res =
+      let* narg, args = get_args [] t in
+      match List.nth_opt args narg with
+      | None -> Ok true
+      | Some t -> Ok (is_neutral t)
+    in
+    Result.fold ~ok:(fun x -> x) ~error:(fun _ -> false) res
+
   (** Checks if a term is in neutral form *)
-  let rec is_neutral : term -> bool = function
+  and is_neutral : term -> bool = function
     | Var _ -> true
+    | t when is_fix_neutral t -> true
     | App (t, _)
     | Unknown t
     | Err t
@@ -115,14 +130,34 @@ module Make (ST : Store) : CastCICRed = struct
     | Universe _ | Unknown (Universe _) | Err (Universe _) | Inductive _ -> true
     | _ -> is_neutral term
 
+  let is_fix_canonical term : bool =
+    let rec get_args acc = function
+      | Fixpoint fi -> Ok (fi.fix_rarg, acc)
+      | App (t, _) -> get_args (acc + 1) t
+      | _ -> Error ()
+    in
+    Result.fold
+      ~ok:(fun (rarg, nargs) -> nargs <= rarg)
+      ~error:(fun _ -> false)
+      (get_args 0 term)
+
   (** Checks if a term is in canonical form *)
   let is_canonical : term -> bool = function
-    | Universe _ | Lambda _ | Prod _ | Constructor _ | Inductive _ -> true
+    | Universe _ | Lambda _ | Prod _ | Constructor _ | Inductive _ | Fixpoint _ -> true
     | Unknown t -> is_unknown_or_error_canonical t
     | Err t -> is_unknown_or_error_canonical t
     | Cast { source = ty; target = Unknown (Universe i); term = _ } when is_germ i ty ->
       true
+    | t when is_fix_canonical t -> true
     | t -> is_neutral t
+
+  (** Unfolds one recursion step of a Fixpoint *)
+  let unfold_fixpoint (fi : fix_info) : int * term =
+    fi.fix_rarg, subst1 fi.fix_id (Fixpoint fi) fi.fix_body
+
+  let is_valid_fix_arg : term -> bool = function
+    | Constructor _ | Unknown _ | Err _ -> true
+    | _ -> false
 
   (** The representation of a continuation of the CEK machine *)
   type continuation =
@@ -141,6 +176,7 @@ module Make (ST : Store) : CastCICRed = struct
     (* Reducing the discriminee of a match. The inductive's name, the z variable, 
    the predicate and the f variable are stored in the state. *)
     | KMatch_discr of (Name.t * Name.t * term * Name.t * branch list)
+    | KFix_app of fix_info * term list
 
   (* Type alias *)
   type state = term * continuation list
@@ -185,6 +221,10 @@ module Make (ST : Store) : CastCICRed = struct
     (* Match-Err *)
     | Match { discr = Err (Inductive _) as discr; z; pred; _ }, _ ->
       Err (subst1 z discr pred), cont
+    (* Fixpoint unfold *)
+    | term, KFix_app (fi, args) :: cont when is_valid_fix_arg term ->
+      let _, fn = unfold_fixpoint fi in
+      List.fold_left (fun t u -> App (t, u)) fn (List.rev (term :: args)), cont
     (* Ind-Unk *)
     | ( Cast
           { source = Inductive (ind1, i1, _)
@@ -263,7 +303,7 @@ module Make (ST : Store) : CastCICRed = struct
       let casted_args, _ =
         List.fold_left cast_arg ([], target_args) (List.combine source_args ci.args)
       in
-      Constructor { ci with params = target_params; args = casted_args }, cont
+      Constructor { ci with params = target_params; args = List.rev casted_args }, cont
       (* Head-Err *)
     | Cast { source; target; term = _ }, _
       when is_type source && is_type target && not (equal_head source target) ->
@@ -323,6 +363,8 @@ module Make (ST : Store) : CastCICRed = struct
       term, KCast_term (source, target) :: cont
     | term, KCast_term (source, target) :: cont when is_canonical term ->
       Cast { source; target; term }, cont
+    | term, KFix_app (fi, args) :: cont when is_canonical term ->
+      List.fold_left (fun t u -> App (t, u)) (Fixpoint fi) (List.rev (term :: args)), cont
     | discr, KMatch_discr (ind, z, pred, f, branches) :: cont when is_canonical discr ->
       Match { ind; discr; z; pred; f; branches }, cont
     | App (t, u), _ -> t, KApp_l u :: cont
@@ -331,6 +373,20 @@ module Make (ST : Store) : CastCICRed = struct
     | Cast { source; target; term }, _ -> target, KCast_target (source, term) :: cont
     | Match { ind; discr; z; pred; f; branches }, _ ->
       discr, KMatch_discr (ind, z, pred, f, branches) :: cont
+    | Fixpoint fi, cont ->
+      let rec get_args acc n cont =
+        match n, cont with
+        | 0, _ -> Some (acc, cont)
+        | n, KApp_l u :: ks -> get_args (u :: acc) (n - 1) ks
+        | _, _ -> None
+      in
+      let args = get_args [] (fi.fix_rarg + 1) cont in
+      (match args with
+      | Some (c :: args, cont) -> c, KFix_app (fi, args) :: cont
+      | _ -> assert false)
+    | _, KFix_app _ :: _ ->
+      print_endline (to_string term);
+      raise (Stuck_term term)
     | _, _ -> raise (Stuck_term term)
 
   (** Transitive clousure of reduce1 with fuel *)
@@ -361,6 +417,8 @@ module Make (ST : Store) : CastCICRed = struct
       | KCast_term (source, target) -> Cast { source; target; term }
       | KMatch_discr (ind, z, pred, f, branches) ->
         Match { ind; discr = term; z; pred; f; branches }
+      | KFix_app (fi, args) ->
+        List.fold_left (fun t u -> App (t, u)) (Fixpoint fi) (List.rev args)
     in
     List.fold_left fill_hole1 term
 

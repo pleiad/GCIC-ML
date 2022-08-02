@@ -1,0 +1,18 @@
+Inductive Nat : Type := 
+| O : Nat 
+| Succ (n : Nat) : Nat.
+
+Inductive unit : Type := | tt : unit. 
+
+Inductive prod (A B : Type) : Type := 
+| pair (a : A) (b : B) : prod A B.
+
+Fixpoint vec (A : Type) (n : Nat) {struct n} : Type := 
+    match@Nat n as z return Type with 
+    | O => unit 
+    | Succ m => prod A (vec A m) 
+    end.  
+
+Definition nil (A : Type) : vec A O := tt. 
+
+Definition cons (A : Type) (a : A) (n : Nat) (v : vec A n) : vec A (Succ n) := pair A (vec A n) a v.

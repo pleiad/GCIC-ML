@@ -2,8 +2,8 @@ Inductive bool : Type :=
 | false : bool 
 | true : bool.
 
-Definition rec2 (c : Type@1) (fb tb : c) (b : bool) : c :=
-match@bool b as z return c with 
+Definition rec2 (c : bool -> Type@1) (fb : c false) (tb : c true) (b : bool) : c b :=
+match@bool b as z return c z with 
 | false => fb 
 | true => tb 
 end.
@@ -22,7 +22,7 @@ Inductive W (a : Type) (b : a -> Type) : Type@1 :=
 | sup (x : a) (f : b x -> W a b) : W a b.
 
 
-Definition natarity : bool -> Type := rec2 Type void unit.
+Definition natarity : bool -> Type := rec2 (fun (b : bool) => Type) void unit.
 
 Definition natW : Type@1 := W bool natarity.
 
@@ -41,3 +41,27 @@ match@sum s as z return c with
 | inl a b x => l x 
 | inr a b x => r x 
 end.
+
+Fixpoint recW (A : Type) (B : A -> Type) (E : W A B -> Type@1) 
+  (e : forall (x : A) (f : B x -> W A B) (rec : forall (b : B x), E (f b)), E (sup A B x f))
+  (w : W A B) {struct w} : E w :=
+match@W w as z return E z with
+| sup A B a f => e a f (fun (b : B a) => recW A B E e (f b))
+end.
+
+Definition recnatW (C : natW -> Type@1) 
+  (e : forall (x : bool) (f : natarity x -> W bool natarity) (rec : forall (b : natarity x), C (f b)), C (sup bool natarity x f))
+  (n : W bool natarity) : C n := recW bool natarity C e n.
+
+Definition double : natW -> natW :=
+recnatW (fun (x : natW) => natW) 
+  (rec2 (fun (b : bool ) =>
+    forall (f : natarity b -> natW)
+          (g : natarity b -> natW),
+          W bool natarity)
+        (fun (f : void -> natW)
+            (g : void -> natW) =>
+            zero)
+        (fun (f : unit -> natW)
+            (g : unit -> natW) =>
+            succ (succ (g tt)))).

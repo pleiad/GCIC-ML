@@ -21,6 +21,14 @@
     let const_def = { name; ty; term } in
     Define const_def
 
+  let mk_fix name args struct_id ty' body =
+    let open Command in
+    let open Common.Declarations in
+    let term = Lambda (args, Ascription (body, ty')) in
+    let ty  = Prod (args, ty') in
+    let const_def = { name; ty; term } in
+    Fix (struct_id, const_def)
+
   (* The inductive's parameters are included immediately in the constructors during parsing *)
   let mk_ind_decl ind params' sort ctors =
     let open Command in
@@ -46,12 +54,12 @@
 %token <int> INT
 %token <string> ID FILENAME
 %token COLON COMMA ARROW BIG_ARROW VBAR AT ASSIGN
-%token LPAREN RPAREN
+%token LPAREN RPAREN LBRACE RBRACE
 %token KWD_UNIVERSE KWD_LAMBDA KWD_UNKNOWN KWD_UNKNOWN_T KWD_FORALL
-%token KWD_LET KWD_IN
+%token KWD_LET KWD_IN KWD_STRUCT
 %token KWD_MATCH KWD_AS KWD_RETURN KWD_WITH KWD_END
 %token VERNAC_CHECK VERNAC_EVAL VERNAC_ELABORATE VERNAC_LOAD
-%token VERNAC_DEFINITION VERNAC_INDUCTIVE  
+%token VERNAC_DEFINITION VERNAC_FIXPOINT VERNAC_INDUCTIVE  
 %token VERNAC_SET VERNAC_FLAG_VARIANT VERNAC_FLAG_FUEL 
 %token VERNAC_VARIANT_G VERNAC_VARIANT_S VERNAC_VARIANT_N
 %token VERNAC_SEPARATOR
@@ -112,11 +120,17 @@ command :
 // Definition foo (x : Type1) : Type1 := ...
 | VERNAC_DEFINITION; id=id; args=args0; COLON; ty=term; ASSIGN ; body=top  
  { mk_definition id args ty body }
+// Fixpoint foo (x : Type1) {struct n} : Type1 := ...
+| VERNAC_FIXPOINT; id=id; args=args0; struct_id=struct_id; COLON; ty=term; ASSIGN ; body=top  
+ { mk_fix id args struct_id ty body }
 // Load "filename"
 | VERNAC_LOAD; filename=FILENAME  { Load filename }
 // Inductive list (a : Type0) : Type0 := <ctor_decls>
 | VERNAC_INDUCTIVE; id=id; params=args0; COLON; ty=term; ASSIGN; ctors=list(ctor_decl)
  { mk_ind_decl id params ty ctors }
+
+%inline struct_id :
+| LBRACE; KWD_STRUCT; id=id; RBRACE { id }
 
 ctor_decl :
 | VBAR; id=id; args=args0; COLON; ty=term { (id, args, ty) }
