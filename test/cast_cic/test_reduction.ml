@@ -1,5 +1,6 @@
 open Common.CastCIC
-open Example
+open Utils.Example
+open Utils
 
 let infer_type = Gcic.CastCIC.CastCICTyping.infer_type
 let check_type = Gcic.CastCIC.CastCICTyping.check_type

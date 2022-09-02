@@ -1,6 +1,7 @@
 open Common.CastCIC
-open Example
+open Utils.Example
 open Common.Id
+open Utils
 
 let is_type : term -> bool = function
   | Prod _ | Universe _ -> true

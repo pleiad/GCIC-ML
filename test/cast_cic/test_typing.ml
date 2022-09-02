@@ -1,4 +1,4 @@
-open Example
+open Utils.Example
 open Common.Id
 open Common.CastCIC
 

@@ -1,5 +1,6 @@
 open Common.CastCIC
-open Example
+open Utils.Example
+open Utils
 module GCIC = Common.GCIC
 
 let delta i =
