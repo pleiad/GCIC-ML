@@ -4,4 +4,5 @@ module type Reduction = sig
 
   val reduce : t -> o
   val is_canonical : t -> bool
+  val is_neutral : t -> bool
 end

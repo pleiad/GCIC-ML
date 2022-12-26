@@ -4,7 +4,12 @@ open Common.Id
 let reduce = Gcic.CastCIC.CastCICReduction.reduce
 let empty_ctx = Name.Map.empty
 let name_of_int n = string_of_int n |> Name.of_string
+
+let id_of x = Name.of_string x
 let id = Name.of_string "__"
+let idx = Name.of_string "x"
+let idy = Name.of_string "y"
+
 let idf = Lambda { id; dom = Universe 0; body = Var id }
 let unknown i = Unknown (Universe i)
 

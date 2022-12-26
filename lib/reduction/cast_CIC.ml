@@ -91,6 +91,7 @@ module Make (ST : Store) : CastCICRed = struct
     | Ok HProd, Ok HProd -> true
     | Ok (HUniverse i), Ok (HUniverse j) -> i = j
     | Ok (HInductive i), Ok (HInductive j) -> i = j
+    | Ok _, Ok _ -> false 
     | _, _ -> assert false
 
   (** Checks if a term is in neutral form *)
@@ -215,11 +216,13 @@ module Make (ST : Store) : CastCICRed = struct
     | ( Cast
           { source = Prod source_fi
           ; target = Prod target_fi
-          ; term = Lambda { id = _; dom; body }
+          ; term = Lambda { id = _; dom= _; body }
           }
       , _ ) ->
       let y, x = target_fi.id, source_fi.id in
-      let inner_cast = Cast { source = target_fi.dom; target = dom; term = Var y } in
+      (* Unlike the paper, the inner cast is from the source domain. Typing should 
+         actually take care of making these the same. *)
+      let inner_cast = Cast { source = target_fi.dom; target = source_fi.dom; term = Var y } in
       let inner_body = subst1 x inner_cast body in
       let source_cast =
         Cast { source = target_fi.dom; target = source_fi.dom; term = Var y }
@@ -263,7 +266,7 @@ module Make (ST : Store) : CastCICRed = struct
       let casted_args, _ =
         List.fold_left cast_arg ([], target_args) (List.combine source_args ci.args)
       in
-      Constructor { ci with params = target_params; args = casted_args }, cont
+      Constructor { ci with params = target_params; args = List.rev casted_args }, cont
       (* Head-Err *)
     | Cast { source; target; term = _ }, _
       when is_type source && is_type target && not (equal_head source target) ->
